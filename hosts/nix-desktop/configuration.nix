@@ -167,12 +167,29 @@
       # Be sure to change it (using passwd) after rebooting!
       initialPassword = "ultrageheim";
       isNormalUser = true;
+      shell = pkgs.zsh;
       openssh.authorizedKeys.keys = [
         # Add your SSH public key(s) here, if you plan on using SSH to connect
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGox9JI8NEi1IxF2AXSQQF+Pnm/kxt1/RtnTyy6Rokk/ ecomex@MacBook.local"
       ];
       # Be sure to add any other groups you need (such as networkmanager, audio, docker, etc)
-      extraGroups = [ "networkmanager" "wheel" "input" "video" ];
+      extraGroups = [
+        "audio"
+        "networkmanager"
+        "users"
+        "video"
+        "input"
+        "wheel"
+      ]
+      ++ ifExists [
+        "docker"
+        "plugdev"
+        "input"
+        "render"
+        "lxd"
+        "kvm"
+        "libvirtd"
+      ];
     };
   };
 
@@ -200,7 +217,7 @@
       PermitRootLogin = "no";
       # Opinionated: use keys only.
       # Remove if you want to SSH using passwords
-      PasswordAuthentication = true;
+      PasswordAuthentication = false;
     };
   };
 
