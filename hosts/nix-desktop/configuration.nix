@@ -13,6 +13,7 @@
     # If you want to use modules your own flake exports (from modules/nixos):
     # inputs.self.nixosModules.example
     inputs.self.nixosModules.sunshine
+    inputs.self.nixosModules.gaming
 
     # Or modules from other flakes (such as nixos-hardware):
     # inputs.hardware.nixosModules.common-cpu-amd
@@ -20,6 +21,7 @@
 
     # You can also split up your configuration and import pieces of it here:
     # ./users.nix
+    ./monitor.nix
 
     # Import your generated (nixos-generate-config) hardware configuration
     ./hardware-configuration.nix
@@ -76,8 +78,22 @@
   boot.kernelModules = [ "uinput" ];
 
   # Enable networking
-  networking.networkmanager.enable = true;
-  networking.hostName = "nix-desktop";
+  networking = {
+    networkmanager.enable = false;
+    hostName = "nix-desktop";
+    defaultGateway.address = "10.20.50.1";
+    nameservers = [ "10.20.50.1" ];
+    interfaces = {
+      enp4s0 = {
+        wakeOnLan.enable = true;
+        useDHCP = false;
+        ipv4.addresses = [{
+          address = "10.20.50.30";
+          prefixLength = 24;
+        }];
+      };
+    };
+  };
 
   # Zsh shell
   programs.zsh.enable = true;
@@ -118,7 +134,7 @@
       nvidia-vaapi-driver
       vdpauinfo
       libva
-      libva-utils		
+      libva-utils
     ];
   };
 
@@ -195,6 +211,7 @@
   cudaPackages.cudatoolkit
   libva-utils
   nvidia-vaapi-driver
+  ethtool
   ];
 
   # Udev-Regel für uinput hinzufügen
