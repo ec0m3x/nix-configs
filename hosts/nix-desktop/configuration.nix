@@ -183,6 +183,7 @@
         "users"
         "video"
         "input"
+        "render"
         "wheel"
       ];
     };
