@@ -12,6 +12,15 @@
   imports = [
     # If you want to use modules your own flake exports (from modules/nixos):
     # inputs.self.nixosModules.example
+    inputs.self.nixosModules.boot
+    inputs.self.nixosModules.locale
+    inputs.self.nixosModules.nh
+    inputs.self.nixosModules.nvidia
+    inputs.self.nixosModules.ollama
+    inputs.self.nixosModules.pipewire
+    inputs.self.nixosModules.plasma
+    inputs.self.nixosModules.ssh
+    inputs.self.nixosModules.tailscale
     inputs.self.nixosModules.sunshine
     inputs.self.nixosModules.gaming
 
@@ -71,13 +80,10 @@
     nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
   };
 
-  # Bootloader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-  boot.initrd.systemd.enable = true;
+  # Kernel modules
   boot.kernelModules = [ "uinput" ];
 
-  # Enable networking
+  # Network
   networking = {
     networkmanager.enable = false;
     hostName = "nix-desktop";
@@ -98,87 +104,8 @@
   # Zsh shell
   programs.zsh.enable = true;
 
-  # Set time zone.
-  time.timeZone = "Europe/Berlin";
-
-  # Select internationalisation properties.
-  i18n.defaultLocale = "de_DE.UTF-8";
-
-  i18n.extraLocaleSettings = {
-    LC_ADDRESS = "de_DE.UTF-8";
-    LC_IDENTIFICATION = "de_DE.UTF-8";
-    LC_MEASUREMENT = "de_DE.UTF-8";
-    LC_MONETARY = "de_DE.UTF-8";
-    LC_NAME = "de_DE.UTF-8";
-    LC_NUMERIC = "de_DE.UTF-8";
-    LC_PAPER = "de_DE.UTF-8";
-    LC_TELEPHONE = "de_DE.UTF-8";
-    LC_TIME = "de_DE.UTF-8";
-  };
-
-  # Configure console keymap
-  console.keyMap = "de";
-
-  # Nvidia driver
-  boot.kernelParams = [ "nvidia.NVreg_PreserveVideoMemoryAllocations=1" ];
-  # Load nvidia driver for Xorg and Wayland
-  services.xserver.videoDrivers = [ "nvidia" ];
-
-  hardware.graphics = {
-    enable = true;
-    enable32Bit = true;
-    extraPackages = with pkgs; [
-      libva-vdpau-driver
-      libvdpau
-      libvdpau-va-gl 
-      nvidia-vaapi-driver
-      vdpauinfo
-      libva
-      libva-utils
-    ];
-  };
-
-  hardware.nvidia = {
-    modesetting.enable = true;
-    powerManagement.finegrained = false;
-    powerManagement.enable = false;
-    open = false;
-    nvidiaSettings = true;
-    package = config.boot.kernelPackages.nvidiaPackages.beta;
-  };
-  
-  hardware.nvidia-container-toolkit.enable = true;
-
-  # Enable the KDE Plasma Desktop Environment.
-  services.displayManager = {
-    sddm = {
-      enable = true;
-      wayland.enable = true;
-    };
-    autoLogin = {
-      enable = true;
-      user = "ecomex";
-    };
-  };
-  services.desktopManager.plasma6.enable = true;
-  programs.xwayland.enable = true;
+  # Disable the desktop start
   systemd.defaultUnit = lib.mkForce "multi-user.target";
-
-  # Enable sound with pipewire.
-  services.pulseaudio.enable = false;
-  security.rtkit.enable = true;
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-    # If you want to use JACK applications, uncomment this
-    #jack.enable = true;
-
-    # use the example session manager (no others are packaged yet so this is enabled by default,
-    # no need to redefine it in your config for now)
-    #media-session.enable = true;
-  };
 
   # Configure your system-wide user settings (groups, etc), add more users as needed.
   users.users = {
@@ -227,20 +154,6 @@
 
   #vscode-server
   programs.nix-ld.enable = true;
-
-  
-  # This setups a SSH server. Very important if you're setting up a headless system.
-  # Feel free to remove if you don't need it.
-  services.openssh = {
-    enable = true;
-    settings = {
-      # Opinionated: forbid root login through SSH.
-      PermitRootLogin = "no";
-      # Opinionated: use keys only.
-      # Remove if you want to SSH using passwords
-      PasswordAuthentication = false;
-    };
-  };
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "23.05";

@@ -5,4 +5,13 @@
   # my-module = import ./my-module.nix;
   sunshine = import ./sunshine.nix;
   gaming = import ./gaming.nix;
+  boot = import ./boot.nix;
+  locale = import ./locale.nix;
+  nh = import ./nh.nix;
+  nvidia = import ./nvidia.nix;
+  ollama = import ./ollama.nix;
+  pipewire = import ./pipewire.nix;
+  plasma = import ./plasma.nix;
+  ssh = import ./ssh.nix;
+  tailscale = import ./tailscale.nix;
 }
