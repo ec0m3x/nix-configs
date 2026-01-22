@@ -9,8 +9,11 @@
 }: {
   # You can import other home-manager modules here
   imports = [
-    # If you want to use home-manager modules from other flakes (such as nix-colors):
-    # inputs.nix-colors.homeManagerModule
+    # If you want to use modules your own flake exports (from modules/home-manager):
+    # inputs.self.homeManagerModules.example
+
+    # Or modules exported from other flakes (such as nix-colors):
+    # inputs.nix-colors.homeManagerModules.default
 
     # You can also split up your configuration and import pieces of it here:
     # ./nvim.nix
@@ -19,7 +22,12 @@
   nixpkgs = {
     # You can add overlays here
     overlays = [
-      # If you want to use overlays exported from other flakes:
+      # Add overlays your own flake exports (from overlays and pkgs dir):
+      inputs.self.overlays.additions
+      inputs.self.overlays.modifications
+      inputs.self.overlays.unstable-packages
+
+      # You can also add overlays exported from other flakes:
       # neovim-nightly-overlay.overlays.default
 
       # Or define it inline, for example:
@@ -33,15 +41,12 @@
     config = {
       # Disable if you don't want unfree packages
       allowUnfree = true;
-      # Workaround for https://github.com/nix-community/home-manager/issues/2942
-      allowUnfreePredicate = _: true;
     };
   };
 
-  # TODO: Set your username
   home = {
-    username = "your-username";
-    homeDirectory = "/home/your-username";
+    username = "ecomex";
+    homeDirectory = "/home/ecomex";
   };
 
   # Add stuff for your user as you see fit:
