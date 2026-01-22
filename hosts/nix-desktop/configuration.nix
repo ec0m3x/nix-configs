@@ -79,6 +79,9 @@
   networking.networkmanager.enable = true;
   networking.hostName = "nix-desktop";
 
+  # Zsh shell
+  programs.zsh.enable = true;
+
   # Set time zone.
   time.timeZone = "Europe/Berlin";
 
