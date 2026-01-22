@@ -192,6 +192,9 @@
 
   environment.systemPackages = with pkgs; [
   libevdev
+  cudaPackages.cudatoolkit
+  libva-utils
+  nvidia-vaapi-driver
   ];
 
   # Udev-Regel für uinput hinzufügen
