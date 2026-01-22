@@ -181,15 +181,6 @@
         "video"
         "input"
         "wheel"
-      ]
-      ++ ifExists [
-        "docker"
-        "plugdev"
-        "input"
-        "render"
-        "lxd"
-        "kvm"
-        "libvirtd"
       ];
     };
   };
