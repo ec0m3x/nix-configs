@@ -19,6 +19,9 @@
       shellAliases = {
         desktop-up   = "sudo systemctl start display-manager";
         desktop-down = "sudo systemctl stop display-manager && sudo loginctl terminate-user ecomex";
+
+        rln = "sudo nixos-rebuild switch --flake .#nix-desktop";
+        rlh = "home-manager switch --flake .#ecomex@nix-desktop";
       };
     };
   };
