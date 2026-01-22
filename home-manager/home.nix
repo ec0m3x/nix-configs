@@ -67,13 +67,6 @@
 
   programs.firefox.enable = true;
 
-  services = {
-    # Following install, you may need to run:
-    # systemctl --user enable auto-fix-vscode-server.service
-    # systemctl --user start auto-fix-vscode-server.service
-    vscode-server.enable = true;
-  };
-
   # Nicely reload system units when changing configs
   systemd.user.startServices = "sd-switch";
 
