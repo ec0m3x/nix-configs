@@ -11,13 +11,20 @@
   imports = [
     # If you want to use modules your own flake exports (from modules/home-manager):
     # inputs.self.homeManagerModules.example
+    inputs.self.homeManagerModules.bat
+    inputs.self.homeManagerModules.bottom
+    inputs.self.homeManagerModules.fastfetch
+    inputs.self.homeManagerModules.fzf
+    inputs.self.homeManagerModules.git
+    inputs.self.homeManagerModules.starship
+    inputs.self.homeManagerModules.tmux
+    inputs.self.homeManagerModules.zsh
 
     # Or modules exported from other flakes (such as nix-colors):
     # inputs.nix-colors.homeManagerModules.default
 
     # You can also split up your configuration and import pieces of it here:
     # ./nvim.nix
-    ./zsh.nix
   ];
 
   nixpkgs = {
@@ -54,16 +61,8 @@
   # programs.neovim.enable = true;
   # home.packages = with pkgs; [ steam ];
 
-  # Enable home-manager and git
+  # Enable home-manager
   programs.home-manager.enable = true;
-
-  programs.git = {
-    enable = true;
-    settings.user = {
-      name = "ecomex";
-      email = "ecomex@nixos";
-    };
-  };
 
   programs.firefox.enable = true;
 

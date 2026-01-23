@@ -80,6 +80,8 @@
     nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
   };
 
+  # Kernel version
+  boot.kernelPackages = pkgs.linuxPackages_xanmod_latest;
   # Kernel modules
   boot.kernelModules = [ "uinput" ];
 
@@ -134,11 +136,14 @@
   };
 
   environment.systemPackages = with pkgs; [
-  libevdev
-  cudaPackages.cudatoolkit
-  libva-utils
-  nvidia-vaapi-driver
-  ethtool
+    libevdev
+    cudaPackages.cudatoolkit
+    libva-utils
+    nvidia-vaapi-driver
+    ethtool
+    nvtopPackages.nvidia
+    btop
+    htop
   ];
 
   # Udev-Regel für uinput hinzufügen

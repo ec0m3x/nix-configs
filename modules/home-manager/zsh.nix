@@ -1,5 +1,4 @@
 { ... }:
-
 {
   programs = {
     zsh = {
@@ -22,6 +21,7 @@
 
         rln = "sudo nixos-rebuild switch --flake .#nix-desktop";
         rlh = "home-manager switch --flake .#ecomex@nix-desktop";
+        cleanup-nix = "nh clean all --keep-since 5d --keep 3";
       };
     };
   };
