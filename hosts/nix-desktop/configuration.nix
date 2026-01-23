@@ -68,6 +68,8 @@
     settings = {
       # Enable flakes and new 'nix' command
       experimental-features = "nix-command flakes";
+      # auto-optimize store
+      auto-optimise-store = true;
       # Opinionated: disable global registry
       flake-registry = "";
       # Workaround for https://github.com/NixOS/nix/issues/9574
@@ -75,7 +77,7 @@
     };
     # Opinionated: disable channels
     channel.enable = false;
-
+    
     # Opinionated: make flake registry and nix path match flake inputs
     registry = lib.mapAttrs (_: flake: {inherit flake;}) flakeInputs;
     nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
