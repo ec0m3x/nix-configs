@@ -64,6 +64,11 @@
   # Enable home-manager
   programs.home-manager.enable = true;
 
+  programs = {
+    eza.enable = true;
+    git.enable = true;
+  };
+  
   programs.firefox.enable = true;
 
   # Nicely reload system units when changing configs

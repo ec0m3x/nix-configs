@@ -23,6 +23,7 @@
     inputs.self.nixosModules.tailscale
     inputs.self.nixosModules.sunshine
     inputs.self.nixosModules.gaming
+    inputs.self.nixosModules.core-packages
 
     # Or modules from other flakes (such as nixos-hardware):
     # inputs.hardware.nixosModules.common-cpu-amd

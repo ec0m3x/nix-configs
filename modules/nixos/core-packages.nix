@@ -1,0 +1,40 @@
+{ pkgs, ... }:
+{
+  environment.systemPackages = with pkgs; [
+    bat
+    binutils
+    btop
+    curl
+    cyme
+    dig
+    dua
+    duf
+    eza
+    fd
+    ffmpeg
+    file
+    flac
+    git
+    htop
+    jq
+    killall
+    mkvtoolnix
+    nfs-utils
+    ntfs3g
+    e2fsprogs
+    gptfdisk
+    pciutils
+    ripgrep
+    rsync
+    tpm2-tss
+    traceroute
+    tree
+    unzip
+    usbutils
+    vim
+    wget
+    yq-go
+    ethtool
+    wakelan
+  ];
+}
