@@ -95,6 +95,7 @@ Imported via `inputs.self.nixosModules.<name>` in configuration.nix:
 - `sunshine` - Game streaming server
 - `tailscale` - VPN networking
 - `core-packages` - Essential system packages
+- `docker` - Docker containerization platform
 
 ### Home-Manager Modules (`modules/home-manager/`)
 

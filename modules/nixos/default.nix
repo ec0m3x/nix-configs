@@ -15,4 +15,5 @@
   ssh = import ./ssh.nix;
   tailscale = import ./tailscale.nix;
   core-packages = import ./core-packages.nix;
+  docker = import ./docker.nix;
 }

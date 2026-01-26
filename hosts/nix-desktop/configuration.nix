@@ -24,6 +24,7 @@
     inputs.self.nixosModules.sunshine
     inputs.self.nixosModules.gaming
     inputs.self.nixosModules.core-packages
+    inputs.self.nixosModules.docker
 
     # Or modules from other flakes (such as nixos-hardware):
     # inputs.hardware.nixosModules.common-cpu-amd
