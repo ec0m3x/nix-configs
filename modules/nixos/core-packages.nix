@@ -4,6 +4,7 @@
     bat
     binutils
     btop
+    claude-code
     curl
     cyme
     dig
