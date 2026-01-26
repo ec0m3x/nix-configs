@@ -31,6 +31,7 @@
     traceroute
     tree
     unzip
+    uv
     usbutils
     vim
     wget
