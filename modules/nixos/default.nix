@@ -3,9 +3,10 @@
 {
   # List your module files here
   # my-module = import ./my-module.nix;
-  sunshine = import ./sunshine.nix;
-  gaming = import ./gaming.nix;
   boot = import ./boot.nix;
+  core-packages = import ./core-packages.nix;
+  docker = import ./docker.nix;
+  gaming = import ./gaming.nix;
   locale = import ./locale.nix;
   nh = import ./nh.nix;
   nvidia = import ./nvidia.nix;
@@ -13,7 +14,6 @@
   pipewire = import ./pipewire.nix;
   plasma = import ./plasma.nix;
   ssh = import ./ssh.nix;
+  sunshine = import ./sunshine.nix;
   tailscale = import ./tailscale.nix;
-  core-packages = import ./core-packages.nix;
-  docker = import ./docker.nix;
 }

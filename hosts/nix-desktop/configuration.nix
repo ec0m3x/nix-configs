@@ -13,6 +13,9 @@
     # If you want to use modules your own flake exports (from modules/nixos):
     # inputs.self.nixosModules.example
     inputs.self.nixosModules.boot
+    inputs.self.nixosModules.core-packages
+    inputs.self.nixosModules.docker
+    inputs.self.nixosModules.gaming
     inputs.self.nixosModules.locale
     inputs.self.nixosModules.nh
     inputs.self.nixosModules.nvidia
@@ -20,11 +23,8 @@
     inputs.self.nixosModules.pipewire
     inputs.self.nixosModules.plasma
     inputs.self.nixosModules.ssh
-    inputs.self.nixosModules.tailscale
     inputs.self.nixosModules.sunshine
-    inputs.self.nixosModules.gaming
-    inputs.self.nixosModules.core-packages
-    inputs.self.nixosModules.docker
+    inputs.self.nixosModules.tailscale
 
     # Or modules from other flakes (such as nixos-hardware):
     # inputs.hardware.nixosModules.common-cpu-amd
