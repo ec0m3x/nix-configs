@@ -56,7 +56,12 @@ nix-shell shell.nix
 ### Flake Structure
 
 The `flake.nix` file is the entry point that defines:
-- **Inputs**: nixpkgs (25.11 stable), nixpkgs-unstable, and home-manager
+- **Inputs**:
+  - nixpkgs (25.11 stable) and nixpkgs-unstable
+  - home-manager (for user configuration)
+  - niri-flake (scrollable-tiling Wayland compositor)
+  - noctalia-shell (desktop shell for Wayland)
+  - zen-browser (privacy-focused Firefox fork)
 - **Outputs**: NixOS configurations, home-manager configurations, custom packages, overlays, and reusable modules
 - **System**: Configured for `nix-desktop` hostname with user `ecomex@nix-desktop`
 
@@ -77,6 +82,7 @@ The `flake.nix` file is the entry point that defines:
 │   └── home-manager/     # User-level modules
 ├── overlays/             # Package overlays and modifications
 ├── pkgs/                 # Custom package definitions
+├── wallpapers/           # Wallpaper images for Noctalia auto-rotation
 └── nix-shell/            # Development environment shells
     └── comfyUI/
 ```
@@ -88,12 +94,12 @@ This configuration uses a modular approach where functionality is split into foc
 **NixOS Modules** (`modules/nixos/`):
 - Imported via `inputs.self.nixosModules.<name>` in configuration.nix
 - Each module file must be registered in `modules/nixos/default.nix`
-- Examples: boot, locale, nvidia, gaming, plasma, ollama, sunshine, tailscale, core-packages
+- Examples: boot, locale, nvidia, gaming, plasma, niri, docker, ollama, sunshine, tailscale, core-packages
 
 **Home-Manager Modules** (`modules/home-manager/`):
 - Imported via `inputs.self.homeManagerModules.<name>` in home.nix
 - Each module file must be registered in `modules/home-manager/default.nix`
-- Examples: bat, bottom, fastfetch, fzf, git, starship, tmux, zsh
+- Examples: bat, bottom, eza, fastfetch, fzf, git, kitty, nextcloud-client, niri, noctalia, spotify, starship, thunderbird, tmux, vesktop, vscode, zen-browser, zsh
 
 ### Overlay System
 
@@ -104,14 +110,64 @@ Three overlays are defined in `overlays/default.nix`:
 
 Both NixOS and home-manager configurations apply these overlays automatically.
 
+### Niri Compositor & Noctalia Shell
+
+This configuration includes a complete Wayland desktop environment setup using Niri compositor and Noctalia shell:
+
+**Niri Compositor**:
+- Scrollable-tiling Wayland compositor with unique layout paradigm
+- System-level module (`modules/nixos/niri.nix`) enables SDDM session support
+- User-level module (`modules/home-manager/niri.nix`) provides:
+  - Display configuration (3440x1440@99.982Hz on DP-2)
+  - Keyboard layout (German) and touchpad settings
+  - Layout configuration (gaps, borders, focus rings)
+  - Comprehensive keybindings for window management, workspaces, launching apps
+  - XWayland support via xwayland-satellite for X11 applications
+  - GNOME Keyring integration for secret management
+  - Complementary tools: fuzzel (launcher), dolphin (file manager), grim/slurp (screenshots), mako (notifications)
+
+**Noctalia Shell**:
+- Modern desktop shell for Wayland compositors (500+ configuration options)
+- Declarative configuration in `modules/home-manager/noctalia.nix`
+- Features include:
+  - App launcher with clipboard history and icon modes
+  - Audio/MPRIS controls with visualizer
+  - Top bar with extensive widget customization
+  - Floating auto-hide dock with app grouping
+  - Control center with network/Bluetooth/wallpaper shortcuts
+  - Calendar with weather integration (location: Weikersheim, Germany)
+  - Automatic wallpaper rotation from `/wallpapers/` directory
+  - Session menu (lock, suspend, hibernate, reboot, shutdown)
+  - System monitor with threshold alerts
+  - OSD notifications with urgency levels
+
+**Wallpapers**:
+- Located in `/wallpapers/` directory (82 images)
+- Automatically rotated by Noctalia shell
+- Mix of numbered and themed wallpapers
+
+### Docker Support
+
+Docker virtualization is configured via `modules/nixos/docker.nix`:
+- Docker daemon with auto-start on boot
+- Weekly automatic pruning of unused containers, images, and volumes
+- Docker-compose and related tools included
+- User `ecomex` added to docker group for rootless container management
+- Use standard docker commands: `docker ps`, `docker run`, `docker-compose up`, etc.
+
 ### Key System Details
 
 - **Kernel**: XanMod latest kernel (`boot.kernelPackages = pkgs.linuxPackages_xanmod_latest`)
-- **Networking**: Static IP configuration (10.20.50.30/24), no NetworkManager
+- **Networking**: NetworkManager with DHCP, wake-on-LAN support
 - **Shell**: Zsh (system-level enabled)
-- **Desktop**: KDE Plasma with KWin, forced software cursor
-- **Graphics**: NVIDIA with beta drivers, CUDA support
-- **Boot Target**: multi-user.target (no graphical login by default)
+- **Desktop Options**:
+  - **KDE Plasma**: Traditional desktop with KWin (auto-login disabled)
+  - **Niri + Noctalia**: Wayland compositor with scrollable-tiling and custom shell
+- **Browser**: Zen Browser (privacy-focused Firefox fork)
+- **Display**: Ultrawide monitor (3440x1440@99.982Hz on DP-2)
+- **Graphics**: NVIDIA with beta drivers, CUDA support, VAAPI enabled
+- **Virtualization**: Docker with auto-pruning enabled
+- **Login Manager**: SDDM (auto-login disabled)
 
 ## Adding New Components
 

@@ -5,6 +5,7 @@
   # my-module = import ./my-module.nix;
   bat = import ./bat.nix;
   bottom = import ./bottom.nix;
+  eza = import ./eza.nix;
   fastfetch = import ./fastfetch.nix;
   fzf = import ./fzf.nix;
   git = import ./git.nix;

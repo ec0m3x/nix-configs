@@ -13,6 +13,7 @@
     # inputs.self.homeManagerModules.example
     inputs.self.homeManagerModules.bat
     inputs.self.homeManagerModules.bottom
+    inputs.self.homeManagerModules.eza
     inputs.self.homeManagerModules.fastfetch
     inputs.self.homeManagerModules.fzf
     inputs.self.homeManagerModules.git
@@ -87,10 +88,6 @@
 
   # Disable home-manager news
   news.display = "silent";
-
-  programs = {
-    eza.enable = true;
-  };
 
   # Nicely reload system units when changing configs
   systemd.user.startServices = "sd-switch";
