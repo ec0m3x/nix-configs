@@ -85,7 +85,7 @@
   };
 
   # Kernel version
-  boot.kernelPackages = pkgs.linuxPackages_xanmod_latest;
+  #boot.kernelPackages = pkgs.linuxPackages_xanmod_latest;
   # Kernel modules
   boot.kernelModules = [ "uinput" ];
 
@@ -97,7 +97,7 @@
   # 2. Den Standard-Treiber (r8169) für die 2.5G-Karte sperren
   #boot.blacklistedKernelModules = [ "r8169" ];
 
-  # 3. Stromparmodi auf Kernel-Ebene deaktivieren (sehr wichtig für RTL8125)
+  # 3. Stromparmodi auf Kernel-Ebene deaktivieren
   boot.kernelParams = [ "pcie_aspm=off" ];
 
 
