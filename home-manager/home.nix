@@ -16,6 +16,8 @@
     inputs.self.homeManagerModules.fastfetch
     inputs.self.homeManagerModules.fzf
     inputs.self.homeManagerModules.git
+    inputs.self.homeManagerModules.niri
+    inputs.self.homeManagerModules.noctalia
     inputs.self.homeManagerModules.starship
     inputs.self.homeManagerModules.tmux
     inputs.self.homeManagerModules.vscode

@@ -8,6 +8,8 @@
   fastfetch = import ./fastfetch.nix;
   fzf = import ./fzf.nix;
   git = import ./git.nix;
+  niri = import ./niri.nix;
+  noctalia = import ./noctalia.nix;
   starship = import ./starship.nix;
   tmux = import ./tmux.nix;
   vscode = import ./vscode.nix;

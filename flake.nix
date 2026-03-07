@@ -12,12 +12,20 @@
     # Home manager
     home-manager.url = "github:nix-community/home-manager/release-25.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
+    # Niri - Scrollable-tiling Wayland compositor
+    niri.url = "github:sodiboo/niri-flake";
+
+    # Noctalia - Desktop shell for Wayland
+    noctalia.url = "github:noctalia-dev/noctalia-shell";
   };
 
   outputs = {
     self,
     nixpkgs,
     home-manager,
+    niri,
+    noctalia,
     ...
   } @ inputs: let
     # Supported systems for your flake packages, shell, etc.
