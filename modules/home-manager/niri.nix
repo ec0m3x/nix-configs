@@ -129,8 +129,8 @@
           Mod+Shift+Ctrl+T { toggle-debug-tint; }
 
           // Screenshot bindings
-          Print { spawn "sh" "-c" "grim -g \"$(slurp)\" \"$HOME/Bilder/Screenshots/$(date +'%Y-%m-%d_%H-%M-%S').png\" && notify-send 'Screenshot' 'Bereich wurde gespeichert'"; }
-          Shift+Print { spawn "sh" "-c" "grim \"$HOME/Bilder/Screenshots/$(date +'%Y-%m-%d_%H-%M-%S').png\" && notify-send 'Screenshot' 'Bildschirm wurde gespeichert'"; }
+          Print { spawn "sh" "-c" "grim -g \"$(slurp)\" \"$HOME/Bilder/Screenshots/$(date +'%Y-%m-%d_%H-%M-%S').png\" && notify-send 'Screenshot' 'Area saved'"; }
+          Shift+Print { spawn "sh" "-c" "grim \"$HOME/Bilder/Screenshots/$(date +'%Y-%m-%d_%H-%M-%S').png\" && notify-send 'Screenshot' 'Screen saved'"; }
 
           // Media control bindings
           XF86AudioPlay { spawn "playerctl" "play-pause"; }

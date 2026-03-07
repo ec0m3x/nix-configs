@@ -99,15 +99,15 @@
   # Kernel modules
   boot.kernelModules = [ "uinput" ];
 
-  # 1. Den richtigen Treiber installieren
-  boot.extraModulePackages = [ 
-    config.boot.kernelPackages.r8125 
+  # 1. Install the correct driver
+  boot.extraModulePackages = [
+    config.boot.kernelPackages.r8125
   ];
 
-  # 2. Den Standard-Treiber (r8169) für die 2.5G-Karte sperren
+  # 2. Block the default driver (r8169) for the 2.5G card
   boot.blacklistedKernelModules = [ "r8169" ];
 
-  # 3. Stromparmodi auf Kernel-Ebene deaktivieren
+  # 3. Disable power modes at kernel level
   boot.kernelParams = [ "pcie_aspm=off" ];
 
 
@@ -166,8 +166,8 @@
     iperf3
   ];
 
-  # Udev-Regel für uinput hinzufügen
-  # Dies erlaubt der Gruppe 'input' (in der Sunshine läuft), virtuelle Eingaben zu senden
+  # Add udev rule for uinput
+  # This allows the 'input' group (in which Sunshine runs) to send virtual inputs
   services.udev.extraRules = ''
     KERNEL=="uinput", GROUP="input", MODE="0660", OPTIONS+="static_node=uinput"
   '';

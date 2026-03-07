@@ -41,26 +41,26 @@
   ]);
 
   runScript = pkgs.writeScript "init.sh" ''
-    # Wir definieren eine Funktion statt eines Alias, das ist in Sub-Shells stabiler
+    # We define a function instead of an alias, this is more stable in sub-shells
     cat <<EOF > /tmp/comfy_bashrc
     [ -f ~/.bashrc ] && . ~/.bashrc
-    
+
     start-comfy() {
-      echo "Versuche venv zu aktivieren..."
+      echo "Trying to activate venv..."
       if [ -f "venv/bin/activate" ]; then
         source venv/bin/activate
-        echo "Venv aktiv. Starte Python..."
-        # Wir nutzen exec nicht, damit die Shell offen bleibt, falls Python crasht
+        echo "Venv active. Starting Python..."
+        # We don't use exec, so the shell stays open if Python crashes
         python main.py --listen 0.0.0.0 --enable-manager --highvram --preview-method auto
       else
-        echo "FEHLER: venv/bin/activate nicht gefunden!"
-        echo "Bist du im richtigen Verzeichnis? (/home/ecomex/ComfyUI)"
+        echo "ERROR: venv/bin/activate not found!"
+        echo "Are you in the correct directory? (/home/ecomex/ComfyUI)"
       fi
     }
 
     echo "-------------------------------------------------------"
-    echo " 🚀 ComfyUI FHS-Umgebung bereit!"
-    echo " Tippe 'start-comfy' zum Starten."
+    echo " 🚀 ComfyUI FHS environment ready!"
+    echo " Type 'start-comfy' to start."
     echo "-------------------------------------------------------"
 EOF
 

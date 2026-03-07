@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 
 {
-  # 1. EDID dem System als Firmware "unterschieben"
+  # 1. Inject EDID to the system as firmware
   hardware.firmware = [
     (pkgs.runCommand "monitor-edid" {} ''
       mkdir -p $out/lib/firmware/edid
@@ -9,10 +9,10 @@
     '')
   ];
 
-  # 2. Kernel anweisen, diese EDID für den Dummy-Port zu nutzen
-  # WICHTIG: Hier muss der Name stehen, den der Kernel verwendet (z.B. DP-1 statt card0-DP-1)
+  # 2. Instruct kernel to use this EDID for the dummy port
+  # IMPORTANT: Use the name that the kernel uses (e.g. DP-1 instead of card0-DP-1)
   boot.kernelParams = [
-    "drm.edid_firmware=HDMI-A-1:edid/monitor.bin" 
+    "drm.edid_firmware=HDMI-A-1:edid/monitor.bin"
     "video=HDMI-A-1:D"
   ];
 }
