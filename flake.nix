@@ -18,6 +18,10 @@
 
     # Noctalia - Desktop shell for Wayland
     noctalia.url = "github:noctalia-dev/noctalia-shell";
+
+    # Zen Browser - Privacy-focused Firefox fork
+    zen-browser.url = "github:0xc000022070/zen-browser-flake";
+    zen-browser.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = {
@@ -26,6 +30,7 @@
     home-manager,
     niri,
     noctalia,
+    zen-browser,
     ...
   } @ inputs: let
     # Supported systems for your flake packages, shell, etc.

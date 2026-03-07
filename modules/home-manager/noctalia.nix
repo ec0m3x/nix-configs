@@ -7,12 +7,14 @@ let
   noctaliaSettings = {
     appLauncher = {
       autoPasteClipboard = false;
+      clipboardWatchImageCommand = "wl-paste --type image --watch cliphist store";
+      clipboardWatchTextCommand = "wl-paste --type text --watch cliphist store";
       clipboardWrapText = true;
       customLaunchPrefix = "";
       customLaunchPrefixEnabled = false;
       density = "default";
       enableClipPreview = true;
-      enableClipboardHistory = false;
+      enableClipboardHistory = true;
       enableSessionSearch = true;
       enableSettingsSearch = true;
       enableWindowsSearch = true;
@@ -78,11 +80,11 @@ let
       widgetSpacing = 6;
       widgets = {
         center = [
-          { id = "Workspace"; }
+          { id = "Clock"; }
         ];
         left = [
           { id = "Launcher"; }
-          { id = "Clock"; }
+          { id = "Workspace"; }
           { id = "SystemMonitor"; }
           { id = "ActiveWindow"; }
           { id = "MediaMini"; }
@@ -121,7 +123,7 @@ let
       monitorForColors = "";
       predefinedScheme = "Noctalia (default)";
       schedulingMode = "off";
-      useWallpaperColors = false;
+      useWallpaperColors = true;
     };
 
     controlCenter = {
@@ -230,7 +232,7 @@ let
       shadowDirection = "bottom_right";
       shadowOffsetX = 2;
       shadowOffsetY = 3;
-      showChangelogOnStartup = true;
+      showChangelogOnStartup = false;
       showHibernateOnLockScreen = false;
       showScreenCorners = false;
       showSessionButtonsOnLockScreen = true;
@@ -269,7 +271,7 @@ let
       firstDayOfWeek = -1;
       hideWeatherCityName = false;
       hideWeatherTimezone = false;
-      name = "Tokyo";
+      name = "Weikersheim";
       showCalendarEvents = true;
       showCalendarWeather = true;
       showWeekNumberInCalendar = false;
@@ -331,7 +333,7 @@ let
       sounds = {
         criticalSoundFile = "";
         enabled = false;
-        excludedApps = "discord,firefox,chrome,chromium,edge";
+        excludedApps = "discord,zen-browser,chrome,chromium,edge";
         lowSoundFile = "";
         normalSoundFile = "";
         separateSounds = false;
@@ -369,7 +371,7 @@ let
         { action = "rebootToUefi"; enabled = true; keybind = "7"; }
       ];
       showHeader = true;
-      showKeybinds = true;
+      showKeybinds = false;
     };
 
     settingsVersion = 0;
@@ -418,7 +420,7 @@ let
 
     wallpaper = {
       automationEnabled = false;
-      directory = "${config.home.homeDirectory}/Pictures/Wallpapers";
+      directory = "/home/ecomex/Code/nix-configs/wallpapers";
       enableMultiMonitorDirectories = false;
       enabled = true;
       favorites = [];
@@ -462,6 +464,7 @@ let
     states = {};
     sources = [];
   };
+
 in
 {
   # Noctalia - A beautiful, minimal desktop shell for Wayland
@@ -480,11 +483,9 @@ in
     qt6.qtdeclarative
     qt6.qtwayland
 
-    # Additional tools that work well with Noctalia
-    libnotify
-    playerctl
-    pamixer
-    brightnessctl
+    # Noctalia-specific tools
+    cliphist  # Clipboard history manager for app launcher
+    # Note: pamixer, brightnessctl, playerctl, libnotify are provided by niri module
   ]);
 
   # Declaratively manage Noctalia configuration
@@ -496,25 +497,7 @@ in
     text = builtins.toJSON noctaliaPlugins;
   };
 
-  # XDG portal configuration for Niri
-  xdg.portal = {
-    enable = true;
-    extraPortals = with pkgs; [
-      xdg-desktop-portal-gtk
-      xdg-desktop-portal-gnome
-    ];
-    config = {
-      # Default portal configuration for Niri
-      niri = {
-        default = [ "gtk" ];
-        "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
-      };
-      # Fallback configuration for other compositors
-      common = {
-        default = [ "gtk" ];
-      };
-    };
-  };
+  # Note: XDG portal configuration is managed by niri module
 
   # Set environment variables for Qt on Wayland
   home.sessionVariables = {

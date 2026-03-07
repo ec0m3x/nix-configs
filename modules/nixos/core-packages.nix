@@ -1,7 +1,6 @@
 { pkgs, ... }:
 {
   environment.systemPackages = with pkgs; [
-    bat
     binutils
     btop
     claude-code
@@ -15,7 +14,6 @@
     ffmpeg
     file
     flac
-    git
     htop
     jq
     killall

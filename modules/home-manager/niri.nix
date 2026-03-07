@@ -35,20 +35,33 @@
           }
 
           default-column-width { proportion 0.5; }
+
+          border {
+              width 1
+          }
+
+          focus-ring {
+              width 1
+          }
       }
 
       prefer-no-csd
 
-      binds {
-          Mod+Shift+Slash { show-hotkey-overlay; }
+      hotkey-overlay {
+          skip-at-startup
+      }
 
+      binds {
+          Mod+Return { spawn "kitty"; }
           Mod+T { spawn "kitty"; }
-          Mod+D { spawn "fuzzel"; }
+          Mod+D { spawn "dolphin"; }
+          Mod+Space { spawn "fuzzel"; }
+          Mod+V { spawn "sh" "-c" "cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"; }
           Mod+Q { close-window; }
 
           Mod+Left  { focus-column-left; }
-          Mod+Down  { focus-window-down; }
-          Mod+Up    { focus-window-up; }
+          Mod+Down  { focus-workspace-down; }
+          Mod+Up    { focus-workspace-up; }
           Mod+Right { focus-column-right; }
           Mod+H     { focus-column-left; }
           Mod+J     { focus-window-down; }
@@ -108,11 +121,27 @@
 
           Mod+Minus { set-column-width "-10%"; }
           Mod+Equal { set-column-width "+10%"; }
+          Mod+0 { set-column-width "50%"; }
 
           Mod+Shift+E { quit; }
           Mod+Shift+P { power-off-monitors; }
 
           Mod+Shift+Ctrl+T { toggle-debug-tint; }
+
+          // Screenshot bindings
+          Print { spawn "sh" "-c" "grim -g \"$(slurp)\" \"$HOME/Bilder/Screenshots/$(date +'%Y-%m-%d_%H-%M-%S').png\" && notify-send 'Screenshot' 'Bereich wurde gespeichert'"; }
+          Shift+Print { spawn "sh" "-c" "grim \"$HOME/Bilder/Screenshots/$(date +'%Y-%m-%d_%H-%M-%S').png\" && notify-send 'Screenshot' 'Bildschirm wurde gespeichert'"; }
+
+          // Media control bindings
+          XF86AudioPlay { spawn "playerctl" "play-pause"; }
+          XF86AudioPause { spawn "playerctl" "play-pause"; }
+          XF86AudioNext { spawn "playerctl" "next"; }
+          XF86AudioPrev { spawn "playerctl" "previous"; }
+
+          // Volume control bindings
+          XF86AudioRaiseVolume { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+"; }
+          XF86AudioLowerVolume { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"; }
+          XF86AudioMute { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
       }
 
       spawn-at-startup "noctalia-shell"
@@ -125,11 +154,11 @@
 
   # Install complementary tools for niri
   home.packages = with pkgs; [
-    # Terminal
-    kitty
-
     # Application launcher
     fuzzel
+
+    # File manager
+    kdePackages.dolphin
 
     # Screenshot tool
     grim
@@ -140,14 +169,43 @@
 
     # Notification daemon
     mako
+    libnotify  # provides notify-send
+
+    # Media player control
+    playerctl
+
+    # Audio control
+    pamixer
+
+    # Brightness control
+    brightnessctl
   ];
 
-  # XDG portal configuration for Niri (user-level, won't affect Plasma)
+  # GNOME Keyring for secret management
+  services.gnome-keyring = {
+    enable = true;
+    components = [ "secrets" ];
+  };
+
+  # Note: polkit-kde-agent is started automatically by niri-flake via systemd service
+
+  # XDG portal configuration for Niri
   xdg.portal = {
     enable = true;
     extraPortals = with pkgs; [
       xdg-desktop-portal-gtk
       xdg-desktop-portal-gnome
     ];
+    config = {
+      # Default portal configuration for Niri
+      niri = {
+        default = [ "gtk" ];
+        "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
+      };
+      # Fallback configuration for other compositors
+      common = {
+        default = [ "gtk" ];
+      };
+    };
   };
 }
