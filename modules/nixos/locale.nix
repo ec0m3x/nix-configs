@@ -21,4 +21,10 @@
 
   # Configure console keymap
   console.keyMap = "de";
+
+  # Configure X11 keyboard layout (used by SDDM and Wayland)
+  services.xserver.xkb = {
+    layout = "de";
+    variant = "";
+  };
 }
