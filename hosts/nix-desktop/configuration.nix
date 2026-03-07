@@ -76,6 +76,15 @@
       flake-registry = "";
       # Workaround for https://github.com/NixOS/nix/issues/9574
       nix-path = config.nix.nixPath;
+      # Binary caches for niri and noctalia (avoids building from source)
+      substituters = [
+        "https://cache.nixos.org"
+        "https://niri.cachix.org"
+      ];
+      trusted-public-keys = [
+        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+        "niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964="
+      ];
     };
     # Opinionated: disable channels
     channel.enable = false;
@@ -96,7 +105,7 @@
   ];
 
   # 2. Den Standard-Treiber (r8169) für die 2.5G-Karte sperren
-  #boot.blacklistedKernelModules = [ "r8169" ];
+  boot.blacklistedKernelModules = [ "r8169" ];
 
   # 3. Stromparmodi auf Kernel-Ebene deaktivieren
   boot.kernelParams = [ "pcie_aspm=off" ];
@@ -106,7 +115,7 @@
   networking = {
     networkmanager.enable = true;
     hostName = "nix-desktop";
-    firewall.allowedTCPPorts = [ 8188 5201];
+    firewall.allowedTCPPorts = [ 8188 /* ComfyUI */ 5201 /* iperf3 */ ];
     firewall.allowedUDPPorts = [ 5201 ];
     interfaces = {
       enp4s0 = {
@@ -128,6 +137,8 @@
       # You can set an initial password for your user.
       # If you do, you can skip setting a root password by passing '--no-root-passwd' to nixos-install.
       # Be sure to change it (using passwd) after rebooting!
+      # TODO: replace with hashedPassword (run: mkpasswd -m yescrypt)
+      # initialPassword stores plaintext in /nix/store (world-readable)
       initialPassword = "ultrageheim";
       isNormalUser = true;
       shell = pkgs.zsh;
@@ -151,12 +162,7 @@
   environment.systemPackages = with pkgs; [
     libevdev
     cudaPackages.cudatoolkit
-    libva-utils
-    nvidia-vaapi-driver
-    ethtool
     nvtopPackages.nvidia
-    btop
-    htop
     iperf3
   ];
 
@@ -166,12 +172,7 @@
     KERNEL=="uinput", GROUP="input", MODE="0660", OPTIONS+="static_node=uinput"
   '';
 
-  # Umgebungsvariable für die gesamte Session setzen
-  environment.variables = {
-    "KWIN_FORCE_SW_CURSOR" = "1";
-  };
-
-  #vscode-server
+  # Required for VSCode server / nix-ld dynamic linking
   programs.nix-ld.enable = true;
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion

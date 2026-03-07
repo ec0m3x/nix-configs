@@ -5,7 +5,7 @@
     flake = "/home/ecomex/Code/nix-configs";
     clean = {
       enable = true;
-      extraArgs = "--keep-since 5d --keep 3";
+      extraArgs = "--keep-since 5d --keep 5";
     };
   };
 }

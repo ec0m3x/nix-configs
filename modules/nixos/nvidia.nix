@@ -13,17 +13,14 @@
     extraPackages = with pkgs; [
       libva-vdpau-driver
       libvdpau
-      libvdpau-va-gl 
+      libvdpau-va-gl
       nvidia-vaapi-driver
-      vdpauinfo
       libva
-      libva-utils
     ];
   };
 
   hardware.nvidia = {
     modesetting.enable = true;
-    powerManagement.finegrained = false;
     powerManagement.enable = false;
     open = false;
     nvidiaSettings = true;

@@ -1,11 +1,9 @@
 { config, pkgs, ... }:
 {
 
-  system.activationScripts = {
-    script.text = ''
-      install -d -m 755 /data/ollama -o ollama -g users
-    '';
-  };
+  systemd.tmpfiles.rules = [
+    "d /data/ollama 0755 ollama users -"
+  ];
 
   services = {
     ollama = {

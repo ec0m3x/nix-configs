@@ -166,6 +166,7 @@
 
     # Clipboard manager
     wl-clipboard
+    cliphist
 
     # Notification daemon
     mako
@@ -181,6 +182,9 @@
     brightnessctl
   ];
 
+  # Clipboard history daemon
+  services.cliphist.enable = true;
+
   # GNOME Keyring for secret management
   services.gnome-keyring = {
     enable = true;
@@ -194,7 +198,7 @@
     enable = true;
     extraPortals = with pkgs; [
       xdg-desktop-portal-gtk
-      xdg-desktop-portal-gnome
+      xdg-desktop-portal-wlr
     ];
     config = {
       # Default portal configuration for Niri

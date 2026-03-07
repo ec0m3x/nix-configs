@@ -13,5 +13,7 @@
     #};
   };
   services.desktopManager.plasma6.enable = true;
-  programs.xwayland.enable = true;
+
+  # Force software cursor (needed with NVIDIA on Wayland)
+  environment.variables.KWIN_FORCE_SW_CURSOR = "1";
 }

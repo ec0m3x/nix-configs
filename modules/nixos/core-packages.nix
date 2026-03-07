@@ -9,7 +9,6 @@
     dig
     dua
     duf
-    eza
     fd
     ffmpeg
     file
@@ -36,5 +35,8 @@
     yq-go
     ethtool
     wakelan
+    # VA-API / VDPAU diagnostic tools (moved from nvidia.nix extraPackages)
+    vdpauinfo
+    libva-utils
   ];
 }

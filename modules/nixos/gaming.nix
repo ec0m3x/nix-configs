@@ -11,7 +11,6 @@
 
   environment.systemPackages = with pkgs; [
     protonup-qt
-    gamemode
     lutris
     prismlauncher
   ];

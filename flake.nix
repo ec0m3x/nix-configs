@@ -15,9 +15,11 @@
 
     # Niri - Scrollable-tiling Wayland compositor
     niri.url = "github:sodiboo/niri-flake";
+    niri.inputs.nixpkgs.follows = "nixpkgs";
 
     # Noctalia - Desktop shell for Wayland
     noctalia.url = "github:noctalia-dev/noctalia-shell";
+    noctalia.inputs.nixpkgs.follows = "nixpkgs";
 
     # Zen Browser - Privacy-focused Firefox fork
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
@@ -35,11 +37,7 @@
   } @ inputs: let
     # Supported systems for your flake packages, shell, etc.
     systems = [
-      "aarch64-linux"
-      "i686-linux"
       "x86_64-linux"
-      "aarch64-darwin"
-      "x86_64-darwin"
     ];
     # This is a function that generates an attribute by calling a function you
     # pass to it, with each system as an argument
