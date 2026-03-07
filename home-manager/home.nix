@@ -18,6 +18,7 @@
     inputs.self.homeManagerModules.git
     inputs.self.homeManagerModules.starship
     inputs.self.homeManagerModules.tmux
+    inputs.self.homeManagerModules.vscode
     inputs.self.homeManagerModules.zsh
 
     # Or modules exported from other flakes (such as nix-colors):

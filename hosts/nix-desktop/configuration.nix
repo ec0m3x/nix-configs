@@ -32,7 +32,7 @@
 
     # You can also split up your configuration and import pieces of it here:
     # ./users.nix
-    ./monitor.nix
+    #./monitor.nix
 
     # Import your generated (nixos-generate-config) hardware configuration
     ./hardware-configuration.nix
@@ -89,21 +89,28 @@
   # Kernel modules
   boot.kernelModules = [ "uinput" ];
 
+  # 1. Den richtigen Treiber installieren
+  boot.extraModulePackages = [ 
+    config.boot.kernelPackages.r8125 
+  ];
+
+  # 2. Den Standard-Treiber (r8169) für die 2.5G-Karte sperren
+  #boot.blacklistedKernelModules = [ "r8169" ];
+
+  # 3. Stromparmodi auf Kernel-Ebene deaktivieren (sehr wichtig für RTL8125)
+  boot.kernelParams = [ "pcie_aspm=off" ];
+
+
   # Network
   networking = {
-    networkmanager.enable = false;
+    networkmanager.enable = true;
     hostName = "nix-desktop";
-    defaultGateway.address = "10.20.50.1";
-    nameservers = [ "10.20.50.1" ];
-    firewall.allowedTCPPorts = [ 8188 ];
+    firewall.allowedTCPPorts = [ 8188 5201];
+    firewall.allowedUDPPorts = [ 5201 ];
     interfaces = {
       enp4s0 = {
         wakeOnLan.enable = true;
-        useDHCP = false;
-        ipv4.addresses = [{
-          address = "10.20.50.30";
-          prefixLength = 24;
-        }];
+        useDHCP = true;
       };
     };
   };
@@ -112,7 +119,7 @@
   programs.zsh.enable = true;
 
   # Disable the desktop start
-  systemd.defaultUnit = lib.mkForce "multi-user.target";
+  #systemd.defaultUnit = lib.mkForce "multi-user.target";
 
   # Configure your system-wide user settings (groups, etc), add more users as needed.
   users.users = {
@@ -149,6 +156,7 @@
     nvtopPackages.nvidia
     btop
     htop
+    iperf3
   ];
 
   # Udev-Regel für uinput hinzufügen

@@ -10,5 +10,6 @@
   git = import ./git.nix;
   starship = import ./starship.nix;
   tmux = import ./tmux.nix;
+  vscode = import ./vscode.nix;
   zsh = import ./zsh.nix;
 }
