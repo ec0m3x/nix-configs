@@ -18,6 +18,7 @@
     inputs.self.nixosModules.gaming
     inputs.self.nixosModules.locale
     inputs.self.nixosModules.nh
+    inputs.self.nixosModules.niri
     inputs.self.nixosModules.nvidia
     inputs.self.nixosModules.ollama
     inputs.self.nixosModules.pipewire

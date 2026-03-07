@@ -2,16 +2,11 @@
 {
   # Niri - Scrollable-tiling Wayland compositor
   # https://github.com/YaLTeR/niri
+  # Note: Niri is enabled at system level (NixOS module)
+  # This module only provides user-specific configuration
 
-  # Import niri home-manager module from flake
-  imports = [ inputs.niri.homeModules.niri ];
-
-  # Enable niri
-  programs.niri = {
-    enable = true;
-
-    # Use raw KDL configuration format
-    config = ''
+  # Niri configuration file
+  xdg.configFile."niri/config.kdl".text = ''
       input {
           keyboard {
               xkb {
@@ -127,7 +122,6 @@
           xcursor-size 24
       }
     '';
-  };
 
   # Install complementary tools for niri
   home.packages = with pkgs; [
@@ -148,12 +142,12 @@
     mako
   ];
 
-  # XDG portal for Wayland
+  # XDG portal configuration for Niri (user-level, won't affect Plasma)
   xdg.portal = {
     enable = true;
     extraPortals = with pkgs; [
       xdg-desktop-portal-gtk
+      xdg-desktop-portal-gnome
     ];
-    config.common.default = "*";
   };
 }
