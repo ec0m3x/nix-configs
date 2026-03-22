@@ -18,16 +18,16 @@
     inputs.self.homeManagerModules.fzf
     inputs.self.homeManagerModules.git
     inputs.self.homeManagerModules.kitty
-    inputs.self.homeManagerModules.nextcloud-client
-    inputs.self.homeManagerModules.niri
-    inputs.self.homeManagerModules.noctalia
-    inputs.self.homeManagerModules.spotify
+    #inputs.self.homeManagerModules.nextcloud-client
+    #inputs.self.homeManagerModules.niri
+    #inputs.self.homeManagerModules.noctalia
+    #inputs.self.homeManagerModules.spotify
     inputs.self.homeManagerModules.starship
-    inputs.self.homeManagerModules.thunderbird
+    #inputs.self.homeManagerModules.thunderbird
     inputs.self.homeManagerModules.tmux
-    inputs.self.homeManagerModules.vesktop
-    inputs.self.homeManagerModules.vscode
-    inputs.self.homeManagerModules.zen-browser
+    #inputs.self.homeManagerModules.vesktop
+    #inputs.self.homeManagerModules.vscode
+    #inputs.self.homeManagerModules.zen-browser
     inputs.self.homeManagerModules.zsh
 
     # Or modules exported from other flakes (such as nix-colors):
@@ -65,18 +65,6 @@
   home = {
     username = "ecomex";
     homeDirectory = "/home/ecomex";
-
-    # Cursor configuration (applies systemwide)
-    pointerCursor = {
-      package = pkgs.adwaita-icon-theme;
-      name = "Adwaita";
-      size = 24;
-      gtk.enable = true;
-      x11.enable = true;
-    };
-
-    # Create Screenshots directory
-    file."Bilder/Screenshots/.keep".text = "";
   };
 
   # Add stuff for your user as you see fit:

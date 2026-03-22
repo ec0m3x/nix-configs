@@ -15,14 +15,14 @@
     inputs.self.nixosModules.boot
     inputs.self.nixosModules.core-packages
     inputs.self.nixosModules.docker
-    inputs.self.nixosModules.gaming
+    #inputs.self.nixosModules.gaming
     inputs.self.nixosModules.locale
     inputs.self.nixosModules.nh
-    inputs.self.nixosModules.niri
+    #inputs.self.nixosModules.niri
     inputs.self.nixosModules.nvidia
     inputs.self.nixosModules.ollama
-    inputs.self.nixosModules.pipewire
-    inputs.self.nixosModules.plasma
+    #inputs.self.nixosModules.pipewire
+    #inputs.self.nixosModules.plasma
     inputs.self.nixosModules.ssh
     inputs.self.nixosModules.sunshine
     inputs.self.nixosModules.tailscale
@@ -114,7 +114,7 @@
   # Network
   networking = {
     networkmanager.enable = true;
-    hostName = "nix-desktop";
+    hostName = "nix-server";
     firewall.allowedTCPPorts = [ 8188 /* ComfyUI */ 5201 /* iperf3 */ ];
     firewall.allowedUDPPorts = [ 5201 ];
     interfaces = {
