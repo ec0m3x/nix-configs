@@ -107,8 +107,8 @@
   networking = {
     networkmanager.enable = true;
     hostName = "nix-server";
-    firewall.allowedTCPPorts = [ 8188 /* ComfyUI */ 5201 /* iperf3 */ ];
-    firewall.allowedUDPPorts = [ 5201 ];
+    firewall.allowedTCPPorts = [ 8188 /* ComfyUI */ 5201 /* iperf3 */ 47984 /* Wolf HTTPS */ 47989 /* Wolf HTTP */ 48010 /* Wolf RTSP */ ];
+    firewall.allowedUDPPorts = [ 5201 47999 /* Wolf Control */ 48100 /* Wolf Video */ 48200 /* Wolf Audio */ ];
     interfaces = {
       enp4s0 = {
         wakeOnLan.enable = true;
@@ -158,10 +158,20 @@
     iperf3
   ];
 
-  # Add udev rule for uinput
-  # This allows the 'input' group (in which Sunshine runs) to send virtual inputs
+  # udev rules for virtual input devices (Sunshine/Wolf)
   services.udev.extraRules = ''
-    KERNEL=="uinput", GROUP="input", MODE="0660", OPTIONS+="static_node=uinput"
+    # Allows Wolf to access /dev/uinput (only needed for joypad support)
+    KERNEL=="uinput", SUBSYSTEM=="misc", MODE="0660", GROUP="input", OPTIONS+="static_node=uinput", TAG+="uaccess"
+
+    # Allows Wolf to access /dev/uhid (only needed for DualSense emulation)
+    KERNEL=="uhid", GROUP="input", MODE="0660", TAG+="uaccess"
+
+    # Joypads
+    KERNEL=="hidraw*", ATTRS{name}=="Wolf PS5 (virtual) pad", GROUP="input", MODE="0660", ENV{ID_SEAT}="seat9"
+    SUBSYSTEMS=="input", ATTRS{name}=="Wolf X-Box One (virtual) pad", MODE="0660", ENV{ID_SEAT}="seat9"
+    SUBSYSTEMS=="input", ATTRS{name}=="Wolf PS5 (virtual) pad", MODE="0660", ENV{ID_SEAT}="seat9"
+    SUBSYSTEMS=="input", ATTRS{name}=="Wolf gamepad (virtual) motion sensors", MODE="0660", ENV{ID_SEAT}="seat9"
+    SUBSYSTEMS=="input", ATTRS{name}=="Wolf Nintendo (virtual) pad", MODE="0660", ENV{ID_SEAT}="seat9"
   '';
 
   # Required for VSCode server / nix-ld dynamic linking
