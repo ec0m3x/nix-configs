@@ -62,11 +62,11 @@
     # NixOS configuration entrypoint
     # Available through 'nixos-rebuild --flake .#your-hostname'
     nixosConfigurations = {
-      nix-desktop = nixpkgs.lib.nixosSystem {
+      nix-server = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs;};
         modules = [
           # > Our main nixos configuration file <
-          ./hosts/nix-desktop/configuration.nix
+          ./hosts/nix-server/configuration.nix
         ];
       };
     };
@@ -74,7 +74,7 @@
     # Standalone home-manager configuration entrypoint
     # Available through 'home-manager --flake .#your-username@your-hostname'
     homeConfigurations = {
-      "ecomex@nix-desktop" = home-manager.lib.homeManagerConfiguration {
+      "ecomex@nix-server" = home-manager.lib.homeManagerConfiguration {
         # Home-manager requires 'pkgs' instance
         pkgs = nixpkgs.legacyPackages.x86_64-linux;
         extraSpecialArgs = {inherit inputs;};

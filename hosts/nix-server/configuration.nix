@@ -99,14 +99,6 @@
   # Kernel modules
   boot.kernelModules = [ "uinput" ];
 
-  # 1. Install the correct driver
-  boot.extraModulePackages = [
-    config.boot.kernelPackages.r8125
-  ];
-
-  # 2. Block the default driver (r8169) for the 2.5G card
-  boot.blacklistedKernelModules = [ "r8169" ];
-
   # 3. Disable power modes at kernel level
   boot.kernelParams = [ "pcie_aspm=off" ];
 
