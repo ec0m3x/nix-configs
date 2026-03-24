@@ -44,6 +44,10 @@
         rlh = "nh home switch";
         cleanup-nix = "nh clean all --keep-since 5d --keep 3";
       };
+
+      initContent = ''
+        export PATH="$HOME/.local/bin:$PATH"
+      '';
     };
   };
 }
