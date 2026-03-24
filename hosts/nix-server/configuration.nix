@@ -15,6 +15,7 @@
     inputs.self.nixosModules.boot
     inputs.self.nixosModules.core-packages
     inputs.self.nixosModules.docker
+    inputs.self.nixosModules.latex
     #inputs.self.nixosModules.gaming
     inputs.self.nixosModules.locale
     inputs.self.nixosModules.nh

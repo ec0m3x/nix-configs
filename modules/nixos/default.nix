@@ -7,6 +7,7 @@
   core-packages = import ./core-packages.nix;
   docker = import ./docker.nix;
   gaming = import ./gaming.nix;
+  latex = import ./latex.nix;
   locale = import ./locale.nix;
   nh = import ./nh.nix;
   niri = import ./niri.nix;
