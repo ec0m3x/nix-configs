@@ -10,7 +10,6 @@
       enable = true;
       package = pkgs.ollama-cuda;
       host = "[::]";
-      acceleration = "cuda";
       user = "ollama";
       group = "users";
       openFirewall = true;

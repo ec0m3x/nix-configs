@@ -16,11 +16,16 @@
     inputs.self.nixosModules.core-packages
     inputs.self.nixosModules.docker
     inputs.self.nixosModules.latex
+    inputs.self.nixosModules.gaming
     inputs.self.nixosModules.locale
     inputs.self.nixosModules.nh
+    inputs.self.nixosModules.niri
     inputs.self.nixosModules.nvidia
     inputs.self.nixosModules.ollama
+    inputs.self.nixosModules.pipewire
+    inputs.self.nixosModules.plasma
     inputs.self.nixosModules.ssh
+    #inputs.self.nixosModules.sunshine
     inputs.self.nixosModules.tailscale
 
     # Or modules from other flakes (such as nixos-hardware):
@@ -137,5 +142,5 @@
   programs.nix-ld.enable = true;
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
-  system.stateVersion = "25.11";
+  system.stateVersion = "26.05";
 }

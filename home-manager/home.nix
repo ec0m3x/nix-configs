@@ -18,16 +18,16 @@
     inputs.self.homeManagerModules.fzf
     inputs.self.homeManagerModules.git
     inputs.self.homeManagerModules.kitty
-    #inputs.self.homeManagerModules.nextcloud-client
-    #inputs.self.homeManagerModules.niri
-    #inputs.self.homeManagerModules.noctalia
-    #inputs.self.homeManagerModules.spotify
+    inputs.self.homeManagerModules.nextcloud-client
+    inputs.self.homeManagerModules.niri
+    inputs.self.homeManagerModules.noctalia
+    inputs.self.homeManagerModules.spotify
     inputs.self.homeManagerModules.starship
-    #inputs.self.homeManagerModules.thunderbird
+    inputs.self.homeManagerModules.thunderbird
     inputs.self.homeManagerModules.tmux
-    #inputs.self.homeManagerModules.vesktop
-    #inputs.self.homeManagerModules.vscode
-    #inputs.self.homeManagerModules.zen-browser
+    inputs.self.homeManagerModules.vesktop
+    inputs.self.homeManagerModules.vscode
+    inputs.self.homeManagerModules.zen-browser
     inputs.self.homeManagerModules.zsh
 
     # Or modules exported from other flakes (such as nix-colors):
@@ -65,6 +65,13 @@
   home = {
     username = "ecomex";
     homeDirectory = "/home/ecomex";
+
+    pointerCursor = {
+      name = "Adwaita";
+      package = pkgs.adwaita-icon-theme;
+      size = 16;
+      gtk.enable = true;
+    };
   };
 
   # Add stuff for your user as you see fit:
@@ -81,5 +88,5 @@
   systemd.user.startServices = "sd-switch";
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
-  home.stateVersion = "25.11";
+  home.stateVersion = "26.05";
 }

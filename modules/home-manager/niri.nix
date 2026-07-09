@@ -144,11 +144,11 @@
           XF86AudioMute { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
       }
 
-      spawn-at-startup "noctalia-shell"
+      spawn-at-startup "noctalia"
 
       cursor {
           xcursor-theme "Adwaita"
-          xcursor-size 24
+          xcursor-size 16
       }
     '';
 
