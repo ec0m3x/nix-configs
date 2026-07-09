@@ -17,8 +17,7 @@
         set -g status on
         set -g mouse on
 
-        # Where this shows 'alacritty' - the value should be whatever $TERM is outside tmux
-        set-option -ga terminal-overrides ",alacritty:Tc"
+        set-option -ga terminal-overrides ",xterm-kitty:Tc"
       '';
     };
   };

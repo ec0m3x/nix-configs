@@ -18,6 +18,10 @@
               tap
               natural-scroll
           }
+
+          mouse {
+              scroll-factor 0.4
+          }
       }
 
       output "DP-2" {
@@ -170,6 +174,7 @@
           open-on-workspace "gaming"
       }
 
+      spawn-at-startup "xwayland-satellite"
       spawn-at-startup "noctalia"
 
       cursor {
