@@ -144,6 +144,17 @@
           XF86AudioMute { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
       }
 
+      workspace "terminal"
+      workspace "browser"
+
+      // Window rules
+      // Note: verify app-id with 'niri msg windows' while the app is open
+      window-rule {
+          match app-id="zen-beta"
+          open-on-workspace "browser"
+          default-column-width { proportion 1.0; }
+      }
+
       spawn-at-startup "noctalia"
 
       cursor {

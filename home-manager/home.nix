@@ -41,6 +41,10 @@
     username = "ecomex";
     homeDirectory = "/home/ecomex";
 
+    sessionVariables = {
+      GH_CONFIG_DIR = "$HOME/.local/share/gh";
+    };
+
     pointerCursor = {
       name = "Adwaita";
       package = pkgs.adwaita-icon-theme;
