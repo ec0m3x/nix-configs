@@ -163,6 +163,7 @@
       window-rule {
           match app-id="code"
           open-on-workspace "code"
+          default-column-width { proportion 1.0; }
       }
       window-rule {
           match app-id="steam"
