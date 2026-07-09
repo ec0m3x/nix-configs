@@ -20,7 +20,9 @@
           }
 
           mouse {
-              scroll-factor 0.4
+              accel-speed 0.0
+              accel-profile "adaptive"
+              scroll-factor 1.0
           }
       }
 
@@ -231,13 +233,13 @@
     enable = true;
     extraPortals = with pkgs; [
       xdg-desktop-portal-gtk
-      xdg-desktop-portal-luminous
+      xdg-desktop-portal-gnome
     ];
     config = {
       niri = {
         default = [ "gtk" ];
-        "org.freedesktop.impl.portal.ScreenCast" = [ "luminous" ];
-        "org.freedesktop.impl.portal.Screenshot" = [ "luminous" ];
+        "org.freedesktop.impl.portal.ScreenCast" = [ "gnome" ];
+        "org.freedesktop.impl.portal.Screenshot" = [ "gnome" ];
         "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
       };
       common = {
