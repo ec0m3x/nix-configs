@@ -146,13 +146,27 @@
 
       workspace "terminal"
       workspace "browser"
+      workspace "code"
+      workspace "gaming"
 
       // Window rules
-      // Note: verify app-id with 'niri msg windows' while the app is open
+      // Note: verify app-ids with 'niri msg windows' while the app is open
       window-rule {
           match app-id="zen-beta"
           open-on-workspace "browser"
           default-column-width { proportion 1.0; }
+      }
+      window-rule {
+          match app-id="kitty"
+          open-on-workspace "terminal"
+      }
+      window-rule {
+          match app-id="code"
+          open-on-workspace "code"
+      }
+      window-rule {
+          match app-id="steam"
+          open-on-workspace "gaming"
       }
 
       spawn-at-startup "noctalia"
