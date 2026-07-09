@@ -96,7 +96,23 @@
 
   # Network
   networking = {
-    networkmanager.enable = true;
+    networkmanager = {
+      enable = true;
+      ensureProfiles.profiles."static-enp42s0" = {
+        connection = {
+          id = "static-enp42s0";
+          type = "ethernet";
+          interface-name = "enp42s0";
+        };
+        ipv4 = {
+          method = "manual";
+          addresses = "10.20.50.20/24";
+          gateway = "10.20.50.1";
+          dns = "10.20.50.1;8.8.8.8;";
+        };
+        ipv6.method = "auto";
+      };
+    };
     hostName = "nix-ai";
   };
 
