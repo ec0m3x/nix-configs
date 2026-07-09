@@ -200,7 +200,6 @@
     cliphist
 
     # Notification daemon
-    mako
     libnotify  # provides notify-send
 
     # Media player control
@@ -216,6 +215,9 @@
   # Clipboard history daemon
   services.cliphist.enable = true;
 
+  # Notification daemon
+  services.mako.enable = true;
+
   # GNOME Keyring for secret management
   services.gnome-keyring = {
     enable = true;
@@ -229,15 +231,15 @@
     enable = true;
     extraPortals = with pkgs; [
       xdg-desktop-portal-gtk
-      xdg-desktop-portal-wlr
+      xdg-desktop-portal-luminous
     ];
     config = {
-      # Default portal configuration for Niri
       niri = {
         default = [ "gtk" ];
+        "org.freedesktop.impl.portal.ScreenCast" = [ "luminous" ];
+        "org.freedesktop.impl.portal.Screenshot" = [ "luminous" ];
         "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
       };
-      # Fallback configuration for other compositors
       common = {
         default = [ "gtk" ];
       };

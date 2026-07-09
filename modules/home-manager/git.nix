@@ -4,7 +4,7 @@
     enable = true;
     settings.user = {
       name = "ecomex";
-      email = "ecomex@nixos";
+      email = "skoch@sks-concept.de";
     };
   };
   programs.gh = {
