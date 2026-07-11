@@ -4,11 +4,13 @@
   # List your module files here
   # my-module = import ./my-module.nix;
   bat = import ./bat.nix;
+  default-apps = import ./default-apps.nix;
   bottom = import ./bottom.nix;
   eza = import ./eza.nix;
   fastfetch = import ./fastfetch.nix;
   fzf = import ./fzf.nix;
   git = import ./git.nix;
+  huggingface-cli = import ./huggingface-cli.nix;
   kitty = import ./kitty.nix;
   nextcloud-client = import ./nextcloud-client.nix;
   niri = import ./niri.nix;

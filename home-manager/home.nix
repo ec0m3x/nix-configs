@@ -12,11 +12,13 @@
     # If you want to use modules your own flake exports (from modules/home-manager):
     # inputs.self.homeManagerModules.example
     inputs.self.homeManagerModules.bat
+    inputs.self.homeManagerModules.default-apps
     inputs.self.homeManagerModules.bottom
     inputs.self.homeManagerModules.eza
     inputs.self.homeManagerModules.fastfetch
     inputs.self.homeManagerModules.fzf
     inputs.self.homeManagerModules.git
+    inputs.self.homeManagerModules.huggingface-cli
     inputs.self.homeManagerModules.kitty
     inputs.self.homeManagerModules.nextcloud-client
     inputs.self.homeManagerModules.niri
