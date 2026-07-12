@@ -16,6 +16,7 @@
   niri = import ./niri.nix;
   noctalia = import ./noctalia.nix;
   spotify = import ./spotify.nix;
+  telegram = import ./telegram.nix;
   starship = import ./starship.nix;
   thunderbird = import ./thunderbird.nix;
   tmux = import ./tmux.nix;

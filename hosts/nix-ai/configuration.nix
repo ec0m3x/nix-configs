@@ -96,6 +96,8 @@
 
   # Network
   networking = {
+    interfaces.enp42s0.wakeOnLan.enable = true;
+
     networkmanager = {
       enable = true;
       ensureProfiles.profiles."static-enp42s0" = {
@@ -156,6 +158,19 @@
 
   # Required for VSCode server / nix-ld dynamic linking
   programs.nix-ld.enable = true;
+
+  # gvfs for Nautilus trash, MTP, network mounts
+  services.gvfs.enable = true;
+
+  # Bluetooth
+  hardware.bluetooth.enable = true;
+  services.blueman.enable = true;
+
+  # TPM2 auto-unlock for LUKS (enroll with: sudo systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs=0+7 /dev/disk/by-uuid/6d721ce2-5405-4b81-9d74-366cd5f79480)
+  boot.initrd.luks.devices."luks-6d721ce2-5405-4b81-9d74-366cd5f79480".crypttabExtraOpts = [
+    "tpm2-device=auto"
+    "tpm2-pcrs=0+7"
+  ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "26.05";

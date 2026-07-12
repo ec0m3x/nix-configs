@@ -24,6 +24,7 @@
     inputs.self.homeManagerModules.niri
     inputs.self.homeManagerModules.noctalia
     inputs.self.homeManagerModules.spotify
+    inputs.self.homeManagerModules.telegram
     inputs.self.homeManagerModules.starship
     inputs.self.homeManagerModules.thunderbird
     inputs.self.homeManagerModules.tmux
@@ -53,6 +54,23 @@
       size = 16;
       gtk.enable = true;
     };
+  };
+
+  gtk = {
+    enable = true;
+    theme = {
+      name = "Tokyonight-Dark";
+      package = pkgs.tokyonight-gtk-theme;
+    };
+    iconTheme = {
+      name = "candy-icons";
+      package = pkgs.candy-icons;
+    };
+  };
+
+  qt = {
+    enable = true;
+    platformTheme.name = "gtk";
   };
 
   # Add stuff for your user as you see fit:

@@ -60,7 +60,8 @@
       binds {
           Mod+Return { spawn "kitty"; }
           Mod+T { spawn "kitty"; }
-          Mod+D { spawn "dolphin"; }
+          Mod+B { spawn "zen-beta"; }
+          Mod+D { spawn "nautilus"; }
           Mod+Space { spawn "fuzzel"; }
           Mod+V { spawn "sh" "-c" "cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"; }
           Mod+Q { close-window; }
@@ -135,8 +136,8 @@
           Mod+Shift+Ctrl+T { toggle-debug-tint; }
 
           // Screenshot bindings
-          Print { spawn "sh" "-c" "grim -g \"$(slurp)\" \"$HOME/Bilder/Screenshots/$(date +'%Y-%m-%d_%H-%M-%S').png\" && notify-send 'Screenshot' 'Area saved'"; }
-          Shift+Print { spawn "sh" "-c" "grim \"$HOME/Bilder/Screenshots/$(date +'%Y-%m-%d_%H-%M-%S').png\" && notify-send 'Screenshot' 'Screen saved'"; }
+          Mod+Shift+5 { spawn "sh" "-c" "mkdir -p \"$HOME/Bilder/Screenshots\" && grim -g \"$(slurp)\" \"$HOME/Bilder/Screenshots/$(date +'%Y-%m-%d_%H-%M-%S').png\" && notify-send 'Screenshot' 'Area saved'"; }
+          Mod+Shift+6 { spawn "sh" "-c" "mkdir -p \"$HOME/Bilder/Screenshots\" && grim \"$HOME/Bilder/Screenshots/$(date +'%Y-%m-%d_%H-%M-%S').png\" && notify-send 'Screenshot' 'Screen saved'"; }
 
           // Media control bindings
           XF86AudioPlay { spawn "playerctl" "play-pause"; }
@@ -163,10 +164,6 @@
           default-column-width { proportion 1.0; }
       }
       window-rule {
-          match app-id="kitty"
-          open-on-workspace "terminal"
-      }
-      window-rule {
           match app-id="code"
           open-on-workspace "code"
           default-column-width { proportion 1.0; }
@@ -191,7 +188,7 @@
     fuzzel
 
     # File manager
-    kdePackages.dolphin
+    nautilus
 
     # Screenshot tool
     grim
