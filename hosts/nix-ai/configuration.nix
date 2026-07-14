@@ -128,14 +128,14 @@
       # You can set an initial password for your user.
       # If you do, you can skip setting a root password by passing '--no-root-passwd' to nixos-install.
       # Be sure to change it (using passwd) after rebooting!
-      # TODO: replace with hashedPassword (run: mkpasswd -m yescrypt)
-      # initialPassword stores plaintext in /nix/store (world-readable)
-      initialPassword = "ultrageheim";
+      # Password hash is read from a file outside the repo (not world-readable).
+      # Create with: mkpasswd -m yescrypt | sudo tee /etc/nixos-secrets/ecomex
+      hashedPasswordFile = "/etc/nixos-secrets/ecomex";
       isNormalUser = true;
       shell = pkgs.zsh;
       openssh.authorizedKeys.keys = [
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGox9JI8NEi1IxF2AXSQQF+Pnm/kxt1/RtnTyy6Rokk/ ecomex@MacBook.local"
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIMITvvLRVK0B6amvBv6ZT1eb80fYLVYP9xdRREl7ftk s.koch@BCWMC00PF64N0RX"
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGox9JI8NEi1IxF2AXSQQF+Pnm/kxt1/RtnTyy6Rokk/ ecomex@nix-ai"
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIMITvvLRVK0B6amvBv6ZT1eb80fYLVYP9xdRREl7ftk ecomex@nix-ai"
       ];
       # Be sure to add any other groups you need (such as networkmanager, audio, docker, etc)
       extraGroups = [

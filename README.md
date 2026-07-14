@@ -91,9 +91,14 @@ cp /mnt/etc/nixos/hardware-configuration.nix /mnt/etc/nixos/hosts/nix-ai/hardwar
 cd /mnt/etc/nixos
 git add -A
 
+# Create the password hash file (outside the repo — not visible in git)
+mkdir -p /mnt/etc/nixos-secrets
+nix-shell -p mkpasswd --run "mkpasswd -m yescrypt" | tee /mnt/etc/nixos-secrets/ecomex
+chmod 600 /mnt/etc/nixos-secrets/ecomex
+
 # Install the system
 nixos-install --flake .#nix-ai
-# → You will be prompted to set a password for user 'ecomex'
+# → No password prompt during install — the hash is read from the file above
 ```
 
 ### Phase 4: Post-Install

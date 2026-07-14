@@ -3,7 +3,7 @@
     enable = true;
     settings.user = {
       name = "ecomex";
-      email = "skoch@sks-concept.de";
+      email = "ec0m3x@users.noreply.github.com";
     };
   };
   programs.gh = {
