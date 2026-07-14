@@ -27,7 +27,6 @@
 
     # ComfyUI - AI image generation (Nix flake with CUDA support)
     comfyui-nix.url = "github:utensils/comfyui-nix";
-    comfyui-nix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = {
