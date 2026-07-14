@@ -155,6 +155,12 @@
     };
   };
 
+  # Sudo: show asterisks on password input and insult on wrong password
+  security.sudo.extraConfig = ''
+    Defaults pwfeedback
+    Defaults insults
+  '';
+
   environment.systemPackages = with pkgs; [
     libevdev
     cudaPackages.cudatoolkit
