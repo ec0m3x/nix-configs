@@ -1,6 +1,8 @@
-{ config, pkgs, ... }:
 {
-
+  config,
+  pkgs,
+  ...
+}: {
   systemd.tmpfiles.rules = [
     "d /data/ollama 0755 ollama users -"
   ];
@@ -14,7 +16,7 @@
       group = "users";
       openFirewall = true;
       models = "/data/ollama";
-      loadModels = [ "llama3.2" "nomic-embed-text" ];
+      loadModels = ["llama3.2" "nomic-embed-text"];
     };
   };
 }

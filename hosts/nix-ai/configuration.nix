@@ -16,6 +16,7 @@
     inputs.self.nixosModules.core-packages
     inputs.self.nixosModules.docker
     inputs.self.nixosModules.latex
+    inputs.self.nixosModules.llama-swap
     inputs.self.nixosModules.gaming
     inputs.self.nixosModules.locale
     inputs.self.nixosModules.nh
@@ -23,7 +24,7 @@
     inputs.self.nixosModules.nvidia
     inputs.self.nixosModules.ollama
     inputs.self.nixosModules.pipewire
-    inputs.self.nixosModules.plasma
+    inputs.self.nixosModules.greetd
     inputs.self.nixosModules.ssh
     #inputs.self.nixosModules.sunshine
     inputs.self.nixosModules.tailscale

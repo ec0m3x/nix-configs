@@ -98,18 +98,52 @@
   # Kernel version
   #boot.kernelPackages = pkgs.linuxPackages_xanmod_latest;
   # Kernel modules
-  boot.kernelModules = [ "uinput" ];
+  boot.kernelModules = ["uinput"];
 
   # 3. Disable power modes at kernel level
-  boot.kernelParams = [ "pcie_aspm=off" ];
-
+  boot.kernelParams = ["pcie_aspm=off"];
 
   # Network
   networking = {
     networkmanager.enable = true;
     hostName = "nix-server";
-    firewall.allowedTCPPorts = [ 8188 /* ComfyUI */ 5201 /* iperf3 */ 47984 /* Wolf HTTPS */ 47989 /* Wolf HTTP */ 48010 /* Wolf RTSP */ ];
-    firewall.allowedUDPPorts = [ 5201 47999 /* Wolf Control */ 48100 /* Wolf Video */ 48200 /* Wolf Audio */ ];
+    firewall.allowedTCPPorts = [
+      8188
+      /*
+      ComfyUI
+      */
+      5201
+      /*
+      iperf3
+      */
+      47984
+      /*
+      Wolf HTTPS
+      */
+      47989
+      /*
+      Wolf HTTP
+      */
+      48010
+      /*
+      Wolf RTSP
+      */
+    ];
+    firewall.allowedUDPPorts = [
+      5201
+      47999
+      /*
+      Wolf Control
+      */
+      48100
+      /*
+      Wolf Video
+      */
+      48200
+      /*
+      Wolf Audio
+      */
+    ];
     interfaces = {
       enp4s0 = {
         wakeOnLan.enable = true;

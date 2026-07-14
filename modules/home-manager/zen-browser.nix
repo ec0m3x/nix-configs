@@ -1,5 +1,10 @@
-{ config, lib, pkgs, inputs, ... }:
 {
+  config,
+  lib,
+  pkgs,
+  inputs,
+  ...
+}: {
   # Zen Browser - Privacy-focused Firefox fork with beautiful design
   # https://zen-browser.app/
   imports = [

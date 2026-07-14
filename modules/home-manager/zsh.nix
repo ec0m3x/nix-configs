@@ -1,5 +1,4 @@
-{ ... }:
-{
+{...}: {
   programs = {
     zsh = {
       enable = true;
@@ -37,7 +36,7 @@
 
         speedtest = "nix-shell -p speedtest-cli --run speedtest";
 
-        desktop-up   = "sudo systemctl start display-manager";
+        desktop-up = "sudo systemctl start display-manager";
         desktop-down = "sudo systemctl stop display-manager && sudo loginctl terminate-user ecomex";
 
         rln = "nh os switch";

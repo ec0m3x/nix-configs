@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   environment.systemPackages = with pkgs; [
     binutils
     btop
@@ -22,6 +21,9 @@
     e2fsprogs
     gptfdisk
     pciutils
+    php
+    phpPackages.composer
+    poppler-utils
     ripgrep
     rsync
     tpm2-tss

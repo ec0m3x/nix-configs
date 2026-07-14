@@ -1,5 +1,10 @@
-{ config, lib, pkgs, inputs, ... }:
-let
+{
+  config,
+  lib,
+  pkgs,
+  inputs,
+  ...
+}: let
   # Monitor configuration - adjust this to match your display
   primaryMonitor = "DP-2";
 
@@ -63,7 +68,7 @@ let
       middleClickAction = "none";
       middleClickCommand = "";
       middleClickFollowMouse = false;
-      monitors = [ primaryMonitor ];  # Configure for primary monitor
+      monitors = [primaryMonitor]; # Configure for primary monitor
       mouseWheelAction = "none";
       mouseWheelWrap = true;
       outerCorners = true;
@@ -80,22 +85,22 @@ let
       widgetSpacing = 6;
       widgets = {
         center = [
-          { id = "Clock"; }
+          {id = "Clock";}
         ];
         left = [
-          { id = "Launcher"; }
-          { id = "Workspace"; }
-          { id = "SystemMonitor"; }
-          { id = "ActiveWindow"; }
-          { id = "MediaMini"; }
+          {id = "Launcher";}
+          {id = "Workspace";}
+          {id = "SystemMonitor";}
+          {id = "ActiveWindow";}
+          {id = "MediaMini";}
         ];
         right = [
-          { id = "Tray"; }
-          { id = "NotificationHistory"; }
-          { id = "Battery"; }
-          { id = "Volume"; }
-          { id = "Brightness"; }
-          { id = "ControlCenter"; }
+          {id = "Tray";}
+          {id = "NotificationHistory";}
+          {id = "Battery";}
+          {id = "Volume";}
+          {id = "Brightness";}
+          {id = "ControlCenter";}
         ];
       };
     };
@@ -109,9 +114,18 @@ let
 
     calendar = {
       cards = [
-        { enabled = true; id = "calendar-header-card"; }
-        { enabled = true; id = "calendar-month-card"; }
-        { enabled = true; id = "weather-card"; }
+        {
+          enabled = true;
+          id = "calendar-header-card";
+        }
+        {
+          enabled = true;
+          id = "calendar-month-card";
+        }
+        {
+          enabled = true;
+          id = "weather-card";
+        }
       ];
     };
 
@@ -128,27 +142,45 @@ let
 
     controlCenter = {
       cards = [
-        { enabled = true; id = "profile-card"; }
-        { enabled = true; id = "shortcuts-card"; }
-        { enabled = true; id = "audio-card"; }
-        { enabled = false; id = "brightness-card"; }
-        { enabled = true; id = "weather-card"; }
-        { enabled = true; id = "media-sysmon-card"; }
+        {
+          enabled = true;
+          id = "profile-card";
+        }
+        {
+          enabled = true;
+          id = "shortcuts-card";
+        }
+        {
+          enabled = true;
+          id = "audio-card";
+        }
+        {
+          enabled = false;
+          id = "brightness-card";
+        }
+        {
+          enabled = true;
+          id = "weather-card";
+        }
+        {
+          enabled = true;
+          id = "media-sysmon-card";
+        }
       ];
       diskPath = "/";
       position = "close_to_bar_button";
       shortcuts = {
         left = [
-          { id = "Network"; }
-          { id = "Bluetooth"; }
-          { id = "WallpaperSelector"; }
-          { id = "NoctaliaPerformance"; }
+          {id = "Network";}
+          {id = "Bluetooth";}
+          {id = "WallpaperSelector";}
+          {id = "NoctaliaPerformance";}
         ];
         right = [
-          { id = "Notifications"; }
-          { id = "PowerProfile"; }
-          { id = "KeepAwake"; }
-          { id = "NightLight"; }
+          {id = "Notifications";}
+          {id = "PowerProfile";}
+          {id = "KeepAwake";}
+          {id = "NightLight";}
         ];
       };
     };
@@ -179,7 +211,7 @@ let
       indicatorThickness = 3;
       launcherIconColor = "none";
       launcherPosition = "end";
-      monitors = [ primaryMonitor ];  # Configure for primary monitor
+      monitors = [primaryMonitor]; # Configure for primary monitor
       onlySameOutput = true;
       pinnedApps = [];
       pinnedStatic = false;
@@ -209,13 +241,13 @@ let
       forceBlackScreenCorners = false;
       iRadiusRatio = 1;
       keybinds = {
-        keyDown = [ "Down" ];
-        keyEnter = [ "Return" "Enter" ];
-        keyEscape = [ "Esc" ];
-        keyLeft = [ "Left" ];
-        keyRemove = [ "Del" ];
-        keyRight = [ "Right" ];
-        keyUp = [ "Up" ];
+        keyDown = ["Down"];
+        keyEnter = ["Return" "Enter"];
+        keyEscape = ["Esc"];
+        keyLeft = ["Left"];
+        keyRemove = ["Del"];
+        keyRight = ["Right"];
+        keyUp = ["Up"];
       };
       language = "";
       lockOnSuspend = true;
@@ -345,7 +377,7 @@ let
       autoHideMs = 2000;
       backgroundOpacity = 1;
       enabled = true;
-      enabledTypes = [ 0 1 2 ];
+      enabledTypes = [0 1 2];
       location = "top_right";
       monitors = [];
       overlayLayer = true;
@@ -362,13 +394,41 @@ let
       largeButtonsStyle = true;
       position = "center";
       powerOptions = [
-        { action = "lock"; enabled = true; keybind = "1"; }
-        { action = "suspend"; enabled = true; keybind = "2"; }
-        { action = "hibernate"; enabled = true; keybind = "3"; }
-        { action = "reboot"; enabled = true; keybind = "4"; }
-        { action = "logout"; enabled = true; keybind = "5"; }
-        { action = "shutdown"; enabled = true; keybind = "6"; }
-        { action = "rebootToUefi"; enabled = true; keybind = "7"; }
+        {
+          action = "lock";
+          enabled = true;
+          keybind = "1";
+        }
+        {
+          action = "suspend";
+          enabled = true;
+          keybind = "2";
+        }
+        {
+          action = "hibernate";
+          enabled = true;
+          keybind = "3";
+        }
+        {
+          action = "reboot";
+          enabled = true;
+          keybind = "4";
+        }
+        {
+          action = "logout";
+          enabled = true;
+          keybind = "5";
+        }
+        {
+          action = "shutdown";
+          enabled = true;
+          keybind = "6";
+        }
+        {
+          action = "rebootToUefi";
+          enabled = true;
+          keybind = "7";
+        }
       ];
       showHeader = true;
       showKeybinds = false;
@@ -387,7 +447,7 @@ let
       diskCriticalThreshold = 90;
       diskWarningThreshold = 80;
       enableDgpuMonitoring = false;
-      externalMonitor = "resources || missioncenter || jdsystemmonitor || corestats || system-monitoring-center || gnome-system-monitor || plasma-systemmonitor || mate-system-monitor || ukui-system-monitor || deepin-system-monitor || pantheon-system-monitor";
+      externalMonitor = "resources || missioncenter || jdsystemmonitor || corestats || system-monitoring-center || gnome-system-monitor || mate-system-monitor || ukui-system-monitor || deepin-system-monitor || pantheon-system-monitor";
       gpuCriticalThreshold = 90;
       gpuWarningThreshold = 80;
       memCriticalThreshold = 90;
@@ -464,9 +524,7 @@ let
     states = {};
     sources = [];
   };
-
-in
-{
+in {
   # Noctalia - A beautiful, minimal desktop shell for Wayland
   # https://github.com/noctalia-dev/noctalia-shell
   # https://noctalia.dev/
@@ -475,18 +533,20 @@ in
   # Configuration is managed declaratively through home-manager
 
   # Install noctalia-shell from flake input and required dependencies
-  home.packages = [
-    inputs.noctalia.packages.${pkgs.system}.default
-  ] ++ (with pkgs; [
-    # Qt/QML runtime for Quickshell
-    qt6.qtbase
-    qt6.qtdeclarative
-    qt6.qtwayland
+  home.packages =
+    [
+      inputs.noctalia.packages.${pkgs.system}.default
+    ]
+    ++ (with pkgs; [
+      # Qt/QML runtime for Quickshell
+      qt6.qtbase
+      qt6.qtdeclarative
+      qt6.qtwayland
 
-    # Noctalia-specific tools
-    cliphist  # Clipboard history manager for app launcher
-    # Note: pamixer, brightnessctl, playerctl, libnotify are provided by niri module
-  ]);
+      # Noctalia-specific tools
+      cliphist # Clipboard history manager for app launcher
+      # Note: pamixer, brightnessctl, playerctl, libnotify are provided by niri module
+    ]);
 
   # Declaratively manage Noctalia configuration
   xdg.configFile."noctalia/settings.json" = {

@@ -14,6 +14,8 @@
   kitty = import ./kitty.nix;
   nextcloud-client = import ./nextcloud-client.nix;
   niri = import ./niri.nix;
+  opencode = import ./opencode.nix;
+  pi-coding-agent = import ./pi-coding-agent.nix;
   noctalia = import ./noctalia.nix;
   spotify = import ./spotify.nix;
   telegram = import ./telegram.nix;

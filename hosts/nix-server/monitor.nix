@@ -1,6 +1,8 @@
-{ config, pkgs, ... }:
-
 {
+  config,
+  pkgs,
+  ...
+}: {
   # 1. Inject EDID to the system as firmware
   hardware.firmware = [
     (pkgs.runCommand "monitor-edid" {} ''

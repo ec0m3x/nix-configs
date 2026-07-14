@@ -1,10 +1,9 @@
-{ ... }:
-{
+{...}: {
   programs.fzf = {
     enable = true;
     enableZshIntegration = true;
 
-    changeDirWidgetOptions = [ "--preview 'tree -C {} | head -200'" ];
+    changeDirWidgetOptions = ["--preview 'tree -C {} | head -200'"];
 
     defaultCommand = "rg --files";
     defaultOptions = [

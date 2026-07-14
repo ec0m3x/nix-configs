@@ -1,5 +1,8 @@
-{ pkgs, config, ... }:
 {
+  pkgs,
+  config,
+  ...
+}: {
   virtualisation.docker = {
     enable = true;
     autoPrune = {
@@ -14,5 +17,5 @@
   ];
 
   # Add user to docker group
-  users.users.ecomex.extraGroups = [ "docker" ];
+  users.users.ecomex.extraGroups = ["docker"];
 }

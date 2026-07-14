@@ -1,5 +1,9 @@
-{ config, lib, pkgs, ... }:
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
   # Thunderbird - Free and open-source email client
   # https://www.thunderbird.net/
   programs.thunderbird = {

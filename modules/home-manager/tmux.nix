@@ -1,5 +1,4 @@
-{ ... }:
-{
+{...}: {
   programs = {
     tmate.enable = true;
 

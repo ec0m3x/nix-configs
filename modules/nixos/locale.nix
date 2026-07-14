@@ -1,6 +1,4 @@
-{ ... }:
-{
-  
+{...}: {
   # Set your time zone.
   time.timeZone = "Europe/Berlin";
 
@@ -22,7 +20,7 @@
   # Configure console keymap
   console.keyMap = "de";
 
-  # Configure X11 keyboard layout (used by SDDM and Wayland)
+  # Configure X11 keyboard layout (used by greetd and Wayland)
   services.xserver.xkb = {
     layout = "de";
     variant = "";

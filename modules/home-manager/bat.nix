@@ -1,8 +1,7 @@
-{ ... }:
-{
+{...}: {
   programs = {
     bat = {
       enable = true;
     };
-  }; 
+  };
 }

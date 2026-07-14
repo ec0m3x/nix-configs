@@ -48,7 +48,14 @@
     packages = forAllSystems (system: import ./pkgs nixpkgs.legacyPackages.${system});
     # Formatter for your nix files, available through 'nix fmt'
     # Other options beside 'alejandra' include 'nixpkgs-fmt'
-    formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
+    formatter = forAllSystems (system:
+      nixpkgs.legacyPackages.${system}.writeShellScriptBin "alejandra" ''
+        if [ $# -eq 0 ]; then
+          exec ${nixpkgs.legacyPackages.${system}.alejandra}/bin/alejandra .
+        else
+          exec ${nixpkgs.legacyPackages.${system}.alejandra}/bin/alejandra "$@"
+        fi
+      '');
 
     # Your custom packages and modifications, exported as overlays
     overlays = import ./overlays {inherit inputs;};

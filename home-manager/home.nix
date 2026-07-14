@@ -22,6 +22,8 @@
     inputs.self.homeManagerModules.kitty
     inputs.self.homeManagerModules.nextcloud-client
     inputs.self.homeManagerModules.niri
+    inputs.self.homeManagerModules.opencode
+    inputs.self.homeManagerModules.pi-coding-agent
     inputs.self.homeManagerModules.noctalia
     inputs.self.homeManagerModules.spotify
     inputs.self.homeManagerModules.telegram

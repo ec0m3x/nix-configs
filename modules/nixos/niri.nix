@@ -1,9 +1,12 @@
-{ inputs, pkgs, ... }:
 {
+  inputs,
+  pkgs,
+  ...
+}: {
   # Import niri nixos module from flake
-  imports = [ inputs.niri.nixosModules.niri ];
+  imports = [inputs.niri.nixosModules.niri];
 
-  # Enable niri at system level for SDDM session availability
+  # Enable niri at system level for greetd session availability
   programs.niri.enable = true;
 
   # Enable XWayland support for X11 applications
@@ -19,5 +22,5 @@
     MOZ_ENABLE_WAYLAND = "1";
   };
 
-  security.pam.services.sddm.enableGnomeKeyring = true;
+  security.pam.services.greetd.enableGnomeKeyring = true;
 }

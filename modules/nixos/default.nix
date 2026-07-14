@@ -8,13 +8,14 @@
   docker = import ./docker.nix;
   gaming = import ./gaming.nix;
   latex = import ./latex.nix;
+  llama-swap = import ./llama-swap.nix;
   locale = import ./locale.nix;
   nh = import ./nh.nix;
   niri = import ./niri.nix;
   nvidia = import ./nvidia.nix;
   ollama = import ./ollama.nix;
   pipewire = import ./pipewire.nix;
-  plasma = import ./plasma.nix;
+  greetd = import ./greetd.nix;
   ssh = import ./ssh.nix;
   sunshine = import ./sunshine.nix;
   tailscale = import ./tailscale.nix;
