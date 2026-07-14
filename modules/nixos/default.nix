@@ -4,6 +4,7 @@
   # List your module files here
   # my-module = import ./my-module.nix;
   boot = import ./boot.nix;
+  comfyui = import ./comfyui.nix;
   core-packages = import ./core-packages.nix;
   docker = import ./docker.nix;
   gaming = import ./gaming.nix;

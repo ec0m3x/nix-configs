@@ -24,6 +24,10 @@
     # Zen Browser - Privacy-focused Firefox fork
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
     zen-browser.inputs.nixpkgs.follows = "nixpkgs";
+
+    # ComfyUI - AI image generation (Nix flake with CUDA support)
+    comfyui-nix.url = "github:utensils/comfyui-nix";
+    comfyui-nix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = {
@@ -33,6 +37,7 @@
     niri,
     noctalia,
     zen-browser,
+    comfyui-nix,
     ...
   } @ inputs: let
     # Supported systems for your flake packages, shell, etc.

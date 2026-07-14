@@ -13,6 +13,7 @@
     # If you want to use modules your own flake exports (from modules/nixos):
     # inputs.self.nixosModules.example
     inputs.self.nixosModules.boot
+    inputs.self.nixosModules.comfyui
     inputs.self.nixosModules.core-packages
     inputs.self.nixosModules.docker
     inputs.self.nixosModules.latex
@@ -77,14 +78,18 @@
       flake-registry = "";
       # Workaround for https://github.com/NixOS/nix/issues/9574
       nix-path = config.nix.nixPath;
-      # Binary caches for niri and noctalia (avoids building from source)
+      # Binary caches for niri, noctalia and comfyui (avoids building from source)
       substituters = [
         "https://cache.nixos.org"
         "https://niri.cachix.org"
+        "https://comfyui.cachix.org"
+        "https://nix-community.cachix.org"
       ];
       trusted-public-keys = [
         "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
         "niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964="
+        "comfyui.cachix.org-1:33mf9VzoIjzVbp0zwj+fT51HG0y31ZTK3nzYZAX0rec="
+        "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       ];
     };
     # Opinionated: disable channels

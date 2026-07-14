@@ -181,8 +181,6 @@ nix shell .#package-name
 ├── overlays/              # Package overlays and modifications
 ├── pkgs/                  # Custom package definitions
 ├── wallpapers/            # Wallpapers for Noctalia auto-rotation
-└── nix-shell/             # Development environment shells
-    └── comfyUI/           # ComfyUI FHS environment
 ```
 
 ## Module System
@@ -192,6 +190,7 @@ nix shell .#package-name
 Imported via `inputs.self.nixosModules.<name>` in `configuration.nix`:
 
 - `boot` — Bootloader and kernel configuration
+- `comfyui` — ComfyUI AI image generation (CUDA, systemd service)
 - `core-packages` — Essential system packages
 - `docker` — Docker with auto-pruning
 - `gaming` — Gaming packages and settings
@@ -256,6 +255,7 @@ Overlays are applied via `home-manager.useGlobalPkgs = true`, so both NixOS and 
 | niri-flake | — | Niri Wayland compositor |
 | noctalia-shell | — | Wayland desktop shell |
 | zen-browser | — | Zen Browser |
+| comfyui-nix | — | ComfyUI AI image generation (CUDA) |
 
 ## Adding Components
 
@@ -292,12 +292,27 @@ Overlays are applied via `home-manager.useGlobalPkgs = true`, so both NixOS and 
    ```
 3. Package is then available via overlays in all configurations.
 
-## Development Shells
+## ComfyUI
+
+ComfyUI runs as a systemd service via the [comfyui-nix](https://github.com/utensils/comfyui-nix) flake. It uses CUDA for NVIDIA GPU acceleration.
 
 ```bash
-cd nix-shell/comfyUI
-nix-shell shell.nix
+# Start/restart the service
+sudo systemctl restart comfyui
+
+# Check status
+systemctl status comfyui
+
+# Access the web UI
+# http://localhost:8188
 ```
+
+- **Data directory**: `/var/lib/comfyui` (models, output, custom nodes)
+- **Config**: `modules/nixos/comfyui.nix`
+- **ComfyUI Manager**: enabled (`--enable-manager`)
+- **Binary cache**: `comfyui.cachix.org` and `nix-community.cachix.org` configured
+
+To add custom nodes declaratively, use the `customNodes` option in `modules/nixos/comfyui.nix`. Manager-installed nodes go to `/var/lib/comfyui/custom_nodes/` and their pip dependencies to `/var/lib/comfyui/.venv/`.
 
 ## Important Notes
 
