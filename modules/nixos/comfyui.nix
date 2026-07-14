@@ -1,10 +1,25 @@
-{ inputs, ... }: {
+{
+  inputs,
+  pkgs,
+  ...
+}: {
   # ComfyUI - AI image generation with node-based interface
   # https://github.com/utensils/comfyui-nix
   imports = [ inputs.comfyui-nix.nixosModules.default ];
 
   # Apply the overlay so pkgs.comfy-ui-cuda is available
-  nixpkgs.overlays = [ inputs.comfyui-nix.overlays.default ];
+  # Also disable flaky portalocker tests that timeout in Nix builds
+  nixpkgs.overlays = [
+    inputs.comfyui-nix.overlays.default
+    (final: prev: {
+      python312Packages = prev.python312Packages.overrideScope (pyFinal: pyPrev: {
+        portalocker = pyPrev.portalocker.overridePythonAttrs (old: {
+          doCheck = false;
+          doInstallCheck = false;
+        });
+      });
+    })
+  ];
 
   services.comfyui = {
     enable = true;
