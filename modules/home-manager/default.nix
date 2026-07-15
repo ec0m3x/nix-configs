@@ -15,7 +15,6 @@
   nextcloud-client = import ./nextcloud-client.nix;
   niri = import ./niri.nix;
   opencode = import ./opencode.nix;
-  protonmail-bridge = import ./protonmail-bridge.nix;
   pi-coding-agent = import ./pi-coding-agent.nix;
   noctalia = import ./noctalia.nix;
   spotify = import ./spotify.nix;
