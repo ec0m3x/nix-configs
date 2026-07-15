@@ -223,6 +223,9 @@
 
     # PDF reader
     papers
+
+    # Graphical text editor
+    gnome-text-editor
   ];
 
   # Clipboard history daemon
