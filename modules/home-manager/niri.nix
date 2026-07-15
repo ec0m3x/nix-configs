@@ -17,6 +17,8 @@
             xkb {
                 layout "de"
             }
+            repeat-delay 600
+            repeat-rate 25
         }
 
         touchpad {
