@@ -150,10 +150,7 @@
         XF86AudioNext { spawn "playerctl" "next"; }
         XF86AudioPrev { spawn "playerctl" "previous"; }
 
-        // Volume control bindings
-        XF86AudioRaiseVolume { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+"; }
-        XF86AudioLowerVolume { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"; }
-        XF86AudioMute { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+        // Volume control handled by Noctalia (volumeStep = 5)
     }
 
     workspace "terminal"
