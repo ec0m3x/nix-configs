@@ -29,6 +29,7 @@
     inputs.self.nixosModules.ssh
     #inputs.self.nixosModules.sunshine
     inputs.self.nixosModules.tailscale
+    inputs.self.nixosModules.wolow-companion
 
     # Or modules from other flakes (such as nixos-hardware):
     # inputs.hardware.nixosModules.common-cpu-amd
@@ -183,6 +184,9 @@
     "tpm2-device=auto"
     "tpm2-pcrs=0+7"
   ];
+
+  # Wolow Companion (remote power management for Wolow mobile app)
+  services.wolow-companion.enable = true;
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "26.05";

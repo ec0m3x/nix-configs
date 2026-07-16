@@ -20,4 +20,5 @@
   ssh = import ./ssh.nix;
   sunshine = import ./sunshine.nix;
   tailscale = import ./tailscale.nix;
+  wolow-companion = import ./wolow-companion.nix;
 }
