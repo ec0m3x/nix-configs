@@ -11,6 +11,10 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    # Open firewall for Wolow Companion (TCP+UDP 20388)
+    networking.firewall.allowedTCPPorts = [20388];
+    networking.firewall.allowedUDPPorts = [20388];
+
     # Polkit rule: allow root to execute power commands ignoring inhibitor locks
     security.polkit.extraConfig = ''
       polkit.addRule(function(action, subject) {
