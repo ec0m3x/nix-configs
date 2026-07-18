@@ -27,6 +27,10 @@
 
     # ComfyUI - AI image generation (Nix flake with CUDA support)
     comfyui-nix.url = "github:utensils/comfyui-nix";
+
+    # nix-darwin - macOS system configuration (für das MacBook)
+    nix-darwin.url = "github:nix-darwin/nix-darwin/nix-darwin-26.05";
+    nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = {
@@ -37,11 +41,13 @@
     noctalia,
     zen-browser,
     comfyui-nix,
+    nix-darwin,
     ...
   } @ inputs: let
     # Supported systems for your flake packages, shell, etc.
     systems = [
       "x86_64-linux"
+      "aarch64-darwin"
     ];
     # This is a function that generates an attribute by calling a function you
     # pass to it, with each system as an argument
@@ -94,6 +100,23 @@
           }
         ];
       };
+    };
+
+    # Darwin (macOS) configuration entrypoint
+    # Available through 'darwin-rebuild switch --flake .#nix-mac'
+    darwinConfigurations.nix-mac = nix-darwin.lib.darwinSystem {
+      system = "aarch64-darwin";
+      specialArgs = {inherit inputs;};
+      modules = [
+        ./hosts/nix-mac/configuration.nix
+        home-manager.darwinModules.home-manager
+        {
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.extraSpecialArgs = {inherit inputs;};
+          home-manager.users.ecomex = import ./home-manager/home.nix;
+        }
+      ];
     };
   };
 }
