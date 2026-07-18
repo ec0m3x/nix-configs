@@ -25,6 +25,7 @@
     #inputs.self.nixosModules.sunshine
     inputs.self.nixosModules.tailscale
     inputs.self.nixosModules.wolow-companion
+    inputs.self.nixosModules.wolf
 
     # Desktop-Module (headless-Betrieb deaktiviert, Dateien behalten):
     #inputs.self.nixosModules.latex
