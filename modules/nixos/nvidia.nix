@@ -4,7 +4,10 @@
   ...
 }: {
   # Nvidia driver
-  boot.kernelParams = ["nvidia.NVreg_PreserveVideoMemoryAllocations=1"];
+  boot.kernelParams = [
+    "nvidia.NVreg_PreserveVideoMemoryAllocations=1"
+    "nvidia-drm.modeset=1"
+  ];
 
   # Load nvidia driver for Xorg and Wayland
   services.xserver.videoDrivers = ["nvidia"];
