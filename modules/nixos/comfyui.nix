@@ -15,8 +15,8 @@
     gpuSupport = "cuda";
     enableManager = true;
     port = 8188;
-    listenAddress = "127.0.0.1";
+    listenAddress = "0.0.0.0";
     dataDir = "/var/lib/comfyui";
-    openFirewall = false;
+    openFirewall = true;
   };
 }
