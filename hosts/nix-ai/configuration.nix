@@ -16,20 +16,22 @@
     inputs.self.nixosModules.comfyui
     inputs.self.nixosModules.core-packages
     inputs.self.nixosModules.docker
-    inputs.self.nixosModules.latex
     inputs.self.nixosModules.llama-swap
-    inputs.self.nixosModules.gaming
     inputs.self.nixosModules.locale
     inputs.self.nixosModules.nh
-    inputs.self.nixosModules.niri
     inputs.self.nixosModules.nvidia
     inputs.self.nixosModules.ollama
-    inputs.self.nixosModules.pipewire
-    inputs.self.nixosModules.greetd
     inputs.self.nixosModules.ssh
     #inputs.self.nixosModules.sunshine
     inputs.self.nixosModules.tailscale
     inputs.self.nixosModules.wolow-companion
+
+    # Desktop-Module (headless-Betrieb deaktiviert, Dateien behalten):
+    #inputs.self.nixosModules.latex
+    #inputs.self.nixosModules.gaming
+    #inputs.self.nixosModules.niri
+    #inputs.self.nixosModules.pipewire
+    #inputs.self.nixosModules.greetd
 
     # Or modules from other flakes (such as nixos-hardware):
     # inputs.hardware.nixosModules.common-cpu-amd
@@ -125,6 +127,18 @@
     hostName = "nix-ai";
   };
 
+  # Zusätzliche Datenträger (SSD + HDD)
+  fileSystems."/mnt/ssd" = {
+    device = "/dev/disk/by-label/ssd";
+    fsType = "ext4";
+    options = ["defaults" "nofail"];
+  };
+  fileSystems."/mnt/hdd" = {
+    device = "/dev/disk/by-label/hdd";
+    fsType = "ext4";
+    options = ["defaults" "nofail"];
+  };
+
   # Zsh shell
   programs.zsh.enable = true;
 
@@ -163,7 +177,6 @@
   '';
 
   environment.systemPackages = with pkgs; [
-    libevdev
     cudaPackages.cudatoolkit
     nvtopPackages.nvidia
     iperf3
@@ -173,11 +186,11 @@
   programs.nix-ld.enable = true;
 
   # gvfs for Nautilus trash, MTP, network mounts
-  services.gvfs.enable = true;
+  # services.gvfs.enable = true;  # headless: deaktiviert
 
-  # Bluetooth
-  hardware.bluetooth.enable = true;
-  services.blueman.enable = true;
+  # Bluetooth (headless: deaktiviert)
+  # hardware.bluetooth.enable = true;
+  # services.blueman.enable = true;
 
   # TPM2 auto-unlock for LUKS (enroll with: sudo systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs=0+7 /dev/disk/by-uuid/6d721ce2-5405-4b81-9d74-366cd5f79480)
   boot.initrd.luks.devices."luks-6d721ce2-5405-4b81-9d74-366cd5f79480".crypttabExtraOpts = [

@@ -9,33 +9,34 @@
 }: {
   # You can import other home-manager modules here
   imports = [
-    # If you want to use modules your own flake exports (from modules/home-manager):
-    # inputs.self.homeManagerModules.example
+    # CLI / headless-taugliche Module:
     inputs.self.homeManagerModules.bat
-    inputs.self.homeManagerModules.default-apps
     inputs.self.homeManagerModules.bottom
     inputs.self.homeManagerModules.eza
     inputs.self.homeManagerModules.fastfetch
     inputs.self.homeManagerModules.fzf
     inputs.self.homeManagerModules.git
     inputs.self.homeManagerModules.huggingface-cli
-    inputs.self.homeManagerModules.kitty
-    inputs.self.homeManagerModules.nextcloud-client
-    inputs.self.homeManagerModules.niri
     inputs.self.homeManagerModules.opencode
-    inputs.self.homeManagerModules.protonmail
-    inputs.self.homeManagerModules.protonmail-bridge
     inputs.self.homeManagerModules.pi-coding-agent
-    inputs.self.homeManagerModules.noctalia
-    inputs.self.homeManagerModules.spotify
-    inputs.self.homeManagerModules.telegram
     inputs.self.homeManagerModules.starship
-    inputs.self.homeManagerModules.thunderbird
     inputs.self.homeManagerModules.tmux
-    inputs.self.homeManagerModules.vesktop
-    inputs.self.homeManagerModules.vscode
-    inputs.self.homeManagerModules.zen-browser
     inputs.self.homeManagerModules.zsh
+
+    # Desktop-Module (headless-Betrieb deaktiviert, Dateien behalten):
+    #inputs.self.homeManagerModules.default-apps
+    #inputs.self.homeManagerModules.kitty
+    #inputs.self.homeManagerModules.nextcloud-client
+    #inputs.self.homeManagerModules.niri
+    #inputs.self.homeManagerModules.noctalia
+    #inputs.self.homeManagerModules.spotify
+    #inputs.self.homeManagerModules.telegram
+    #inputs.self.homeManagerModules.thunderbird
+    #inputs.self.homeManagerModules.vesktop
+    #inputs.self.homeManagerModules.vscode
+    #inputs.self.homeManagerModules.zen-browser
+    #inputs.self.homeManagerModules.protonmail
+    #inputs.self.homeManagerModules.protonmail-bridge
 
     # Or modules exported from other flakes (such as nix-colors):
     # inputs.nix-colors.homeManagerModules.default
@@ -52,30 +53,31 @@
       GH_CONFIG_DIR = "$HOME/.local/share/gh";
     };
 
-    pointerCursor = {
-      name = "Adwaita";
-      package = pkgs.adwaita-icon-theme;
-      size = 16;
-      gtk.enable = true;
-    };
+    # Desktop-Appearance (headless: deaktiviert, Blöcke erhalten)
+    # pointerCursor = {
+    #   name = "Adwaita";
+    #   package = pkgs.adwaita-icon-theme;
+    #   size = 16;
+    #   gtk.enable = true;
+    # };
   };
 
-  gtk = {
-    enable = true;
-    theme = {
-      name = "Tokyonight-Dark";
-      package = pkgs.tokyonight-gtk-theme;
-    };
-    iconTheme = {
-      name = "candy-icons";
-      package = pkgs.candy-icons;
-    };
-  };
+  # gtk = {
+  #   enable = true;
+  #   theme = {
+  #     name = "Tokyonight-Dark";
+  #     package = pkgs.tokyonight-gtk-theme;
+  #   };
+  #   iconTheme = {
+  #     name = "candy-icons";
+  #     package = pkgs.candy-icons;
+  #   };
+  # };
 
-  qt = {
-    enable = true;
-    platformTheme.name = "gtk";
-  };
+  # qt = {
+  #   enable = true;
+  #   platformTheme.name = "gtk";
+  # };
 
   # Add stuff for your user as you see fit:
   # programs.neovim.enable = true;
