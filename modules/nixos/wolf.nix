@@ -15,7 +15,6 @@
       # Apps run as ecomex (uid 1000) : users (gid 100) on the host
       WOLF_DEFAULT_RUN_UID = "1000";
       WOLF_DEFAULT_RUN_GID = "100";
-      WOLF_LOG_LEVEL = "DEBUG";
     };
     volumes = [
       "nvidia-driver-vol:/usr/nvidia:rw"
