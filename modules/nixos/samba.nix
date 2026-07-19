@@ -28,7 +28,7 @@
       };
 
       home-share = {
-        path = "/mnt/ssd";
+        path = "/mnt/ssd/shares";
         browseable = "yes";
         public = "yes"; # = guest ok = yes
         "read only" = "yes"; # Default: nur Lesen
@@ -41,9 +41,11 @@
     };
   };
 
-  # Share-Root gehört ecomex — sonst schlägt `force user` fehl, weil die
-  # ext4-Root der SSD default root:root ist.
+  # Share-Verzeichnis gehört ecomex — sonst schlägt `force user` fehl, weil
+  # die ext4-Root der SSD default root:root ist. Das Verzeichnis liegt
+  # extra unter /mnt/ssd/shares, damit die SSD nicht direkt exponiert wird.
   systemd.tmpfiles.rules = [
     "d /mnt/ssd 0755 ecomex users -"
+    "d /mnt/ssd/shares 0755 ecomex users -"
   ];
 }
