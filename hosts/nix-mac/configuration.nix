@@ -99,12 +99,9 @@
     casks = [
       "codex"
       "cyberduck"
-      "devolo-cockpit"
       "discord"
       "dolphin"
       "google-chrome"
-      "mactex"
-      "macwhisper"
       "microsoft-excel"
       "microsoft-powerpoint"
       "microsoft-teams"
@@ -113,7 +110,6 @@
       "nextcloud"
       "obs"
       "obsidian"
-      "parsec"
       "sonos"
       "spotify"
       "tailscale-app"
@@ -212,6 +208,27 @@
       StartCalendarInterval = [{Weekday = 0; Hour = 3; Minute = 30;}];
       StandardOutPath = "/tmp/brew-cleanup.log";
       StandardErrorPath = "/tmp/brew-cleanup.log";
+    };
+  };
+
+  # WLAN automatisch deaktivieren, wenn Ethernet die Default-Route ist,
+  # und aktivieren, wenn kein Ethernet vorliegt. Pollt alle 15 s die Route.
+  # macOS hat dafür keine eingebaute Option; das Script umgeht das.
+  launchd.daemons.eth-wifi-switch = {
+    script = ''
+      wifi_dev=$(networksetup -listallhardwareports | awk '/^Wi-Fi/{getline;print $NF}')
+      default_if=$(route -n get default 2>/dev/null | awk '/interface:/{print $2}')
+      if [ -z "$default_if" ] || [ "$default_if" = "$wifi_dev" ]; then
+        networksetup -setairportpower "$wifi_dev" on
+      else
+        networksetup -setairportpower "$wifi_dev" off
+      fi
+    '';
+    serviceConfig = {
+      RunAtLoad = true;
+      StartInterval = 15;
+      StandardOutPath = "/var/log/eth-wifi-switch.log";
+      StandardErrorPath = "/var/log/eth-wifi-switch.log";
     };
   };
 
