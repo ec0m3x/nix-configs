@@ -141,6 +141,30 @@
     options = ["defaults" "nofail"];
   };
 
+  # Host-spezifische Samba-Freigabe auf der SSD.
+  # Das generische `samba`-Modul aktiviert nur den Dienst + global-Config;
+  # die konkrete Freigabe wird hier pro Host definiert.
+  # Passwort für `ecomex` einmalig setzen: `sudo smbpasswd -a ecomex`
+  services.samba.settings.home-share = {
+    path = "/mnt/ssd/shares";
+    browseable = "yes";
+    public = "yes"; # = guest ok = yes
+    "read only" = "yes"; # Default: nur Lesen
+    "write list" = ["ecomex"]; # nur ecomex darf schreiben
+    "force user" = "ecomex"; # Schreib-I/O als ecomex (konsistente Ownership)
+    "force group" = "users";
+    "create mask" = "0644";
+    "directory mask" = "0755";
+  };
+
+  # Share-Verzeichnis gehört ecomex — sonst schlägt `force user` fehl, weil
+  # die ext4-Root der SSD default root:root ist. Verzeichnis liegt extra
+  # unter /mnt/ssd/shares, damit die SSD nicht direkt exponiert wird.
+  systemd.tmpfiles.rules = [
+    "d /mnt/ssd 0755 ecomex users -"
+    "d /mnt/ssd/shares 0755 ecomex users -"
+  ];
+
   # Zsh shell
   programs.zsh.enable = true;
 
