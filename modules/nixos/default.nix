@@ -16,7 +16,7 @@
   nvidia = import ./nvidia.nix;
   ollama = import ./ollama.nix;
   pipewire = import ./pipewire.nix;
-  greetd = import ./greetd.nix;
+  samba = import ./samba.nix;
   ssh = import ./ssh.nix;
   sunshine = import ./sunshine.nix;
   tailscale = import ./tailscale.nix;

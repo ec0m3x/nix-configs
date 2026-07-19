@@ -21,6 +21,7 @@
     inputs.self.nixosModules.nh
     inputs.self.nixosModules.nvidia
     inputs.self.nixosModules.ollama
+    inputs.self.nixosModules.samba
     inputs.self.nixosModules.ssh
     #inputs.self.nixosModules.sunshine
     inputs.self.nixosModules.tailscale
