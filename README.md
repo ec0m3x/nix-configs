@@ -6,11 +6,16 @@ Based on the [nix-starter-config](https://github.com/Misterio77/nix-starter-conf
 
 ## System Overview
 
-- **Active host**: `nix-ai` — AI/desktop workstation
+- **Active hosts**:
+  - `nix-ai` — AI/desktop workstation (NixOS, x86_64-linux)
+  - `nix-mac` — MacBook (nix-darwin, aarch64-darwin)
 - **User**: `ecomex`
 - **NixOS Version**: 26.05 (stable)
 - **Kernel**: Stock (Linux)
 - **Desktop**: Niri (scrollable-tiling Wayland compositor) + Noctalia shell
+  > Note: `nix-ai` is currently running **headless** — the desktop modules
+  > (Niri, Noctalia, greetd, etc.) are commented out in `configuration.nix`
+  > and `home.nix`. Re-enable by uncommenting the import lines.
 - **Display Manager**: greetd + tuigreet
 - **Graphics**: NVIDIA with CUDA support
 - **Shell**: Zsh
@@ -126,9 +131,132 @@ sudo nixos-rebuild switch --flake .#nix-ai
   sudo systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs=0+7 /dev/disk/by-uuid/<your-luks-uuid>
   ```
 
+## Installation on macOS (nix-darwin)
+
+This guide sets up the `nix-mac` host (Apple Silicon, `aarch64-darwin`) from
+a fresh macOS install. The flake exposes `darwinConfigurations.nix-mac` in
+`flake.nix`; home-manager runs as a darwin module, so a single
+`darwin-rebuild switch` applies both system and user config.
+
+### Step 1: Install Nix
+
+Use the Determinate installer (brings flakes + nix-command out of the box
+and is more robust on macOS than the official installer):
+
+```bash
+curl --proto '=https' --tlsv1.2 -fsSL https://install.determinate.systems/nix \
+  | sh -s -- install
+
+# Reload shell, then verify:
+nix --version
+nix run nixpkgs#hello   # should print "Hello, world!"
+```
+
+### Step 2: Clone the repo & stage files
+
+```bash
+git clone https://github.com/<your-username>/nix-configs.git ~/Code/nix-configs
+cd ~/Code/nix-configs
+
+# Flakes only see git-tracked files — always stage before building.
+git add -A
+```
+
+### Step 3: Homebrew (optional but expected by `nix-mac`)
+
+`hosts/nix-mac/configuration.nix` enables `homebrew` with Casks. If you
+don't have Homebrew yet:
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+If you don't want Homebrew, comment out the `homebrew` block in
+`hosts/nix-mac/configuration.nix` before the first switch — otherwise
+activation will fail.
+
+### Step 4: Make sure the user exists
+
+`nix-mac` references `users.users.ecomex` and
+`home-manager.users.ecomex` (in `flake.nix`). The macOS account must
+already exist under **System Settings → Users & Groups** — nix-darwin
+only manages the shell/groups, it does not create the user. Adjust the
+names in `hosts/nix-mac/configuration.nix` and `flake.nix` if yours differ.
+
+### Step 5: First build (do not switch yet)
+
+```bash
+nix build .#darwinConfigurations.nix-mac.system
+```
+
+This pulls all flake inputs and compiles. Common failures at this stage:
+- *`does not provide attribute ...`* → files not `git add`-ed.
+- *Homebrew errors* → see Step 3.
+
+### Step 6: First activation
+
+```bash
+# darwin-rebuild is inside the result symlink:
+./result/sw/bin/darwin-rebuild switch --flake .#nix-mac
+```
+
+The first switch installs the nix-darwin profile (`~/.nix-profile`,
+`/etc/nix-darwin`) and activates the configuration. You may be prompted
+once to allow changes to your `~/.zshrc` / `~/.zprofile` — answer `y`.
+After the first successful switch, `darwin-rebuild` is on your PATH via
+the Nix profile and you can use the short form:
+
+```bash
+darwin-rebuild switch --flake .#nix-mac
+```
+
+### Step 7: Apply future changes
+
+```bash
+cd ~/Code/nix-configs
+git add -A   # mandatory — flakes ignore untracked files
+darwin-rebuild switch --flake .#nix-mac
+```
+
+### Test without switching
+
+```bash
+darwin-rebuild build --flake .#nix-mac   # build only
+darwin-rebuild check  --flake .#nix-mac  # non-persistent activation check
+```
+
+### Notes specific to `nix-mac`
+
+- **Home-manager is a darwin module** (`flake.nix` wires
+  `home-manager.darwinModules.home-manager`), so do **not** run
+  `home-manager switch` — `darwin-rebuild switch` covers both.
+- **`additions` overlay is Linux-only** (it pulls `wolow-companion` and
+  other Linux packages), so `nix-mac` only applies `modifications` and
+  `unstable-packages` (`hosts/nix-mac/configuration.nix`).
+- **State version is 6** (nix-darwin-specific, not 26.05). Do not change
+  after first activation.
+- **Channels are disabled** (`channel.enable = false`); the flake
+  registry and `nixPath` are derived from flake inputs. Do not add
+  channel-based config.
+- **Cachix**: `nix-community.cachix.org` is already pinned as a
+  substituter in `hosts/nix-mac/configuration.nix`, saving build time for
+  home-manager dependencies.
+- **Login shell**: nix-darwin only changes the login shell after a
+  re-login. Log out and back in if `zsh` is not active after the switch.
+
+### Reinstalling / moving to a new Mac
+
+- The `nix-mac` config is not hardware-specific (no
+  `hardware-configuration.nix` equivalent on macOS), so the same flake can
+  be applied to a different Mac without regeneration. Just repeat
+  Steps 1, 2, and 6 on the new machine.
+- macOS system defaults set via `system.defaults` are applied
+  idempotently; manual changes in System Settings may be overwritten on
+  the next `darwin-rebuild switch`.
+
 ## Quick Start
 
-### System Configuration
+### System Configuration (nix-ai)
 
 home-manager runs as a NixOS module — a single rebuild applies both system and user config:
 
@@ -141,6 +269,21 @@ sudo nixos-rebuild test --flake .#nix-ai
 
 # Build without activating
 sudo nixos-rebuild build --flake .#nix-ai
+```
+
+### System Configuration (nix-mac, macOS)
+
+home-manager runs as a darwin module — `darwin-rebuild switch` applies both:
+
+```bash
+# Apply system + home-manager configuration
+darwin-rebuild switch --flake .#nix-mac
+
+# Build without activating
+darwin-rebuild build --flake .#nix-mac
+
+# Non-persistent activation check
+darwin-rebuild check --flake .#nix-mac
 ```
 
 ### Flake Management
@@ -165,10 +308,12 @@ nix shell .#package-name
 .
 ├── flake.nix              # Main flake configuration
 ├── flake.lock             # Dependency lock file
-├── hosts/                 # Per-host NixOS configurations
-│   ├── nix-ai/            # AI/desktop workstation (active)
+├── hosts/                 # Per-host configurations
+│   ├── nix-ai/            # AI/desktop workstation (active, NixOS)
 │   │   ├── configuration.nix
 │   │   └── hardware-configuration.nix
+│   ├── nix-mac/           # MacBook (active, nix-darwin)
+│   │   └── configuration.nix
 │   └── nix-server/        # Headless game streaming server (inactive/reference)
 │       ├── configuration.nix
 │       ├── hardware-configuration.nix

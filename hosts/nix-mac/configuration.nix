@@ -24,9 +24,14 @@
     };
   };
 
+  # Determinate verwaltet /etc/nix/nix.conf selbst und blockt nix-darwins
+  # Nix-Management. Deshalb deaktivieren wir es hier. Die `settings` unten
+  # werden von nix-darwin ignoriert — Substituters stattdessen in
+  # /etc/nix/determinate.nix pflegen (z.B. nix-community.cachix.org).
   nix = let
     flakeInputs = lib.filterAttrs (_: lib.isType "flake") inputs;
   in {
+    enable = false;
     settings = {
       experimental-features = "nix-command flakes";
       auto-optimise-store = true;
@@ -67,19 +72,56 @@
     home = "/Users/ecomex";
   };
 
-  # Homebrew integration (the user opted into Casks).
+  # Homebrew integration.
+  # Top-level formulae via `brew leaves`, casks via `brew list --cask`.
+  # `cleanup = "uninstall"` entfernt alles, was hier nicht deklariert ist —
+  # beim Hinzufügen/Entfernen also die Listen pflegen.
   homebrew = {
     enable = true;
     brews = [
-      # CLI tools not (yet) in nixpkgs / handy to keep via brew.
+      "espeak-ng"
+      "ffmpeg"
+      "gh"
+      "immich-cli"
+      "iperf3"
+      "opencode"
+      "openjdk"
+      "php"
+      "syncthing"
+      "uv"
+      "wakeonlan"
+      "whisper-cpp"
+      "xcodegen"
+      "zsh-autosuggestions"
+      "zsh-completions"
+      "zsh-syntax-highlighting"
     ];
     casks = [
-      # GUI apps managed via Homebrew Casks. Add your apps here, e.g.:
-      # "raycast"
-      # "1password"
-      # "visual-studio-code"
-      # "ghostty"
-      # "firefox"
+      "codex"
+      "cyberduck"
+      "devolo-cockpit"
+      "discord"
+      "dolphin"
+      "google-chrome"
+      "mactex"
+      "macwhisper"
+      "microsoft-excel"
+      "microsoft-powerpoint"
+      "microsoft-teams"
+      "minecraft"
+      "moonlight"
+      "nextcloud"
+      "obs"
+      "obsidian"
+      "parsec"
+      "sonos"
+      "spotify"
+      "tailscale-app"
+      "telegram-desktop"
+      "visual-studio-code"
+      "warp"
+      "whatsapp"
+      "windows-app"
     ];
     # Keep brew-managed apps when they are not declared here anymore.
     onActivation.cleanup = "uninstall";
@@ -87,35 +129,68 @@
     onActivation.autoUpdate = false;
   };
 
-  # macOS system defaults (a small sensible selection; extend as needed).
+  # macOS system defaults — gespiegelt vom aktuellen Live-Stand via
+  # `defaults read NSGlobalDomain`, `com.apple.dock`, `com.apple.finder`
+  # und `com.apple.driver.AppleBluetoothMultitouch.trackpad`.
+  # Nur Optionen, die nix-darwin als typisierte Options kennt — Rest bleibt
+  # auf macOS-Default (wird nicht überschrieben).
   system.defaults = {
     NSGlobalDomain = {
+      AppleInterfaceStyle = "Dark";
       AppleShowAllExtensions = true;
-      InitialKeyRepeat = 14;
-      KeyRepeat = 1;
-      NSAutomaticCapitalizationEnabled = false;
+      NSAutomaticCapitalizationEnabled = true;
+      NSAutomaticPeriodSubstitutionEnabled = true;
       NSAutomaticQuoteSubstitutionEnabled = false;
-      "com.apple.keyboard.fnState" = true;
+      NSAutomaticSpellingCorrectionEnabled = false;
+      "com.apple.sound.beep.feedback" = 1; # int, 0/1
+      "com.apple.springing.enabled" = true;
+      "com.apple.springing.delay" = 0.5;
+      "com.apple.trackpad.forceClick" = true;
     };
     dock = {
-      autohide = true;
-      orientation = "left";
+      autohide = false;
+      magnification = true;
+      largesize = 72;
+      tilesize = 57;
       show-recents = false;
-      tilesize = 36;
+      show-process-indicators = true;
+      launchanim = true;
+      wvous-br-corner = 14; # 14 = Quick Note
+      persistent-apps = [
+        "/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app"
+        "/System/Applications/Mail.app"
+        "/Applications/Warp.app"
+        "/Applications/Visual Studio Code.app"
+        "/System/Applications/Calendar.app"
+        "/Applications/Telegram Desktop.app"
+        "/Applications/Obsidian.app"
+        "/Applications/Moonlight.app"
+        "/Users/ecomex/.hermes/hermes-agent/apps/desktop/release/mac-arm64/Hermes.app"
+        "/Applications/WhatsApp.app"
+      ];
+      persistent-others = [
+        "/Users/ecomex/Downloads"
+      ];
     };
     finder = {
       AppleShowAllExtensions = true;
-      ShowPathbar = true;
-      ShowStatusBar = true;
-      _showRelativePath = true;
+      ShowExternalHardDrivesOnDesktop = true;
+      ShowHardDrivesOnDesktop = true;
+      ShowMountedServersOnDesktop = true;
+      ShowRemovableMediaOnDesktop = true;
+      ShowPathbar = false;
+      ShowStatusBar = false;
+      NewWindowTarget = "Home";
     };
     trackpad = {
       Clicking = true;
       TrackpadRightClick = true;
+      TrackpadThreeFingerDrag = false;
     };
   };
 
   # Used by nix-darwin to know whether this is the first activation.
   # https://github.com/LnL/nix-darwin/blob/master/docs/index.md
+  system.primaryUser = "ecomex";
   system.stateVersion = 6;
 }
