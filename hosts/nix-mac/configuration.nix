@@ -84,6 +84,7 @@
       "gh"
       "immich-cli"
       "iperf3"
+      "mas"
       "opencode"
       "openjdk"
       "php"
@@ -119,6 +120,17 @@
       "whatsapp"
       "windows-app"
     ];
+    # Mac App Store Apps. `mas` muss in `brews` stehen (s.o.). Du musst im
+    # App Store eingeloggt sein, damit `mas install` klappt. Apps, die du
+    # hier entfernst, werden NICHT automatisch deinstalliert — Limitation
+    # von `mas`/`brew bundle`. Manuelles Entfernen dann per
+    # `mas uninstall <id>` oder über den App Store.
+    masApps = {
+      AusweisApp = 948660805;
+      Bitwarden = 1352778147;
+      "Return Dislikes" = 6605923430;
+      Xcode = 497799835;
+    };
     # Keep brew-managed apps when they are not declared here anymore.
     onActivation.cleanup = "uninstall";
     # Avoid auto-updating brew on every activation (run `brew upgrade` manually).
