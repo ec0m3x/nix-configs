@@ -1,5 +1,6 @@
-# This is your home-manager configuration file
-# Use this to configure your home environment (it replaces ~/.config/nixpkgs/home.nix)
+# Gemeinsame Home-Config-Basis für alle Hosts (nix-ai, nix-mac).
+# Host-spezifische Ergänzungen in home-<host>.nix, die diese Datei
+# importieren.
 {
   inputs,
   lib,
@@ -7,9 +8,8 @@
   pkgs,
   ...
 }: {
-  # You can import other home-manager modules here
   imports = [
-    # CLI / headless-taugliche Module:
+    # CLI / headless-taugliche Module (plattformübergreifend):
     inputs.self.homeManagerModules.bat
     inputs.self.homeManagerModules.bottom
     inputs.self.homeManagerModules.eza
@@ -22,27 +22,6 @@
     inputs.self.homeManagerModules.starship
     inputs.self.homeManagerModules.tmux
     inputs.self.homeManagerModules.zsh
-
-    # Desktop-Module (headless-Betrieb deaktiviert, Dateien behalten):
-    #inputs.self.homeManagerModules.default-apps
-    #inputs.self.homeManagerModules.kitty
-    #inputs.self.homeManagerModules.nextcloud-client
-    #inputs.self.homeManagerModules.niri
-    #inputs.self.homeManagerModules.noctalia
-    #inputs.self.homeManagerModules.spotify
-    #inputs.self.homeManagerModules.telegram
-    #inputs.self.homeManagerModules.thunderbird
-    #inputs.self.homeManagerModules.vesktop
-    #inputs.self.homeManagerModules.vscode
-    #inputs.self.homeManagerModules.zen-browser
-    #inputs.self.homeManagerModules.protonmail
-    #inputs.self.homeManagerModules.protonmail-bridge
-
-    # Or modules exported from other flakes (such as nix-colors):
-    # inputs.nix-colors.homeManagerModules.default
-
-    # You can also split up your configuration and import pieces of it here:
-    # ./nvim.nix
   ];
 
   home = {
@@ -52,36 +31,7 @@
     sessionVariables = {
       GH_CONFIG_DIR = "$HOME/.local/share/gh";
     };
-
-    # Desktop-Appearance (headless: deaktiviert, Blöcke erhalten)
-    # pointerCursor = {
-    #   name = "Adwaita";
-    #   package = pkgs.adwaita-icon-theme;
-    #   size = 16;
-    #   gtk.enable = true;
-    # };
   };
-
-  # gtk = {
-  #   enable = true;
-  #   theme = {
-  #     name = "Tokyonight-Dark";
-  #     package = pkgs.tokyonight-gtk-theme;
-  #   };
-  #   iconTheme = {
-  #     name = "candy-icons";
-  #     package = pkgs.candy-icons;
-  #   };
-  # };
-
-  # qt = {
-  #   enable = true;
-  #   platformTheme.name = "gtk";
-  # };
-
-  # Add stuff for your user as you see fit:
-  # programs.neovim.enable = true;
-  # home.packages = with pkgs; [ steam ];
 
   # Disable home-manager news
   news.display = "silent";

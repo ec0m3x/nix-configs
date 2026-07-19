@@ -53,12 +53,24 @@
   };
 
   # System-wide packages available in the global profile.
+  # Früher über Homebrew formulae bezogen — jetzt via Nix gepinnt.
   environment.systemPackages = with pkgs; [
     git
     curl
     wget
     ripgrep
     fd
+    espeak-ng
+    ffmpeg
+    gh
+    immich-cli
+    iperf3
+    openjdk
+    php
+    uv
+    wakeonlan
+    whisper-cpp
+    xcodegen
   ];
 
   # Zsh shell (matches the nix-ai setup).
@@ -79,23 +91,10 @@
   homebrew = {
     enable = true;
     brews = [
-      "espeak-ng"
-      "ffmpeg"
-      "gh"
-      "immich-cli"
-      "iperf3"
-      "mas"
-      "opencode"
-      "openjdk"
-      "php"
+      # syncthing bleibt via Brew, weil `brew services` den LaunchAgent
+      # verwaltet (`homebrew.mxcl.syncthing`). Nix-Pendant wäre ein eigener
+      # launchd-Job — auf Wunsch nachrüsten.
       "syncthing"
-      "uv"
-      "wakeonlan"
-      "whisper-cpp"
-      "xcodegen"
-      "zsh-autosuggestions"
-      "zsh-completions"
-      "zsh-syntax-highlighting"
     ];
     casks = [
       "codex"
