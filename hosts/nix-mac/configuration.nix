@@ -189,6 +189,32 @@
     };
   };
 
+  # Wöchentlicher Cleanup-Job: Homebrew-Cache leeren (als User) und alte
+  # Nix-Generationen löschen (als root via System-Daemon). Läuft sonntags 03:00.
+  launchd.daemons.nix-gc = {
+    script = ''
+      exec /nix/var/nix/profiles/default/bin/nix-collect-garbage --delete-older-than 7d
+    '';
+    serviceConfig = {
+      RunAtLoad = false;
+      StartCalendarInterval = [{Weekday = 0; Hour = 3; Minute = 0;}];
+      StandardOutPath = "/var/log/nix-gc.log";
+      StandardErrorPath = "/var/log/nix-gc.log";
+    };
+  };
+
+  launchd.user.agents.brew-cleanup = {
+    script = ''
+      exec /opt/homebrew/bin/brew cleanup --prune=all
+    '';
+    serviceConfig = {
+      RunAtLoad = false;
+      StartCalendarInterval = [{Weekday = 0; Hour = 3; Minute = 30;}];
+      StandardOutPath = "/tmp/brew-cleanup.log";
+      StandardErrorPath = "/tmp/brew-cleanup.log";
+    };
+  };
+
   # Used by nix-darwin to know whether this is the first activation.
   # https://github.com/LnL/nix-darwin/blob/master/docs/index.md
   system.primaryUser = "ecomex";
