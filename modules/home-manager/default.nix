@@ -6,6 +6,7 @@
   bat = import ./bat.nix;
   default-apps = import ./default-apps.nix;
   bottom = import ./bottom.nix;
+  codex = import ./codex.nix;
   eza = import ./eza.nix;
   fastfetch = import ./fastfetch.nix;
   fzf = import ./fzf.nix;
