@@ -19,4 +19,7 @@
     dataDir = "/var/lib/comfyui";
     openFirewall = true;
   };
+
+  systemd.services.comfyui.environment.LD_LIBRARY_PATH =
+    "${pkgs.cudaPackages_12_8.cuda_nvrtc.lib}/lib";
 }
