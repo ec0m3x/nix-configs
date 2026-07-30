@@ -23,7 +23,9 @@ ssh "$source_host" 'jq -Rs . < /home/ecomex/honcho/.env' |
     "$secrets_file" '["honcho_environment"]'
 
 if ! grep -q '^honcho_postgres_password:' "$secrets_file"; then
-  honcho_postgres_password="$(openssl rand -hex 32)"
+  honcho_postgres_password="$(
+    od -An -N32 -tx1 /dev/urandom | tr -d '[:space:]'
+  )"
   jq -Rn --arg value "$honcho_postgres_password" '$value' |
     "${sops_cmd[@]}" set --value-stdin \
       "$secrets_file" '["honcho_postgres_password"]'
