@@ -17,6 +17,7 @@
   ];
 
   nixpkgs = {
+    hostPlatform = "x86_64-linux";
     overlays = [
       inputs.self.overlays.additions
       inputs.self.overlays.modifications
