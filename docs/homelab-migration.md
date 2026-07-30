@@ -615,6 +615,32 @@ bleibt unangetastet.
   Inventarzähler und einen tatsächlichen Restore-Test. Vor dem finalen Export
   werden schreibende Dienste kontrolliert gestoppt.
 
+**Vorbereitete Zielkonfiguration und AVA-Schattenexport:**
+
+- Der hl01-SSH-Hostkey ist außerhalb des Repos für nixos-anywhere
+  vorbereitet. Fingerprint:
+  `SHA256:A7EclpYxNb6oxdnytOi7ibgrZJQjOa33V6vchYZZxTE`; sein age-Empfänger
+  steht in `.sops.yaml`. Der bisherige AVA-Environment-File-Inhalt wurde ohne
+  Klartext-Zwischendatei nach `secrets/hl01.yaml` übernommen.
+- Die deklarative Zielkonfiguration enthält Immich `3.0.3`, Paperless-ngx
+  `2.20.15`, natives Open WebUI `0.10.2`, PostgreSQL 16 auf `/srv` und den
+  Hermes-Dashboard-Dienst mit Ressourcenlimits. Der vollständige
+  hl01-Systembuild war erfolgreich:
+  `/nix/store/5k9z8pijgqpqvcw6lb7m8mqd0yv0h8qf-nixos-system-hl01-26.05.20260719.fd14620`.
+- AVA wurde ohne Dienstunterbrechung aus einem unveränderlichen ZFS-Snapshot
+  vollständig gesichert. Das age-verschlüsselte Archiv
+  `ava-shadow-20260730-205541/ava-home.tar.zst.age` liegt byteidentisch auf
+  Mac und nix-ai; SHA-256:
+  `f2bb400bad7d2200f28fc57341c84c45c0a37b29b6e384e31c456ee27dcd9f56`.
+  Es enthält 220.238 Einträge einschließlich Launcher, Git-Metadaten,
+  uv-Python, venv, Dokumenten und der 110.362.624 Byte großen `state.db`.
+- Der Restore wurde vollständig auf nix-ai entpackt. SQLite `quick_check`
+  meldete `ok`, der Checkout stand auf Commit
+  `1dfe781edd5e96d09511cf27d800a03e63b09789`, und die restaurierte
+  Debian-Laufzeit startete isoliert unter NixOS mit nix-ld als Hermes Agent
+  `0.19.0`/Build `2026.7.20`. Die Klartext-Testkopie und der temporäre
+  ZFS-Snapshot wurden danach entfernt.
+
 **Go/No-Go vor dem Wipe:**
 
 - [x] Zielbetriebsform für Immich, Paperless, Open WebUI und AVA bestätigt;
