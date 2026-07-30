@@ -79,13 +79,6 @@
     # NixOS configuration entrypoint
     # Available through 'nixos-rebuild --flake .#your-hostname'
     nixosConfigurations = {
-      nix-server = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs;};
-        modules = [
-          # > Our main nixos configuration file <
-          ./hosts/nix-server/configuration.nix
-        ];
-      };
       nix-ai = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs;};
         modules = [

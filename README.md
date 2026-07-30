@@ -2,8 +2,6 @@
 
 Personal NixOS flake-based configuration for `nix-ai` (hostname) and `ecomex` (user).
 
-Based on the [nix-starter-config](https://github.com/Misterio77/nix-starter-configs) standard template.
-
 ## System Overview
 
 - **Active hosts**:
@@ -20,8 +18,6 @@ Based on the [nix-starter-config](https://github.com/Misterio77/nix-starter-conf
 - **Graphics**: NVIDIA with CUDA support
 - **Shell**: Zsh
 - **Networking**: NetworkManager
-
-> `nix-server` is an inactive reference config (headless game streaming server). It is retained as a template but no machine currently runs it.
 
 ## Installation from NixOS Minimal Image
 
@@ -312,14 +308,12 @@ nix shell .#package-name
 │   ├── nix-ai/            # AI/desktop workstation (active, NixOS)
 │   │   ├── configuration.nix
 │   │   └── hardware-configuration.nix
-│   ├── nix-mac/           # MacBook (active, nix-darwin)
-│   │   └── configuration.nix
-│   └── nix-server/        # Headless game streaming server (inactive/reference)
-│       ├── configuration.nix
-│       ├── hardware-configuration.nix
-│       └── monitor.nix
+│   └── nix-mac/           # MacBook (active, nix-darwin)
+│       └── configuration.nix
 ├── home-manager/          # Home-manager user configurations
-│   └── home.nix           # Main home config for ecomex
+│   ├── home.nix           # Shared base home config for ecomex
+│   ├── home-nix-ai.nix    # Host-specific config for nix-ai
+│   └── home-nix-mac.nix   # Host-specific config for nix-mac
 ├── modules/               # Reusable modules
 │   ├── nixos/             # System-level modules
 │   └── home-manager/      # User-level modules
@@ -473,7 +467,3 @@ To add custom nodes declaratively, use the `customNodes` option in `modules/nixo
 - [Home Manager Manual](https://nix-community.github.io/home-manager/)
 - [Nix Package Search](https://search.nixos.org/packages)
 - [NixOS Wiki](https://wiki.nixos.org/)
-
-## Credits
-
-Based on [nix-starter-config](https://github.com/Misterio77/nix-starter-configs) by Misterio77.

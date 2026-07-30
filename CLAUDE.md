@@ -4,10 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is a NixOS flake-based configuration repository following the "standard" template structure from nix-starter-config. It manages both system-wide NixOS configuration and user-level home-manager configuration for user `ecomex`.
+This is a NixOS flake-based configuration repository. It manages both system-wide NixOS configuration and user-level home-manager configuration for user `ecomex`.
 
-- **`nix-ai`** (active): AI/desktop workstation with both the Niri (scrollable-tiling Wayland) and KDE Plasma desktops enabled. This is the only host currently deployed.
-- **`nix-server`** (inactive/reference): Headless gaming/streaming server config (Sunshine/Wolf game streaming, ComfyUI, ollama, no desktop). Retained as a template — the flake still exposes its outputs, but no machine currently runs it. Prefer editing `nix-ai` unless you specifically mean the server template.
+- **`nix-ai`**: AI/desktop workstation (NixOS, x86_64-linux) with both the Niri (scrollable-tiling Wayland) and KDE Plasma desktops enabled.
+- **`nix-mac`**: MacBook (nix-darwin, aarch64-darwin).
 
 ## Common Commands
 
@@ -66,7 +66,7 @@ The `flake.nix` file is the entry point that defines:
   - noctalia-shell (desktop shell for Wayland)
   - zen-browser (privacy-focused Firefox fork)
 - **Outputs**: NixOS configurations, home-manager configurations, custom packages, overlays, and reusable modules
-- **Systems**: `nix-ai` (active) and `nix-server` (inactive/reference), each with a matching `ecomex@<host>` home-manager configuration
+- **Systems**: `nix-ai` (NixOS) and `nix-mac` (nix-darwin), each with home-manager for `ecomex` integrated as a module
 
 ### Directory Layout
 
@@ -74,15 +74,15 @@ The `flake.nix` file is the entry point that defines:
 .
 ├── flake.nix              # Main flake configuration
 ├── hosts/                 # Per-host NixOS configurations
-│   ├── nix-ai/            # AI/desktop workstation (Niri + Plasma) — ACTIVE
+│   ├── nix-ai/            # AI/desktop workstation (Niri + Plasma)
 │   │   ├── configuration.nix
 │   │   └── hardware-configuration.nix
-│   └── nix-server/        # Headless gaming/streaming server — inactive/reference
-│       ├── configuration.nix
-│       ├── hardware-configuration.nix
-│       └── monitor.nix
+│   └── nix-mac/           # MacBook (nix-darwin)
+│       └── configuration.nix
 ├── home-manager/          # Home-manager user configurations
-│   └── home.nix           # Main home config for ecomex
+│   ├── home.nix           # Shared base home config for ecomex
+│   ├── home-nix-ai.nix    # Host-specific config for nix-ai (imports home.nix)
+│   └── home-nix-mac.nix   # Host-specific config for nix-mac (imports home.nix)
 ├── modules/               # Reusable modules
 │   ├── nixos/            # System-level modules
 │   └── home-manager/     # User-level modules
@@ -163,15 +163,13 @@ Docker virtualization is configured via `modules/nixos/docker.nix`:
 
 ### Key System Details
 
-- **Networking**: NetworkManager. `nix-server` (reference) additionally uses DHCP + wake-on-LAN on `enp4s0` and opens firewall ports for ComfyUI, iperf3, and Wolf game streaming.
+- **Networking**: NetworkManager.
 - **Shell**: Zsh (system-level enabled), user `ecomex` in groups audio/video/input/render/networkmanager/wheel.
-- **Desktop** (per host):
-  - `nix-ai` (active): both **KDE Plasma** (KWin) and **Niri + Noctalia** (scrollable-tiling Wayland) enabled.
-  - `nix-server` (reference): headless — niri and plasma modules are disabled.
+- **Desktop** (`nix-ai`): both **KDE Plasma** (KWin) and **Niri + Noctalia** (scrollable-tiling Wayland) enabled.
 - **Browser**: Zen Browser (privacy-focused Firefox fork)
 - **Graphics**: NVIDIA drivers with CUDA support (`cudatoolkit`, `nvtop`), VAAPI enabled
 - **Virtualization**: Docker with auto-pruning enabled
-- **Game streaming** (`nix-server` reference): Sunshine + Wolf, with udev rules for virtual input devices (`/dev/uinput`, `/dev/uhid`, virtual gamepads)
+- **Game streaming**: Sunshine + Wolf, with udev rules for virtual input devices (`/dev/uinput`, `/dev/uhid`, virtual gamepads)
 - **VSCode server**: `programs.nix-ld.enable` for dynamic linking
 
 Note: the XanMod kernel line in the host configs is currently commented out (stock kernel in use).
