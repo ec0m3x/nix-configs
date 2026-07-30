@@ -343,10 +343,11 @@ persistenten State-Verzeichnis numerisch übernommen werden.
 - pve03 besitzt 8 GiB RAM und nur noch etwa 0,9 GiB `MemAvailable`. Es laufen
   genau VM 114 `nextcloud-vm`, VM 200 `pbs01` und VM 303 `k3s03`.
 - Die LITEON-SSD mit 256 GB ist die Proxmox-Systemdisk und das deklarierte
-  NixOS-Root-Ziel. Die Samsung 840 PRO mit 120 GB enthält aktuell die
-  minütliche ZFS-Replik von NAS-CT 210. Replikationsjob, HA-Regel und
-  Failover-Ziel müssen vor ihrer Verwendung als `/srv` kontrolliert entfernt
-  werden.
+  NixOS-Root-Ziel. Die Samsung 840 PRO mit 120 GB enthält noch die bewusst
+  aufbewahrte letzte ZFS-Replik von NAS-CT 210. Der Replikationsjob ist mit
+  `keep=1` entfernt, die strikte HA-Regel erlaubt nur noch `pve01:2`; CT 210
+  läuft weiterhin als HA-Ressource auf pve01. Damit ist pve03 kein
+  Replikations- oder Failover-Ziel mehr.
 - Die EXCERIA PLUS mit 1 TB ist per USB angeschlossen und vollständig als
   Raw-Disk an PBS-VM 200 durchgereicht. Ihr ext4-Dateisystem enthält den
   verschlüsselten PBS-Datastore: etwa 419 GiB belegt, 451 GiB frei. Der letzte
@@ -440,6 +441,20 @@ persistenten State-Verzeichnis numerisch übernommen werden.
   `8e191090a6336158c6d0e349d880f7dff256b6d68af579506a96bfa07f4bb4f6`.
   Die Entschlüsselung mit dem externen Recovery-Key und der vollständige
   Archivtest waren erfolgreich.
+- Vor dem Abbau von k3s03 wurde auf k3s01 der zusätzliche komprimierte
+  etcd-Snapshot
+  `pre-hl03-removal-20260730-212506-k3s01-1785439509.zip.age`
+  erstellt. Die age-verschlüsselten Kopien auf Mac und nix-ai sind
+  entschlüsselbar und haben beide SHA-256
+  `81107365832974429a19522a8fb0030c454483b1344a97d6b035da232f61c93b`.
+- Die bereits nach hl02 migrierten K8s-Deployments für SearXNG, Valkey und
+  Stirling-PDF sind wie Vaultwarden gegen Flux-Reconcile gesperrt und auf
+  null skaliert. Danach wurde k3s03 kontrolliert gedrained, über den
+  K3s-etcd-Removal-Controller als Voter entfernt, der K3s-Dienst gestoppt
+  und das Node-Objekt gelöscht. VM 303 ist heruntergefahren. etcd `3.6.12`
+  enthält nur noch das gesunde Mitglied `k3s01-f20d22ac`; API-Readiness,
+  VIP auf k3s01, LiteLLM samt PostgreSQL und der verbleibende
+  cloudflared-Connector wurden danach erfolgreich geprüft.
 
 **Go/No-Go vor dem Wipe:**
 
@@ -459,9 +474,9 @@ persistenten State-Verzeichnis numerisch übernommen werden.
       Nextcloud, PostgreSQL, LiteLLM, cloudflared und restic vollständig bauen.
 - [x] Frische PBS-Sicherungen von VM 114 und VM 303 erstellen und mindestens
       einen Restore prüfen; aktuellen PBS-Konfigurations-Export verifizieren.
-- [ ] NAS-Replikationsjob und HA-Regel kontrolliert von pve03 lösen, ohne
+- [x] NAS-Replikationsjob und HA-Regel kontrolliert von pve03 lösen, ohne
       den primären CT 210 auf pve01 zu beeinträchtigen.
-- [ ] k3s03 drainen und als etcd-Mitglied entfernen; k3s01, LiteLLM und der
+- [x] k3s03 drainen und als etcd-Mitglied entfernen; k3s01, LiteLLM und der
       verbleibende cloudflared-Connector müssen danach gesund sein.
 - [ ] EXCERIA aus PBS sauber aushängen und VM 200 herunterfahren; By-ID,
       UUID und Nicht-Zielstatus im finalen Disko-Preflight erneut prüfen.
@@ -499,14 +514,17 @@ Vaultwarden, SearXNG, Stirling-PDF und Traefik laufen nativ auf hl02;
 öffentlicher Tunnel und interner Wildcard-DNS zeigen auf den neuen Proxy.
 Für Phase 3 sind Inventar, Datenträgerentscheidung, konsistente und
 wiederhergestellte Schattenexporte, hl03-Hostidentität, SOPS-Secrets sowie die
-vollständig gebaute Zielkonfiguration fertig. k3s01 und k3s03 laufen weiter;
-die hl02-Traefik-Routen auf die künftigen hl03-Dienste sind nur gebaut und
-noch nicht aktiviert. Die EXCERIA und der PBS-Datastore sind unverändert.
+vollständig gebaute Zielkonfiguration fertig. NAS-HA und Replikation sind von
+pve03 gelöst; k3s03 ist aus Kubernetes und etcd entfernt und VM 303 ist
+heruntergefahren. k3s01 trägt den verbleibenden Cluster allein und wurde mit
+LiteLLM und cloudflared gesund geprüft. Die hl02-Traefik-Routen auf die
+künftigen hl03-Dienste sind nur gebaut und noch nicht aktiviert. Die EXCERIA
+und der PBS-Datastore sind unverändert.
 
-**Nächster Schritt:** NAS-Replikation und HA-Ziel kontrolliert von pve03
-lösen, ohne den primären CT 210 auf pve01 zu beeinträchtigen. Danach k3s03
-drainen und als etcd-Mitglied entfernen. Erst nach dem finalen Datenträger-
-und EXCERIA-Preflight gibt es ein Go für den Wipe.
+**Nächster Schritt:** EXCERIA aus PBS sauber aushängen, PBS-VM 200
+herunterfahren und By-ID, UUID sowie Disko-Nicht-Zielstatus final prüfen.
+Parallel wird der schreibgesperrte finale Nextcloud-Export erzeugt. Erst
+danach gibt es ein Go für den Wipe.
 
 **Zugriffswege aus dieser Session:**
 - SSH als root auf `pve01` und `pve03` sowie als ecomex auf `hl02`
