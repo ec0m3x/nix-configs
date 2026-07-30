@@ -15,12 +15,24 @@
     package = pkgs.unstable.immich;
     host = "10.20.50.11";
     port = 2283;
-    mediaLocation = "/srv/immich/upload";
+    # The restored database contains absolute paths below
+    # /opt/immich/upload. Keep that logical path while storing the data on
+    # the dedicated /srv SSD.
+    mediaLocation = "/opt/immich/upload";
     settings.server.externalDomain = "https://photos.sk4i.com";
     machine-learning.environment = {
       MACHINE_LEARNING_WORKERS = "1";
       MACHINE_LEARNING_MODEL_TTL = "300";
     };
+  };
+
+  fileSystems."/opt/immich/upload" = {
+    device = "/srv/immich/upload";
+    fsType = "none";
+    options = [
+      "bind"
+      "x-system.requires-mounts-for=/srv/immich/upload"
+    ];
   };
 
   systemd.tmpfiles.rules = [
