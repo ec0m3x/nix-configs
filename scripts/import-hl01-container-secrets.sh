@@ -14,31 +14,23 @@ fi
 sudo -v
 
 identity_dir="$(mktemp -d)"
-identity_fifo="$identity_dir/ssh_host_ed25519_key"
-mkfifo -m 600 "$identity_fifo"
+identity_file="$identity_dir/ssh_host_ed25519_key"
+umask 077
+# The unprivileged shell creates the mode-0600 destination; sudo only reads
+# the root-owned source key.
+# shellcheck disable=SC2024
+sudo cat /etc/ssh/ssh_host_ed25519_key >"$identity_file"
 cleanup() {
-  rm -f "$identity_fifo"
+  shred -u "$identity_file" 2>/dev/null || rm -f "$identity_file"
   rmdir "$identity_dir"
 }
 trap cleanup EXIT
 
 sops_set() {
   local index="$1"
-  local writer_pid
 
-  # Open the FIFO inside the background process. Opening it in this shell
-  # would block before SOPS has a chance to start its reader.
-  sudo sh -c \
-    'cat /etc/ssh/ssh_host_ed25519_key > "$1"' \
-    sh "$identity_fifo" &
-  writer_pid="$!"
-  if ! SOPS_AGE_SSH_PRIVATE_KEY_FILE="$identity_fifo" \
-    "${sops_cmd[@]}" set --value-stdin "$secrets_file" "$index"; then
-    kill "$writer_pid" 2>/dev/null || true
-    wait "$writer_pid" 2>/dev/null || true
-    return 1
-  fi
-  wait "$writer_pid"
+  SOPS_AGE_SSH_PRIVATE_KEY_FILE="$identity_file" \
+    "${sops_cmd[@]}" set --value-stdin "$secrets_file" "$index"
 }
 
 sops_set '["haushaltsbuch_environment"]' < <(
