@@ -547,16 +547,85 @@ bleibt unangetastet.
   startet.
 
 ### Phase 4 — pve01 → hl01 (der große Brocken)
-1. Sichern/Zwischenlagern auf hl03: NAS-Daten (100 GiB), immich (~100 GB),
-   paperless, open-webui, ava, docker-vm (haushaltsbuch + honcho inkl.
-   pgvector-DB). SSH-Zugang zur docker-vm klären (Key fehlt aktuell).
-2. k3s01 + Cluster endgültig stilllegen; HAOS-VM für Restore auf hl01
-   sichern beziehungsweise exportieren.
-3. nixos-anywhere → hl01 (USB-NIC beachten!), zweite SSD als /srv.
-4. Dienste: immich, paperless-ngx, open-webui, Samba-NAS,
-   Home Assistant als VM, haushaltsbuch + honcho (oci-containers), ava
-   (Deployment-Weg klären — Hermes-Agent).
-5. restic-Jobs auf allen drei Hosts aktivieren, Erst-Backup + Restore-Test.
+
+**Live-Inventar vom 2026-07-30:**
+
+- pve01 ist ein Dell OptiPlex 9020M mit 16 GiB RAM und i5-4590T. Die
+  Onboard-I217-NIC ist down; produktiv ist ausschließlich der
+  AX88179-USB-Adapter mit MAC `00:24:9b:49:70:91`. Der NixOS-Link auf
+  `lan0` ist dafür bereits vorbereitet.
+- PM871b 256 GB
+  (`ata-SAMSUNG_SSD_PM871b_M.2_2280_256GB_S3U0NE1K918382`) und 860 EVO
+  250 GB (`ata-Samsung_SSD_860_EVO_250GB_S3YJNX0KB91294E`) bilden aktuell
+  gemeinsam den gesunden ZFS-Mirror `rpool`. Beide SMART-Tests sind
+  bestanden, es gibt keine reallokierten Sektoren oder ZFS-Fehler.
+  Etwa 108 GiB sind belegt. Das geplante Ziel — PM871b als Root und 860 EVO
+  als `/srv` — zerstört daher zwingend den gesamten aktuellen Mirror.
+- pve01 ist nach dem Entfernen von pve03 ein quorates Ein-Knoten-Cluster.
+  Die verbleibenden Gäste laufen, außer k3s01: Diese VM bleibt mit
+  `onboot=0` als manueller Rollback gestoppt. Der tägliche PBS-Job kann
+  nicht mehr laufen, weil PBS bewusst außer Betrieb ist; sein erhaltener
+  Datastore liegt auf hl03.
+- Unter laufender Last sind etwa 5 GiB RAM verfügbar und kein Swap belegt.
+  Das Ziel benötigt trotzdem feste Ressourcenlimits, besonders für
+  Immich-ML, Open WebUI, HAOS und AVA.
+
+| Quelle | Live-Stand und zustandsbehaftete Daten | Zielvorschlag |
+|---|---|---|
+| NAS-CT 210 | `/srv/data` enthält nur 133 MiB: LiteLLM-/Vaultwarden-Rollback-PVCs und eine praktisch leere Samba-Freigabe. NFS exportiert noch an die alten k3s-IP-Adressen. | Daten als Rollback archivieren; Samba nativ auf `/srv/nas`, kein produktives k3s-NFS mehr. |
+| Immich-CT 102 | Immich `3.0.3`, PostgreSQL `16.11`; 240-MiB-DB, 66 Tabellen, 5.646 Assets, 2 Benutzer und 5.166 Dateien. `/opt/immich/upload` belegt 24 GiB. | Natives NixOS-Modul mit `pkgs.unstable.immich` `3.0.3`, Medien und PostgreSQL unter `/srv`. |
+| Paperless-CT 104 | Paperless-ngx `2.20.15`, PostgreSQL `16.11`; 20-MiB-DB, 72 Tabellen und 169 Dokumente. Daten 7,8 MiB, Medien 408 MiB, Papierkorb 108 MiB. | Natives stabiles NixOS-Modul, exakt `2.20.15`, Daten und PostgreSQL unter `/srv`. |
+| OpenWebUI-CT 105 | Open WebUI `0.11.0`; SQLite `webui.db` 3,6 MiB, `quick_check=ok`, 44 Tabellen. Gesamter `.open-webui`-State 147 MiB; der übrige Platz ist überwiegend reproduzierbarer uv-/Modellcache. | Exakt gepinnter OCI-Container `0.11.0`; aktuelles stable `0.9.6` und unstable `0.10.2` wären unzulässige Downgrades. |
+| AVA-CT 100 | Hermes Agent `0.19.0`/Build `2026.7.20`; `/home/hermes` 10 GiB, davon 3,4 GiB Dokumente und 2,2 GiB Hermes-State. `state.db` ist 110 MiB. | Dedizierter Systembenutzer, gepinnte Hermes-Installation und systemd-Dienst; komplettes Benutzerhome verschlüsselt übernehmen, Caches später getrennt bereinigen. |
+| docker-vm 110 | Aktiv: Haushaltsbuch (SQLite 360 KiB, `quick_check=ok`, 14 Tabellen), Honcho (PostgreSQL 15.18, 93 MiB, 12 Tabellen), Redis und Portainer. Haushaltsbuch- und Honcho-Compose bauen lokale Images aus den Source-Trees. Weitere große Projekt-/Cache-Verzeichnisse sind nicht aktiv. | Haushaltsbuch und Honcho deklarativ als OCI-Container; DBs/Source/Compose sichern. Sonstige Projekte archivieren, aber nicht automatisch deployen. |
+| HAOS-VM 101 | HAOS `18.1`, Core `2026.7.4`, Supervisor `2026.07.5`; 50-GiB-Disk mit 5,72 GiB belegt. Kein USB-Gerät ist aktuell durchgereicht. Es existiert nur ein älteres partielles 13-MiB-Backup. | Neue HAOS-VM auf hl01; vor dem Cutover frisches vollständiges Backup extern sichern und Restore testen. USB-Passthrough erst ergänzen, wenn konkrete Geräte vorhanden sind. |
+
+**Verbindliche Export-/Restore-Regeln:**
+
+- Immich benötigt immer Datenbank **und** komplettes `UPLOAD_LOCATION`.
+  Für einen konsistenten finalen Stand wird der Server gestoppt; die
+  Dateidaten und der dazugehörige DB-Dump werden gemeinsam gesichert. Siehe
+  [offizielle Immich-Anleitung](https://docs.immich.app/administration/backup-and-restore/).
+- Paperless wird mit dem Document Exporter exportiert und nur in dieselbe
+  Version `2.20.15` importiert; zusätzlich werden PostgreSQL und die
+  Originalverzeichnisse gesichert. Siehe
+  [Paperless-Administration](https://docs.paperless-ngx.com/administration/).
+- Bei Open WebUI wird das vollständige State-Verzeichnis einschließlich
+  Datenbank, Uploads und Knowledge-Base-Daten gesichert. Siehe
+  [Open-WebUI Backup & Restore](https://docs.openwebui.com/getting-started/updating/#backup--restore).
+- Für HAOS ist ein frisches vollständiges Backup Pflicht. Der Restore erfolgt
+  in eine neue VM nach dem offiziellen
+  [Home-Assistant-Backup-Verfahren](https://www.home-assistant.io/common-tasks/general/#backups).
+- Konfigurationen mit Zugangsdaten werden nicht offen in das Repo kopiert.
+  Die Quellsysteme enthalten derzeit mehrere zu weit lesbare Dateien
+  (`paperless.conf`, Honcho `.env`, Hermes-Defaults); relevante Werte werden
+  ausschließlich in `secrets/hl01.yaml` überführt und auf dem Ziel via
+  SOPS-Credentials bereitgestellt.
+- Schattenexporte werden außerhalb pve01 auf hl03 und für kritische
+  Datenbanken zusätzlich extern abgelegt. Jeder Export erhält SHA-256,
+  Inventarzähler und einen tatsächlichen Restore-Test. Vor dem finalen Export
+  werden schreibende Dienste kontrolliert gestoppt.
+
+**Go/No-Go vor dem Wipe:**
+
+- [ ] Zielbetriebsform und exakte Version jedes Dienstes bestätigen.
+- [ ] hl01-Hostkey, SOPS-Empfänger und alle benötigten Secrets vorbereiten.
+- [ ] `/srv`-Layout für die 860 EVO in disko ergänzen; By-ID beider
+      Zielplatten unmittelbar vor der Installation erneut prüfen.
+- [ ] Immich-Dateien plus DB exportieren und auf Version `3.0.3`
+      wiederherstellen.
+- [ ] Paperless-Exporter, PostgreSQL-Dump und Verzeichnisbackup erstellen;
+      Import auf Version `2.20.15` prüfen.
+- [ ] Open-WebUI-State, AVA-Home, NAS-Daten, Haushaltsbuch-SQLite,
+      Honcho-PostgreSQL/Redis und beide Source-Trees extern sichern und
+      stichprobenartig beziehungsweise vollständig wiederherstellen.
+- [ ] Frisches vollständiges HAOS-Backup extern sichern und Restore in einer
+      Test-VM prüfen.
+- [ ] Zielkonfiguration vollständig evaluieren und bauen; HAOS-VM-Erstellung,
+      OCI-Images und Rollback-Befehle vorbereiten.
+- [ ] Finales Wartungsfenster: Dienste stoppen, finale Exporte prüfen, alle
+      Gäste sauber herunterfahren und Disko-Preflight wiederholen.
+- [ ] Erst wenn alle Punkte erfüllt sind: **Go für den Wipe von pve01**.
 
 ### Phase 5 — Aufräumen
 - homelab-kubernetes archivieren (README-Verweis hierher), SSH-Config +
