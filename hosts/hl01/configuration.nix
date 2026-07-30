@@ -13,6 +13,7 @@
   imports = [
     ../homelab/common.nix
     ./disko.nix
+    inputs.self.nixosModules.haushaltsbuch-honcho
     inputs.self.nixosModules.hermes-agent
     inputs.self.nixosModules.immich
     inputs.self.nixosModules.open-webui
