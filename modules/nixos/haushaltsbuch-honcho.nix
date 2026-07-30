@@ -4,8 +4,8 @@
   pkgs,
   ...
 }: let
-  haushaltsbuchImage = "ghcr.io/ec0m3x/haushaltsbuch:f2aeb9d@sha256:500b3d1773d4690c33887ac530c90bd225ab08894e56970f778e4ee2326b59e7";
-  honchoImage = "ghcr.io/ec0m3x/honcho:eb386c3@sha256:1013f0208844cfa0add7deab9f8a5f4d158f11f83cd0d3bceccb011daa4d288f";
+  haushaltsbuchImage = "ghcr.io/ec0m3x/haushaltsbuch@sha256:500b3d1773d4690c33887ac530c90bd225ab08894e56970f778e4ee2326b59e7";
+  honchoImage = "ghcr.io/ec0m3x/honcho@sha256:1013f0208844cfa0add7deab9f8a5f4d158f11f83cd0d3bceccb011daa4d288f";
   ghcrLogin = {
     registry = "ghcr.io";
     username = "ec0m3x";

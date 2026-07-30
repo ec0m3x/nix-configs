@@ -693,10 +693,12 @@ bleibt unangetastet.
 - Haushaltsbuch und Honcho wurden aus den gesicherten Git-Ständen ohne
   Secrets im Build-Kontext neu gebaut und als private GHCR-Pakete
   veröffentlicht. Die Zielkonfiguration pinnt nicht nur die Tags, sondern
-  die unveränderlichen Registry-Digests:
-  `ghcr.io/ec0m3x/haushaltsbuch:f2aeb9d@sha256:500b3d1773d4690c33887ac530c90bd225ab08894e56970f778e4ee2326b59e7`
+  die unveränderlichen Registry-Digests. Die Tags sind
+  `haushaltsbuch:f2aeb9d` und `honcho:eb386c3`; NixOS verwendet die gültigen
+  digest-only-Referenzen
+  `ghcr.io/ec0m3x/haushaltsbuch@sha256:500b3d1773d4690c33887ac530c90bd225ab08894e56970f778e4ee2326b59e7`
   und
-  `ghcr.io/ec0m3x/honcho:eb386c3@sha256:1013f0208844cfa0add7deab9f8a5f4d158f11f83cd0d3bceccb011daa4d288f`.
+  `ghcr.io/ec0m3x/honcho@sha256:1013f0208844cfa0add7deab9f8a5f4d158f11f83cd0d3bceccb011daa4d288f`.
   Beide Pakete wurden über die GitHub-API als `private` verifiziert; die
   temporäre Push-Anmeldung auf docker-vm wurde anschließend entfernt.
 - Alle Schattenexporte wurden ohne Dienstunterbrechung erstellt. Temporäre
