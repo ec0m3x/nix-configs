@@ -652,7 +652,14 @@ bleibt unangetastet.
   `0e078dd65ad47307cf4d65ad8e13b7c4c6f08b6ff3724667ed9ee1139e89b8fa`).
   Das Medienarchiv enthält 16.440 reguläre Dateien. Der Dump ließ sich in
   PostgreSQL 16 mit allen 66 Tabellen, 5.646 Assets und 2 Benutzern
-  wiederherstellen.
+  wiederherstellen. Der vollständige Anwendungstest mit exakt Immich `3.0.3`
+  bestätigte alle Storage-Mount-Checks und meldete keinen Schema-Drift;
+  `/api/server/ping` antwortete mit `{"res":"pong"}`. Alle 5.646
+  Originaldateien, 10.342 abgeleiteten Dateien und 427 Personen-Thumbnails,
+  auf die die Datenbank verweist, waren im Restore vorhanden. Die temporäre
+  24-GiB-Klartextkopie wurde anschließend vollständig entfernt. Die in der
+  Quelldatenbank gespeicherte alte Immich-ML-Adresse `10.20.50.44:3003` muss
+  der finale Restore auf die native hl01-Instanz umstellen.
 - Paperless besitzt zusätzlich zum vollständigen Datenverzeichnis einen
   erfolgreichen offiziellen Document-Exporter mit 508 Dateien und Manifest.
   Byteidentische verschlüsselte Kopien auf Mac und nix-ai:
@@ -662,6 +669,11 @@ bleibt unangetastet.
   und `paperless-data.tar.zst.age` (944.526.914 Byte, SHA-256
   `77b1c5d3c52e46080667a15f29625e13abca3fee1e91bc2104f05279410f8d68`).
   Der logische Restore in PostgreSQL 16 ergab 72 Tabellen und 169 Dokumente.
+  Zusätzlich wurde der offizielle Export isoliert in exakt
+  Paperless-ngx `2.20.15` importiert: 1.844 Fixture-Objekte, 169 Dokumente,
+  4 Benutzer und 507 Mediendateien wurden übernommen; der
+  `document_sanity_checker` fand keine Fehler. Die temporäre Klartextkopie
+  wurde anschließend vollständig entfernt.
 - Open WebUIs kompletter Quell-State `0.11.0` ist unter
   `openwebui-shadow-20260730-212911/openwebui-state.tar.zst.age`
   verschlüsselt auf Mac und nix-ai gesichert (137.806.997 Byte, SHA-256
@@ -717,9 +729,9 @@ bleibt unangetastet.
       verschlüsselt nach `secrets/hl01.yaml` übernehmen.
 - [x] `/srv`-Layout für die 860 EVO in disko ergänzen; By-ID beider
       Zielplatten unmittelbar vor der Installation erneut prüfen.
-- [ ] Immich-Dateien plus DB exportieren und auf Version `3.0.3`
+- [x] Immich-Dateien plus DB exportieren und auf Version `3.0.3`
       wiederherstellen.
-- [ ] Paperless-Exporter, PostgreSQL-Dump und Verzeichnisbackup erstellen;
+- [x] Paperless-Exporter, PostgreSQL-Dump und Verzeichnisbackup erstellen;
       Import auf Version `2.20.15` prüfen.
 - [x] Open-WebUI-State, komplettes AVA-Home, NAS-Daten, Haushaltsbuch-SQLite,
       Honcho-PostgreSQL/Redis und beide Source-Trees extern sichern und
@@ -736,7 +748,7 @@ bleibt unangetastet.
   DNS-Einträge auf hl-Namen, CLAUDE.md/README aktualisieren,
   RAM/OOM-Check, Restore-Test dokumentieren.
 
-## Stand & Übergabe (2026-07-30)
+## Stand & Übergabe (2026-07-31)
 
 **Wo wir stehen:** Phase 1, Phase 2 und Phase 3 sind abgeschlossen und
 abgenommen.
@@ -749,11 +761,16 @@ EXCERIA samt PBS-Datastore blieb unverändert erhalten. pve01 ist nach dem
 Entfernen des migrierten pve03 wieder quorate; alle noch benötigten
 Phase-4-Quellgäste laufen, während k3s01 bewusst gestoppt bleibt.
 
-**Nächster Schritt:** Die Anwendungsebene der Immich- und
-Paperless-Schattenexporte in den exakten Zielversionen prüfen und anschließend
-den finalen hl01-Restore-/Rollback-Ablauf vorbereiten. HAOS und Samba sind aus
-diesem Cutover ausgeklammert. Erst danach darf das Go/No-Go-Gate für den Wipe
-von pve01 bewertet werden.
+Die Anwendungsebene der Immich- und Paperless-Schattenexporte wurde in den
+exakten Zielversionen erfolgreich geprüft. Immich `3.0.3` startete mit dem
+restaurierten PostgreSQL- und Medienbestand, Paperless-ngx `2.20.15`
+importierte den offiziellen Export vollständig und bestand seinen
+Dokumenten-Sanity-Check.
+
+**Nächster Schritt:** Den finalen hl01-Restore-/Rollback-Ablauf einschließlich
+AVA, Haushaltsbuch und Honcho vorbereiten und den vollständigen Zielbuild
+erneut prüfen. HAOS und Samba sind aus diesem Cutover ausgeklammert. Erst
+danach darf das Go/No-Go-Gate für den Wipe von pve01 bewertet werden.
 
 **Zugriffswege aus dieser Session:**
 - SSH als root auf `pve01` sowie als ecomex auf `hl02` und `hl03`
