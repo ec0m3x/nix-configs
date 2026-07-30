@@ -28,6 +28,12 @@ in {
     '';
   };
 
+  # PostgreSQL's service sandbox resolves the data directory before its
+  # ExecStartPre can initialize it, so the directory must already exist.
+  systemd.tmpfiles.rules = [
+    "d /srv/postgresql/18 0700 postgres postgres -"
+  ];
+
   services.postgresql = {
     enable = true;
     package = pkgs.postgresql_18;
