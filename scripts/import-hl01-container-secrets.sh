@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-repo_root="$(git rev-parse --show-toplevel)"
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 secrets_file="$repo_root/secrets/hl01.yaml"
 source_host="${HL01_SOURCE_HOST:-ecomex@10.20.50.46}"
 sops_cmd=(nix run nixpkgs#sops --)
@@ -26,6 +26,9 @@ sops_set() {
   local index="$1"
   local writer_pid
 
+  # The unprivileged shell intentionally opens the FIFO; sudo only reads the
+  # root-owned key. No key material is written to disk.
+  # shellcheck disable=SC2024
   sudo cat /etc/ssh/ssh_host_ed25519_key >"$identity_fifo" &
   writer_pid="$!"
   if ! SOPS_AGE_SSH_PRIVATE_KEY_FILE="$identity_fifo" \
