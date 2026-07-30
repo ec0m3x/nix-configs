@@ -31,6 +31,14 @@
     # nix-darwin - macOS system configuration (für das MacBook)
     nix-darwin.url = "github:nix-darwin/nix-darwin/nix-darwin-26.05";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
+
+    # disko - deklarative Disk-Layouts (Homelab-Hosts, nixos-anywhere)
+    disko.url = "github:nix-community/disko";
+    disko.inputs.nixpkgs.follows = "nixpkgs";
+
+    # sops-nix - verschlüsselte Secrets im Repo (Homelab-Hosts)
+    sops-nix.url = "github:Mic92/sops-nix";
+    sops-nix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = {
@@ -42,6 +50,8 @@
     zen-browser,
     comfyui-nix,
     nix-darwin,
+    disko,
+    sops-nix,
     ...
   } @ inputs: let
     # Supported systems for your flake packages, shell, etc.
@@ -91,6 +101,33 @@
             home-manager.extraSpecialArgs = {inherit inputs;};
             home-manager.users.ecomex = import ./home-manager/home-nix-ai.nix;
           }
+        ];
+      };
+
+      # Homelab-Hosts (ehemals Proxmox pve01–pve03), Installation via
+      # nixos-anywhere: siehe docs/homelab-migration.md
+      hl01 = nixpkgs.lib.nixosSystem {
+        specialArgs = {inherit inputs;};
+        modules = [
+          disko.nixosModules.disko
+          sops-nix.nixosModules.sops
+          ./hosts/hl01/configuration.nix
+        ];
+      };
+      hl02 = nixpkgs.lib.nixosSystem {
+        specialArgs = {inherit inputs;};
+        modules = [
+          disko.nixosModules.disko
+          sops-nix.nixosModules.sops
+          ./hosts/hl02/configuration.nix
+        ];
+      };
+      hl03 = nixpkgs.lib.nixosSystem {
+        specialArgs = {inherit inputs;};
+        modules = [
+          disko.nixosModules.disko
+          sops-nix.nixosModules.sops
+          ./hosts/hl03/configuration.nix
         ];
       };
     };

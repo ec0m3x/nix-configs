@@ -1,0 +1,14 @@
+keys:
+  # Workstation/Passwortmanager (gleicher Key wie im homelab-kubernetes-Repo)
+  - &admin age1yex3n3e9uyyq3r0etnry6glhxave345e47kj77jzgseetn9vefqsn8dw29
+  # Host-Keys (ssh-to-age aus /etc/ssh/ssh_host_ed25519_key.pub) werden je
+  # Migrationsphase nach der Installation ergänzt:
+  # - &hl01 age1...
+  # - &hl02 age1...
+  # - &hl03 age1...
+
+creation_rules:
+  - path_regex: secrets/.*\.ya?ml$
+    key_groups:
+      - age:
+          - *admin
