@@ -627,8 +627,11 @@ bleibt unangetastet.
   Hermes-Dashboard-Dienst mit Ressourcenlimits. Der vollständige
   hl01-Systembuild einschließlich der Haushaltsbuch-/Honcho-Container,
   privater GHCR-Anmeldung, Redis und Honcho-PostgreSQL-Provisionierung war
-  erfolgreich:
-  `/nix/store/n5q9dgm62nns6b5zg3x1z1b7h10pgb0v-nixos-system-hl01-26.05.20260719.fd14620`.
+  erfolgreich. Da die Immich-Datenbank absolute Medienpfade unter
+  `/opt/immich/upload` enthält, stellt ein deklarativer Bind-Mount diesen
+  Pfad bereit; physisch bleiben die Daten auf `/srv/immich/upload`. Der
+  vollständige Build nach dieser Korrektur ist:
+  `/nix/store/fl57qxlzcsi5qjd479f353m3g41glx3p-nixos-system-hl01-26.05.20260719.fd14620`.
 - AVA wurde ohne Dienstunterbrechung aus einem unveränderlichen ZFS-Snapshot
   vollständig gesichert. Das age-verschlüsselte Archiv
   `ava-shadow-20260730-205541/ava-home.tar.zst.age` liegt byteidentisch auf
@@ -720,6 +723,14 @@ bleibt unangetastet.
   ZFS-Snapshots, PostgreSQL-Testcluster, Klartext-Restoreverzeichnisse und der
   Paperless-Exporter auf der Quelle wurden nach erfolgreicher Prüfung
   entfernt; die Quelldienste blieben aktiv.
+- Der finale Wartungsablauf ist als vier getrennte, fehlertolerante Skripte
+  vorbereitet: `export-pve01-phase4-final.sh` stoppt ausschließlich die
+  schreibenden Quelldienste, erzeugt verschlüsselte Endstände und prüft jedes
+  Artefakt; `stage-hl01-phase4-inputs.sh` entschlüsselt erst nach der
+  Installation direkt auf hl01; `restore-hl01-phase4.sh` importiert und
+  validiert alle Anwendungen; `rollback-hl01-phase4.sh` setzt einen
+  fehlgeschlagenen Zielrestore auf den frischen NixOS-Stand zurück. Die
+  Skripte wurden noch nicht im Wartungsmodus ausgeführt.
 
 **Go/No-Go vor dem Wipe:**
 
@@ -736,7 +747,7 @@ bleibt unangetastet.
 - [x] Open-WebUI-State, komplettes AVA-Home, NAS-Daten, Haushaltsbuch-SQLite,
       Honcho-PostgreSQL/Redis und beide Source-Trees extern sichern und
       stichprobenartig beziehungsweise vollständig wiederherstellen.
-- [ ] Zielkonfiguration vollständig evaluieren und bauen; Images beziehungsweise
+- [x] Zielkonfiguration vollständig evaluieren und bauen; Images beziehungsweise
       Startmechanismen für Haushaltsbuch und Honcho sowie Rollback-Befehle
       vorbereiten.
 - [ ] Finales Wartungsfenster: Dienste stoppen, finale Exporte prüfen, alle
@@ -767,10 +778,11 @@ restaurierten PostgreSQL- und Medienbestand, Paperless-ngx `2.20.15`
 importierte den offiziellen Export vollständig und bestand seinen
 Dokumenten-Sanity-Check.
 
-**Nächster Schritt:** Den finalen hl01-Restore-/Rollback-Ablauf einschließlich
-AVA, Haushaltsbuch und Honcho vorbereiten und den vollständigen Zielbuild
-erneut prüfen. HAOS und Samba sind aus diesem Cutover ausgeklammert. Erst
-danach darf das Go/No-Go-Gate für den Wipe von pve01 bewertet werden.
+**Nächster Schritt:** Nach bewusster Freigabe das finale Wartungsfenster mit
+`scripts/export-pve01-phase4-final.sh` beginnen, die verifizierten Endstände
+zusätzlich extern kopieren und erst dann den Disko-Preflight ausführen. HAOS
+und Samba sind aus diesem Cutover ausgeklammert. Ohne diese Freigabe bleibt
+pve01 unverändert.
 
 **Zugriffswege aus dieser Session:**
 - SSH als root auf `pve01` sowie als ecomex auf `hl02` und `hl03`
