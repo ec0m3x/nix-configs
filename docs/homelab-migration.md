@@ -615,7 +615,7 @@ bleibt unangetastet.
   Inventarzähler und einen tatsächlichen Restore-Test. Vor dem finalen Export
   werden schreibende Dienste kontrolliert gestoppt.
 
-**Vorbereitete Zielkonfiguration und AVA-Schattenexport:**
+**Vorbereitete Zielkonfiguration und Schattenexporte:**
 
 - Der hl01-SSH-Hostkey ist außerhalb des Repos für nixos-anywhere
   vorbereitet. Fingerprint:
@@ -640,6 +640,42 @@ bleibt unangetastet.
   Debian-Laufzeit startete isoliert unter NixOS mit nix-ld als Hermes Agent
   `0.19.0`/Build `2026.7.20`. Die Klartext-Testkopie und der temporäre
   ZFS-Snapshot wurden danach entfernt.
+- Immich wurde zuerst logisch aus PostgreSQL und anschließend aus einem
+  read-only ZFS-Snapshot des kompletten Upload-Verzeichnisses gesichert.
+  Beide age-verschlüsselten Dateien liegen byteidentisch auf Mac und nix-ai:
+  `immich-shadow-20260730-211112/immich-postgres.dump.age`
+  (60.340.438 Byte, SHA-256
+  `ba8e1c8faa662ab1a734bfaf39dcc4c5f73410e3e290f8b7800fbc3f993df493`)
+  und `immich-upload.tar.zst.age` (24.814.831.796 Byte, SHA-256
+  `0e078dd65ad47307cf4d65ad8e13b7c4c6f08b6ff3724667ed9ee1139e89b8fa`).
+  Das Medienarchiv enthält 16.440 reguläre Dateien. Der Dump ließ sich in
+  PostgreSQL 16 mit allen 66 Tabellen, 5.646 Assets und 2 Benutzern
+  wiederherstellen.
+- Paperless besitzt zusätzlich zum vollständigen Datenverzeichnis einen
+  erfolgreichen offiziellen Document-Exporter mit 508 Dateien und Manifest.
+  Byteidentische verschlüsselte Kopien auf Mac und nix-ai:
+  `paperless-shadow-20260730-211112/paperless-postgres.dump.age`
+  (1.556.614 Byte, SHA-256
+  `c3da7aaa144efd4fd3f526ade2f6eec68a9c39c190f8e86d72e32eb31b40e365`)
+  und `paperless-data.tar.zst.age` (944.526.914 Byte, SHA-256
+  `77b1c5d3c52e46080667a15f29625e13abca3fee1e91bc2104f05279410f8d68`).
+  Der logische Restore in PostgreSQL 16 ergab 72 Tabellen und 169 Dokumente.
+- Open WebUIs kompletter Quell-State `0.11.0` ist unter
+  `openwebui-shadow-20260730-212911/openwebui-state.tar.zst.age`
+  verschlüsselt auf Mac und nix-ai gesichert (137.806.997 Byte, SHA-256
+  `53d765e610d7b3cf8834d922c0a7ebf7f1c98f250465d1567e0d9e05c949bed7`).
+  Die enthaltene SQLite-Datenbank hat 44 Tabellen und meldet
+  `quick_check=ok`; sie bleibt Archivquelle und wird nicht in die ältere
+  native Zielversion importiert.
+- Die NAS-Daten liegen ausschließlich als Rollback-Archiv
+  `nas-shadow-20260730-212911/nas-data.tar.zst.age` auf Mac und nix-ai
+  (55.831.441 Byte, 4.440 Einträge, SHA-256
+  `a0f7b52e212300b493b573ed1fd5c58274afc6b570bcf25c8afb90523cd8997f`).
+  Samba wird daraus im ersten Cutover nicht aktiviert.
+- Alle Schattenexporte wurden ohne Dienstunterbrechung erstellt. Temporäre
+  ZFS-Snapshots, PostgreSQL-Testcluster, Klartext-Restoreverzeichnisse und der
+  Paperless-Exporter auf der Quelle wurden nach erfolgreicher Prüfung
+  entfernt; die Quelldienste blieben aktiv.
 
 **Go/No-Go vor dem Wipe:**
 
