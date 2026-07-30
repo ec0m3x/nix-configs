@@ -10,6 +10,8 @@
   docker = import ./docker.nix;
   gaming = import ./gaming.nix;
   latex = import ./latex.nix;
+  hermes-agent = import ./hermes-agent.nix;
+  immich = import ./immich.nix;
   llama-swap = import ./llama-swap.nix;
   locale = import ./locale.nix;
   litellm = import ./litellm.nix;
@@ -18,6 +20,8 @@
   niri = import ./niri.nix;
   nvidia = import ./nvidia.nix;
   ollama = import ./ollama.nix;
+  open-webui = import ./open-webui.nix;
+  paperless = import ./paperless.nix;
   pipewire = import ./pipewire.nix;
   restic-target = import ./restic-target.nix;
   samba = import ./samba.nix;

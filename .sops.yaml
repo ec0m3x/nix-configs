@@ -4,8 +4,7 @@ keys:
   # Host-Keys (ssh-to-age aus /etc/ssh/ssh_host_ed25519_key.pub)
   - &hl02 age1nz400gnh03d8fhq066pa0gj5c6lj6suycke0epct3p7nhycrpdfqqqga4w
   - &hl03 age1hu6u6lnczz4y6ne8m3fcw4spdnc90hhm4k25sf3lshze4yeyjpjs00z5kr
-  # Weitere Host-Keys werden je Migrationsphase ergänzt:
-  # - &hl01 age1...
+  - &hl01 age1f2ky3s8yrvju8cvx7yj4qgp0ztn8gn03mw64dfa22k7y9kvjzceszf05r8
 
 creation_rules:
   - path_regex: secrets/.*\.ya?ml$
@@ -14,3 +13,4 @@ creation_rules:
           - *admin
           - *hl02
           - *hl03
+          - *hl01
