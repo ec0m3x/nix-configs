@@ -672,6 +672,22 @@ bleibt unangetastet.
   (55.831.441 Byte, 4.440 Einträge, SHA-256
   `a0f7b52e212300b493b573ed1fd5c58274afc6b570bcf25c8afb90523cd8997f`).
   Samba wird daraus im ersten Cutover nicht aktiviert.
+- Aus der docker-vm liegen vier weitere byteidentische, verschlüsselte
+  Schattenexporte auf Mac und nix-ai:
+  `docker-vm-shadow-20260730-213209/haushaltsbuch.sqlite.age`
+  (360.740 Byte, SHA-256
+  `de5dfd5e565d1d4503e4b0f8d328ca802db95c22bc1648ac7bdffa91ca821018`),
+  `honcho-postgres.dump.age` (35.816.230 Byte, SHA-256
+  `a596155e8329a75c961a8f12b59791b111f466b5991bb1cdb56501ef473c06ea`),
+  `honcho-redis.rdb.age` (300 Byte, SHA-256
+  `08550af636e55d4235eaefa7c65e832efed9d5ecc1281e6ac1adfeff49e748ba`)
+  und `source-trees.tar.zst.age` (58.093.663 Byte, SHA-256
+  `7f36e45fa8ee939ba15b7cec3f96a24e4f1ce00e81bf7fe14fb9a84d02089aaa`).
+  Haushaltsbuch meldete `quick_check=ok` und 14 Tabellen; Honcho ließ sich
+  mit 12 Tabellen in PostgreSQL 15.18 wiederherstellen. Der Redis-RDB-Check
+  war erfolgreich und bestätigte, dass die aktuelle Instanz keine
+  persistenten Keys enthält. Beide Compose-Dateien und vollständigen
+  Git-Checkouts sind im Source-Archiv enthalten.
 - Alle Schattenexporte wurden ohne Dienstunterbrechung erstellt. Temporäre
   ZFS-Snapshots, PostgreSQL-Testcluster, Klartext-Restoreverzeichnisse und der
   Paperless-Exporter auf der Quelle wurden nach erfolgreicher Prüfung
@@ -689,7 +705,7 @@ bleibt unangetastet.
       wiederherstellen.
 - [ ] Paperless-Exporter, PostgreSQL-Dump und Verzeichnisbackup erstellen;
       Import auf Version `2.20.15` prüfen.
-- [ ] Open-WebUI-State, komplettes AVA-Home, NAS-Daten, Haushaltsbuch-SQLite,
+- [x] Open-WebUI-State, komplettes AVA-Home, NAS-Daten, Haushaltsbuch-SQLite,
       Honcho-PostgreSQL/Redis und beide Source-Trees extern sichern und
       stichprobenartig beziehungsweise vollständig wiederherstellen.
 - [ ] Zielkonfiguration vollständig evaluieren und bauen; Images beziehungsweise
