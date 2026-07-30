@@ -26,10 +26,11 @@ sops_set() {
   local index="$1"
   local writer_pid
 
-  # The unprivileged shell intentionally opens the FIFO; sudo only reads the
-  # root-owned key. No key material is written to disk.
-  # shellcheck disable=SC2024
-  sudo cat /etc/ssh/ssh_host_ed25519_key >"$identity_fifo" &
+  # Open the FIFO inside the background process. Opening it in this shell
+  # would block before SOPS has a chance to start its reader.
+  sudo sh -c \
+    'cat /etc/ssh/ssh_host_ed25519_key > "$1"' \
+    sh "$identity_fifo" &
   writer_pid="$!"
   if ! SOPS_AGE_SSH_PRIVATE_KEY_FILE="$identity_fifo" \
     "${sops_cmd[@]}" set --value-stdin "$secrets_file" "$index"; then
