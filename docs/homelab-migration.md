@@ -48,11 +48,11 @@ Alle drei: Intel i5-4590T (4 Cores), UEFI-Boot.
 
 ## Phasen und Status
 
-### Phase 0 — Repo-Scaffolding ⏳
+### Phase 0 — Repo-Scaffolding ✅ (2026-07-30)
 - [x] flake-Inputs disko + sops-nix, nixosConfigurations hl01–hl03
 - [x] hosts/homelab/common.nix (Basis), hosts/hl0X/ (configuration + disko)
 - [x] .sops.yaml (Admin-Key; Host-Keys folgen je Phase)
-- [ ] Eval-/Build-Test der drei Konfigurationen (auf nix-ai)
+- [x] Eval-Test aller Host-Configs via GitHub Actions (.github/workflows/check.yml)
 
 ### Phase 1 — pve02 → hl02 (AdGuard + Tailscale-Router)
 1. AdGuard-Config (LXC 106: /opt/AdGuardHome/AdGuardHome.yaml o. ä.) und
@@ -97,6 +97,49 @@ Alle drei: Intel i5-4590T (4 Cores), UEFI-Boot.
 - homelab-kubernetes archivieren (README-Verweis hierher), SSH-Config +
   DNS-Einträge auf hl-Namen, CLAUDE.md/README aktualisieren,
   RAM/OOM-Check, Restore-Test dokumentieren.
+
+## Stand & Übergabe (2026-07-30)
+
+**Wo wir stehen:** Phase 0 ist fertig und CI-validiert. Der Stand liegt auf
+dem Branch `homelab-migration` (gepusht); `main` enthält lokal zusätzlich
+einen noch **nicht gepushten** Commit (Entfernung von nix-server +
+Misterio-Referenzen). Die Live-Systeme (Proxmox, k3s) sind unverändert —
+es wurde noch nichts migriert.
+
+**Nächster Schritt (Phase 1):** pve02 → hl02. Ablauf steht oben; vorher
+klären, von wo nixos-anywhere läuft (siehe Blocker).
+
+**Zugriffswege aus dieser Session:**
+- SSH als root auf `pve01`/`pve02`/`pve03` (~/.ssh/config) funktioniert.
+- `kubectl` mit Kontext `pve-k3s` funktioniert.
+- `gh` ist authentifiziert (Repo: ec0m3x/nix-configs, Branch homelab-migration).
+- Die k3s-VMs (debian@10.20.50.3X) und docker-vm (ecomex@.46) akzeptieren den
+  Windows-Key NICHT — Zugriff nur vom Mac (Ansible-Key) bzw. via
+  `ssh pve01 "qm guest exec 110 -- …"` (Guest-Agent, funktioniert).
+- nix-ai (10.20.50.20) war aus; MAC unbekannt, WoL daher nicht möglich.
+
+**Blocker/Entscheidung für Phase 1 — Build-Host:** Windows kann kein NixOS
+bauen. Optionen: (a) nix-ai einschalten und von dort nixos-anywhere +
+`nixos-rebuild --target-host` fahren (bevorzugt), oder (b) Nix auf pve01
+installieren (Wegwerf-Buildhost, wird in Phase 4 eh gewiped) — dafür braucht
+es die Freigabe des Users (Auto-Mode blockt `curl | sh` auf den Live-Hosts).
+
+**Vor der Installation von hl02 außerdem nötig:**
+1. `mkpasswd -m yescrypt`-Hash für ecomex erzeugen → via
+   `--extra-files` nach `/etc/nixos-secrets/ecomex`.
+2. SSH-Hostkeys für hl02 vorab generieren (`ssh-keygen -t ed25519`),
+   Public-Key mit ssh-to-age in `.sops.yaml` eintragen, Private-Key via
+   `--extra-files` nach `/etc/ssh/` — sonst funktionieren sops-Secrets
+   ab dem ersten Boot nicht.
+3. AdGuard-Config aus LXC 106 sichern (`pct exec 106 -- cat …` via pve02),
+   Tailscale-Auth-Key für den neuen Subnet-Router bereitlegen.
+
+**Gotchas:**
+- Flake sieht nur git-getrackte Dateien — neue Dateien immer `git add`.
+- flake.lock wurde von Hand um disko/sops-nix ergänzt (Pins aus CI-Log +
+  GitHub-API-Timestamps) — bei nächster Gelegenheit auf einem Nix-Host
+  `nix flake lock` gegenprüfen.
+- Claude-Session-Tasks #1–#6 bilden die Phasen ab (Task #1 = Phase 0 done).
 
 ## Offene Punkte
 
