@@ -534,7 +534,9 @@ bleibt unangetastet.
   wurden `cloud.sk4i.com/status.php` und `/login` extern über Cloudflare
   sowie `litellm.hl.sk4i.com/health/readiness` und `/ui/` intern über den
   Tailnet-Einstieg, jeweils mit gültigem TLS und HTTP 200. Direkte
-  Backend-Tests von hl02 nach hl03 waren ebenfalls erfolgreich.
+  Backend-Tests von hl02 nach hl03 waren ebenfalls erfolgreich. Die
+  anschließende manuelle Anmeldung und Datenprüfung in Nextcloud und LiteLLM
+  war erfolgreich.
 - Durch das endgültige Abschalten von pve03 verlor der verbliebene
   Proxmox-Knoten pve01 erwartungsgemäß sein Quorum und wurde vom
   HA-Watchdog gefenced. pve03 wurde daraufhin aus Corosync entfernt;
