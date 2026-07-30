@@ -44,7 +44,7 @@ fehlgeschlagener oder nicht eindeutig prüfbarer Punkt bedeutet **No-Go**.
 |---|---|---|---|---|
 | hl01 | 10.20.50.11 | 16 GiB | PM871b 256 GB (root), 860 EVO 250 GB (→ /srv) | **USB-Adapter** 00:24:9b:49:70:91 (onboard defekt/down) |
 | hl02 | 10.20.50.12 | 8 GiB | 860 EVO 250 GB (root) | 64:00:6a:3e:65:e2 |
-| hl03 | 10.20.50.13 | 8 GiB | LITEON 256 GB (root), 840 PRO 120 GB (→ /srv), 1 TB EXCERIA (USB?, → restic) | 98:90:96:b2:db:a5 |
+| hl03 | 10.20.50.13 | 8 GiB | LITEON 256 GB (root), 840 PRO 120 GB (→ /srv), 1 TB EXCERIA (USB, → restic) | 98:90:96:b2:db:a5 |
 
 Alle drei: Intel i5-4590T (4 Cores), UEFI-Boot.
 
@@ -336,7 +336,7 @@ persistenten State-Verzeichnis numerisch übernommen werden.
   `PRAGMA quick_check` prüfen; erst danach die Reconcile-Sperre entfernen und
   das k3s-Deployment starten.
 
-### Phase 3 — pve03 → hl03 (Nextcloud, LiteLLM, restic)
+### Phase 3 — pve03 → hl03 (Nextcloud, LiteLLM, restic) ✅ (2026-07-30)
 
 **Live-Inventar vom 2026-07-30:**
 
@@ -506,13 +506,43 @@ persistenten State-Verzeichnis numerisch übernommen werden.
 darf jetzt ausschließlich LITEON und Samsung neu partitionieren; die EXCERIA
 bleibt unangetastet.
 
-1. LiteLLM-Postgres dumpen; Nextcloud-VM: Daten + DB exportieren.
-2. Letzte PBS-Vollsicherung aller verbleibenden Gäste; bestehenden
-   PBS-Datastore auf der 1-TB-Platte erhalten und restic getrennt daneben
-   einrichten.
-3. k3s03 stoppen, nixos-anywhere → hl03.
-4. services.nextcloud (+ Import), LiteLLM, cloudflared, restic-Ziel
-   (rest-server o. SFTP) auf 1-TB-Platte.
+**Durchführung und Abnahme:**
+
+- nixos-anywhere hat ausschließlich LITEON und Samsung neu partitioniert.
+  hl03 bootet mit dem vorbereiteten Hostkey auf `10.20.50.13`; Root liegt auf
+  LITEON, `/srv` auf Samsung. Die EXCERIA blieb unverändert und ist mit
+  derselben UUID unter `/srv/backup` gemountet. Der PBS-Datastore belegt
+  weiterhin 422 GiB; restic verwendet nur das neue Nachbarverzeichnis
+  `/srv/backup/restic`.
+- Nextcloud-Daten und finaler MariaDB-Dump wurden mit
+  `scripts/restore-hl03-phase3.sh` importiert. Die deklarativ von NixOS und
+  SOPS verwaltete Konfiguration blieb dabei erhalten. Abnahme: Version
+  `34.0.1`, 26.290 Datendateien, 144 Tabellen, 2 Benutzer, Maintenance-Modus
+  aus und kein ausstehendes Datenbank-Upgrade.
+- Der LiteLLM-Custom-Dump wurde mit
+  `scripts/resume-hl03-phase3.sh` nach PostgreSQL 18 importiert. Abnahme:
+  68 physische Tabellen, 17 Modelle, 45 Virtual Keys, 2 Benutzer und
+  320 Prisma-Migrationen. Das gepinnte Image `1.94.0` meldet
+  `{"status":"healthy","db":"connected"}`.
+- MariaDB, PostgreSQL, Redis, Nextcloud PHP-FPM/nginx, LiteLLM, cloudflared,
+  restic-rest-server und Tailscale laufen auf hl03 ohne fehlgeschlagene
+  Units. Die frischen Nextcloud-Bootstrap-Daten und die Restore-Eingaben
+  bleiben zunächst als lokaler Rollback erhalten:
+  `/srv/nextcloud/data.pre-restore-20260730T200626Z` und
+  `/home/ecomex/.local/share/nix-configs-migration/hl03/restore-input`.
+- Die vorbereitete hl02-Traefik-Konfiguration wurde aktiviert. Abgenommen
+  wurden `cloud.sk4i.com/status.php` und `/login` extern über Cloudflare
+  sowie `litellm.hl.sk4i.com/health/readiness` und `/ui/` intern über den
+  Tailnet-Einstieg, jeweils mit gültigem TLS und HTTP 200. Direkte
+  Backend-Tests von hl02 nach hl03 waren ebenfalls erfolgreich.
+- Durch das endgültige Abschalten von pve03 verlor der verbliebene
+  Proxmox-Knoten pve01 erwartungsgemäß sein Quorum und wurde vom
+  HA-Watchdog gefenced. pve03 wurde daraufhin aus Corosync entfernt;
+  pve01 ist jetzt persistent quorate als Ein-Knoten-Cluster. NAS, Immich,
+  Paperless, OpenWebUI, AVA, HAOS und docker-vm wurden wieder gestartet und
+  ihre relevanten Backends geprüft. k3s01 bleibt als Rollback gestoppt und
+  hat `onboot=0`, damit die alte LiteLLM-Datenbank nicht erneut schreibend
+  startet.
 
 ### Phase 4 — pve01 → hl01 (der große Brocken)
 1. Sichern/Zwischenlagern auf hl03: NAS-Daten (100 GiB), immich (~100 GB),
@@ -533,32 +563,34 @@ bleibt unangetastet.
 
 ## Stand & Übergabe (2026-07-30)
 
-**Wo wir stehen:** Phase 1 und Phase 2 sind abgeschlossen und abgenommen.
+**Wo wir stehen:** Phase 1, Phase 2 und Phase 3 sind abgeschlossen und
+abgenommen.
 Vaultwarden, SearXNG, Stirling-PDF und Traefik laufen nativ auf hl02;
 öffentlicher Tunnel und interner Wildcard-DNS zeigen auf den neuen Proxy.
-Für Phase 3 sind Inventar, Datenträgerentscheidung, konsistente und
-wiederhergestellte Schattenexporte, hl03-Hostidentität, SOPS-Secrets sowie die
-vollständig gebaute Zielkonfiguration fertig. NAS-HA und Replikation sind von
-pve03 gelöst; k3s03 ist aus Kubernetes und etcd entfernt und VM 303 ist
-heruntergefahren. k3s01 trägt den verbleibenden Cluster allein und wurde mit
-LiteLLM und cloudflared gesund geprüft. Die hl02-Traefik-Routen auf die
-künftigen hl03-Dienste sind nur gebaut und noch nicht aktiviert. Der finale
-Nextcloud-Export ist geprüft, alle pve03-Gäste sind gestoppt und die EXCERIA
-ist sauber ausgehängt. Der PBS-Datastore und sein ext4-Dateisystem sind
-unverändert und geprüft.
+Nextcloud, LiteLLM, PostgreSQL, MariaDB, cloudflared und das restic-Ziel laufen
+auf dem neuen hl03. Der hl02-Proxy leitet die produktiven Nextcloud- und
+LiteLLM-Routen nach hl03; öffentliche und interne Pfade sind geprüft. Die
+EXCERIA samt PBS-Datastore blieb unverändert erhalten. pve01 ist nach dem
+Entfernen des migrierten pve03 wieder quorate; alle noch benötigten
+Phase-4-Quellgäste laufen, während k3s01 bewusst gestoppt bleibt.
 
-**Nächster Schritt:** Mit nixos-anywhere pve03 auf hl03 umstellen. Danach
-EXCERIA read-only einhängen, Nextcloud und LiteLLM importieren und erst nach
-deren lokaler Prüfung die vorbereiteten hl02-Proxy-Routen aktivieren.
+**Nächster Schritt:** Phase 4 zunächst vollständig inventarisieren und
+absichern: Daten und Datenbanken von NAS, Immich, Paperless, OpenWebUI, AVA
+sowie docker-vm exportieren, HAOS-Backup und Ziel-VM-Konzept prüfen und erst
+danach das Go/No-Go-Gate für den Wipe von pve01 erteilen.
 
 **Zugriffswege aus dieser Session:**
-- SSH als root auf `pve01` und `pve03` sowie als ecomex auf `hl02`
-  funktioniert; nix-ai ist für hl02 deklarativ autorisiert.
-- `kubectl` mit Kontext `pve-k3s` funktioniert.
+- SSH als root auf `pve01` sowie als ecomex auf `hl02` und `hl03`
+  funktioniert; nix-ai ist für beide NixOS-Hosts deklarativ autorisiert.
+- Der Kontext `pve-k3s` ist bewusst nicht erreichbar, solange k3s01 gestoppt
+  ist. Die VM bleibt mit ihrer etcd-Datenbank als manueller Rollback erhalten,
+  darf aber wegen des inzwischen produktiven LiteLLM auf hl03 nicht
+  unkontrolliert gestartet werden.
 - `gh` ist authentifiziert (Repo: ec0m3x/nix-configs, Branch homelab-migration).
-- Die verbleibenden k3s-VMs k3s01/k3s03 und docker-vm (ecomex@.46)
-  akzeptieren den Windows-Key NICHT — Zugriff nur vom Mac (Ansible-Key) bzw. via
-  `ssh pve01 "qm guest exec 110 -- …"` (Guest-Agent, funktioniert).
+- k3s01 und docker-vm (ecomex@.46) akzeptieren den Windows-Key NICHT —
+  Zugriff nur vom Mac (Ansible-Key) beziehungsweise via
+  `ssh pve01 "qm guest exec 110 -- …"` (Guest-Agent, funktioniert). k3s03
+  existiert nach der Migration von pve03 nicht mehr.
 - nix-ai (10.20.50.20) ist der Buildhost für die Homelab-Migration.
 
 **Gotchas:**
@@ -566,6 +598,8 @@ deren lokaler Prüfung die vorbereiteten hl02-Proxy-Routen aktivieren.
 - flake.lock wurde von Hand um disko/sops-nix ergänzt (Pins aus CI-Log +
   GitHub-API-Timestamps) — bei nächster Gelegenheit auf einem Nix-Host
   `nix flake lock` gegenprüfen.
+- pve01 ist das einzige verbleibende Proxmox-Mitglied. pve03 wurde aus
+  Corosync entfernt; erwartete Stimmen und Quorum stehen persistent auf 1.
 - Claude-Session-Tasks #1–#6 bilden die Phasen ab (Task #1 = Phase 0 done).
 
 ## Offene Punkte
@@ -575,4 +609,3 @@ deren lokaler Prüfung die vorbereiteten hl02-Proxy-Routen aktivieren.
 - ava (Hermes-Agent-LXC): Deployment-Weg unter NixOS klären.
 - Home Assistant auf hl01: Virtualisierung, HAOS-Restore und USB-Passthrough
   für Zigbee-/Z-Wave-Sticks vor Phase 4 festlegen und testen.
-- 1-TB-EXCERIA auf pve03: Anschlussart (USB?) und PBS-Datastore-Verbleib.
