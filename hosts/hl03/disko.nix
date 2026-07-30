@@ -1,33 +1,51 @@
-# Disk-Layout hl03: Root auf der LITEON 256 GB.
-# Nicht von disko angefasst:
-# - Samsung 840 PRO 120 GB (S12PNEACB03826W): wird in Phase 3 als
-#   /srv-Datenplatte (Nextcloud-Daten, Postgres) eingerichtet.
-# - 1 TB EXCERIA PLUS (vermutlich USB, trägt aktuell den PBS-Datastore!):
-#   wird erst NACH der letzten PBS-Vollsicherung und bewusster Entscheidung
-#   über den Datastore-Verbleib als restic-Ziel neu formatiert.
+# Disk-Layout hl03: Root auf der LITEON 256 GB, /srv auf der Samsung 840 PRO.
+# Die Samsung darf erst nach Entfernen der NAS-Replikation und des
+# pve03-HA-Ziels formatiert werden.
+#
+# Die 1-TB-EXCERIA mit dem bestehenden PBS-Datastore wird ausdrücklich nicht
+# von disko verwaltet. Sie wird in configuration.nix anhand ihrer vorhandenen
+# Dateisystem-UUID eingehängt.
 {
-  disko.devices.disk.main = {
-    type = "disk";
-    device = "/dev/disk/by-id/ata-LITEON_L8H-256V2G-HP_002628100X62";
-    content = {
-      type = "gpt";
-      partitions = {
-        ESP = {
-          size = "1G";
-          type = "EF00";
-          content = {
-            type = "filesystem";
-            format = "vfat";
-            mountpoint = "/boot";
-            mountOptions = ["umask=0077"];
+  disko.devices.disk = {
+    main = {
+      type = "disk";
+      device = "/dev/disk/by-id/ata-LITEON_L8H-256V2G-HP_002628100X62";
+      content = {
+        type = "gpt";
+        partitions = {
+          ESP = {
+            size = "1G";
+            type = "EF00";
+            content = {
+              type = "filesystem";
+              format = "vfat";
+              mountpoint = "/boot";
+              mountOptions = ["umask=0077"];
+            };
+          };
+          root = {
+            size = "100%";
+            content = {
+              type = "filesystem";
+              format = "ext4";
+              mountpoint = "/";
+            };
           };
         };
-        root = {
+      };
+    };
+
+    srv = {
+      type = "disk";
+      device = "/dev/disk/by-id/ata-Samsung_SSD_840_PRO_Series_S12PNEACB03826W";
+      content = {
+        type = "gpt";
+        partitions.data = {
           size = "100%";
           content = {
             type = "filesystem";
             format = "ext4";
-            mountpoint = "/";
+            mountpoint = "/srv";
           };
         };
       };

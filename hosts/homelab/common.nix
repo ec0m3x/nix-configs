@@ -14,6 +14,7 @@
     inputs.self.nixosModules.locale
     inputs.self.nixosModules.nh
     inputs.self.nixosModules.ssh
+    inputs.self.nixosModules.tailscale
   ];
 
   nixpkgs = {
@@ -32,6 +33,12 @@
     settings = {
       experimental-features = "nix-command flakes";
       auto-optimise-store = true;
+      # Erlaubt deklarative Remote-Deployments vom Buildhost. Nur Mitglieder
+      # der administrativen wheel-Gruppe dürfen unsignierte Closures senden.
+      trusted-users = [
+        "root"
+        "@wheel"
+      ];
       flake-registry = "";
       nix-path = config.nix.nixPath;
     };
@@ -63,6 +70,7 @@
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGox9JI8NEi1IxF2AXSQQF+Pnm/kxt1/RtnTyy6Rokk/ ecomex@nix-ai"
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIMITvvLRVK0B6amvBv6ZT1eb80fYLVYP9xdRREl7ftk ecomex@nix-ai"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKGL9iDJCW/+SzxmSNrXvzD++sjageJ+IaFFGYdc3k9T ecomex@nix-ai"
     ];
     extraGroups = ["wheel" "users"];
   };

@@ -4,6 +4,7 @@
   # List your module files here
   # my-module = import ./my-module.nix;
   boot = import ./boot.nix;
+  cloudflared = import ./cloudflared.nix;
   comfyui = import ./comfyui.nix;
   core-packages = import ./core-packages.nix;
   docker = import ./docker.nix;
@@ -11,15 +12,22 @@
   latex = import ./latex.nix;
   llama-swap = import ./llama-swap.nix;
   locale = import ./locale.nix;
+  litellm = import ./litellm.nix;
+  nextcloud = import ./nextcloud.nix;
   nh = import ./nh.nix;
   niri = import ./niri.nix;
   nvidia = import ./nvidia.nix;
   ollama = import ./ollama.nix;
   pipewire = import ./pipewire.nix;
+  restic-target = import ./restic-target.nix;
   samba = import ./samba.nix;
+  searxng = import ./searxng.nix;
   ssh = import ./ssh.nix;
+  stirling-pdf = import ./stirling-pdf.nix;
   sunshine = import ./sunshine.nix;
   tailscale = import ./tailscale.nix;
+  traefik = import ./traefik.nix;
+  vaultwarden = import ./vaultwarden.nix;
   wolow-companion = import ./wolow-companion.nix;
   wolf = import ./wolf.nix;
 }
