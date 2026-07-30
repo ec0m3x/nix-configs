@@ -455,6 +455,26 @@ persistenten State-Verzeichnis numerisch übernommen werden.
   enthält nur noch das gesunde Mitglied `k3s01-f20d22ac`; API-Readiness,
   VIP auf k3s01, LiteLLM samt PostgreSQL und der verbleibende
   cloudflared-Connector wurden danach erfolgreich geprüft.
+- Nach Aktivierung des Nextcloud-Maintenance-Modes wurde der endgültige
+  Cutover-Export
+  `nextcloud-final-20260730-213541/nextcloud-final-20260730-213541.tar.zst.age`
+  erstellt: 4.048.231.696 Byte, SHA-256
+  `1ccc10be1a94f61948be7dacc7ab7415af9e06f1852747e41dbe3f4f447b178e`.
+  Die identischen verschlüsselten Kopien liegen auf Mac und nix-ai. Das
+  Archiv wurde vollständig entschlüsselt und der enthaltene Dump aller
+  144 MariaDB-Tabellen gegen den Quellhash
+  `3212f247b38f7793a724e7d570f4ee2c5910ca8ada24ecd762c1959a5bee664f`
+  geprüft. Der temporäre Root-SSH-Key wurde entfernt und VM 114 sauber
+  heruntergefahren.
+- In PBS liefen keine Tasks mehr. Proxy, API und Update-Timer wurden
+  gestoppt, `/mnt/datastore/usb-datastore` synchronisiert und ausgehängt
+  und VM 200 heruntergefahren. Der finale Host-Preflight ordnete die
+  Disko-Ziele eindeutig `/dev/sdb` (LITEON) und `/dev/sda` (Samsung) zu;
+  die nicht von Disko referenzierte EXCERIA ist `/dev/sdc`, ihre erhaltene
+  ext4-Partition `/dev/sdc1` mit UUID
+  `bea9cd03-b112-4d84-8c7d-26d53635a9d7`. Der read-only-Lauf
+  `e2fsck -fn` durchlief alle fünf Prüfphasen fehlerfrei; das Dateisystem
+  meldet `clean`. VM 114, VM 200 und VM 303 sind gestoppt.
 
 **Go/No-Go vor dem Wipe:**
 
@@ -478,9 +498,13 @@ persistenten State-Verzeichnis numerisch übernommen werden.
       den primären CT 210 auf pve01 zu beeinträchtigen.
 - [x] k3s03 drainen und als etcd-Mitglied entfernen; k3s01, LiteLLM und der
       verbleibende cloudflared-Connector müssen danach gesund sein.
-- [ ] EXCERIA aus PBS sauber aushängen und VM 200 herunterfahren; By-ID,
+- [x] EXCERIA aus PBS sauber aushängen und VM 200 herunterfahren; By-ID,
       UUID und Nicht-Zielstatus im finalen Disko-Preflight erneut prüfen.
-- [ ] Erst wenn alle Punkte erfüllt sind: **Go für den Wipe von pve03**.
+- [x] Erst wenn alle Punkte erfüllt sind: **Go für den Wipe von pve03**.
+
+**Go erteilt am 2026-07-30:** Alle verbindlichen Gates sind erfüllt. Disko
+darf jetzt ausschließlich LITEON und Samsung neu partitionieren; die EXCERIA
+bleibt unangetastet.
 
 1. LiteLLM-Postgres dumpen; Nextcloud-VM: Daten + DB exportieren.
 2. Letzte PBS-Vollsicherung aller verbleibenden Gäste; bestehenden
@@ -518,13 +542,14 @@ vollständig gebaute Zielkonfiguration fertig. NAS-HA und Replikation sind von
 pve03 gelöst; k3s03 ist aus Kubernetes und etcd entfernt und VM 303 ist
 heruntergefahren. k3s01 trägt den verbleibenden Cluster allein und wurde mit
 LiteLLM und cloudflared gesund geprüft. Die hl02-Traefik-Routen auf die
-künftigen hl03-Dienste sind nur gebaut und noch nicht aktiviert. Die EXCERIA
-und der PBS-Datastore sind unverändert.
+künftigen hl03-Dienste sind nur gebaut und noch nicht aktiviert. Der finale
+Nextcloud-Export ist geprüft, alle pve03-Gäste sind gestoppt und die EXCERIA
+ist sauber ausgehängt. Der PBS-Datastore und sein ext4-Dateisystem sind
+unverändert und geprüft.
 
-**Nächster Schritt:** EXCERIA aus PBS sauber aushängen, PBS-VM 200
-herunterfahren und By-ID, UUID sowie Disko-Nicht-Zielstatus final prüfen.
-Parallel wird der schreibgesperrte finale Nextcloud-Export erzeugt. Erst
-danach gibt es ein Go für den Wipe.
+**Nächster Schritt:** Mit nixos-anywhere pve03 auf hl03 umstellen. Danach
+EXCERIA read-only einhängen, Nextcloud und LiteLLM importieren und erst nach
+deren lokaler Prüfung die vorbereiteten hl02-Proxy-Routen aktivieren.
 
 **Zugriffswege aus dieser Session:**
 - SSH als root auf `pve01` und `pve03` sowie als ecomex auf `hl02`
