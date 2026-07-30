@@ -427,6 +427,19 @@ persistenten State-Verzeichnis numerisch übernommen werden.
   `/nix/store/ziyvpd75p0041q0rphrs1mdj2vz06imn-nixos-system-hl03-26.05.20260719.fd14620`
   und der für den späteren Proxy-Cutover vorbereitete hl02-Build waren auf
   nix-ai erfolgreich. Es wurde noch nichts deployed.
+- Der planmäßige PBS-Lauf vom 2026-07-30 um 21:00 Uhr sicherte VM 114 als
+  `PBS:backup/vm/114/2026-07-30T19:00:07Z` und VM 303 als
+  `PBS:backup/vm/303/2026-07-30T19:00:43Z`. Beide Sicherungen verwendeten
+  Clientverschlüsselung, Guest-Agent-Freeze und endeten mit `TASK OK`.
+  VM 303 wurde vollständig ohne Start unter der temporären VMID 9303
+  wiederhergestellt; alle 32 GiB wurden aus PBS gelesen und verifiziert.
+  VM und beide temporären LVM-Volumes wurden anschließend entfernt.
+- Ein aktueller PBS-Konfigurationsexport liegt unter
+  `hl03/recovery/pbs-config-20260730-211721.tar.gz.age` auf Mac und nix-ai,
+  SHA-256
+  `8e191090a6336158c6d0e349d880f7dff256b6d68af579506a96bfa07f4bb4f6`.
+  Die Entschlüsselung mit dem externen Recovery-Key und der vollständige
+  Archivtest waren erfolgreich.
 
 **Go/No-Go vor dem Wipe:**
 
@@ -444,7 +457,7 @@ persistenten State-Verzeichnis numerisch übernommen werden.
       außerhalb pve03 sichern und Restore testen.
 - [x] hl03-Hostkey und SOPS-Secrets vorbereiten; Zielkonfiguration mit
       Nextcloud, PostgreSQL, LiteLLM, cloudflared und restic vollständig bauen.
-- [ ] Frische PBS-Sicherungen von VM 114 und VM 303 erstellen und mindestens
+- [x] Frische PBS-Sicherungen von VM 114 und VM 303 erstellen und mindestens
       einen Restore prüfen; aktuellen PBS-Konfigurations-Export verifizieren.
 - [ ] NAS-Replikationsjob und HA-Regel kontrolliert von pve03 lösen, ohne
       den primären CT 210 auf pve01 zu beeinträchtigen.
@@ -490,12 +503,10 @@ vollständig gebaute Zielkonfiguration fertig. k3s01 und k3s03 laufen weiter;
 die hl02-Traefik-Routen auf die künftigen hl03-Dienste sind nur gebaut und
 noch nicht aktiviert. Die EXCERIA und der PBS-Datastore sind unverändert.
 
-**Nächster Schritt:** Frische PBS-Sicherungen von Nextcloud-VM 114 und
-k3s03-VM 303 erstellen, mindestens einen Restore prüfen und den aktuellen
-PBS-Konfigurationsexport erneut verifizieren. Danach NAS-Replikation/HA-Ziel
-kontrolliert von pve03 lösen, k3s03 drainen und als etcd-Mitglied entfernen.
-Erst nach dem finalen Datenträger- und EXCERIA-Preflight gibt es ein Go für
-den Wipe.
+**Nächster Schritt:** NAS-Replikation und HA-Ziel kontrolliert von pve03
+lösen, ohne den primären CT 210 auf pve01 zu beeinträchtigen. Danach k3s03
+drainen und als etcd-Mitglied entfernen. Erst nach dem finalen Datenträger-
+und EXCERIA-Preflight gibt es ein Go für den Wipe.
 
 **Zugriffswege aus dieser Session:**
 - SSH als root auf `pve01` und `pve03` sowie als ecomex auf `hl02`
