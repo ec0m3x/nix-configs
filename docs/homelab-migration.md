@@ -628,7 +628,7 @@ bleibt unangetastet.
   hl01-Systembuild einschließlich der Haushaltsbuch-/Honcho-Container,
   privater GHCR-Anmeldung, Redis und Honcho-PostgreSQL-Provisionierung war
   erfolgreich:
-  `/nix/store/hgwk71rzq5ac2paksl0mm4abh2jmy167-nixos-system-hl01-26.05.20260719.fd14620`.
+  `/nix/store/n5q9dgm62nns6b5zg3x1z1b7h10pgb0v-nixos-system-hl01-26.05.20260719.fd14620`.
 - AVA wurde ohne Dienstunterbrechung aus einem unveränderlichen ZFS-Snapshot
   vollständig gesichert. Das age-verschlüsselte Archiv
   `ava-shadow-20260730-205541/ava-home.tar.zst.age` liegt byteidentisch auf
@@ -700,7 +700,10 @@ bleibt unangetastet.
   und
   `ghcr.io/ec0m3x/honcho@sha256:1013f0208844cfa0add7deab9f8a5f4d158f11f83cd0d3bceccb011daa4d288f`.
   Beide Pakete wurden über die GitHub-API als `private` verifiziert; die
-  temporäre Push-Anmeldung auf docker-vm wurde anschließend entfernt.
+  temporäre Push-Anmeldung auf docker-vm wurde anschließend entfernt. Der
+  separate Classic-PAT besitzt nur `read:packages`, liegt in
+  `secrets/hl01.yaml` und wurde mit einer temporären Skopeo-Anmeldung gegen
+  beide digest-only-Referenzen erfolgreich geprüft.
 - Alle Schattenexporte wurden ohne Dienstunterbrechung erstellt. Temporäre
   ZFS-Snapshots, PostgreSQL-Testcluster, Klartext-Restoreverzeichnisse und der
   Paperless-Exporter auf der Quelle wurden nach erfolgreicher Prüfung
@@ -746,11 +749,11 @@ EXCERIA samt PBS-Datastore blieb unverändert erhalten. pve01 ist nach dem
 Entfernen des migrierten pve03 wieder quorate; alle noch benötigten
 Phase-4-Quellgäste laufen, während k3s01 bewusst gestoppt bleibt.
 
-**Nächster Schritt:** Die vorbereitete hl01-Zielkonfiguration bauen und
-anschließend Schattenexporte samt Restore-Tests für Immich, Paperless,
-OpenWebUI, AVA, NAS und docker-vm erstellen. HAOS und Samba sind aus diesem
-Cutover ausgeklammert. Erst danach darf das Go/No-Go-Gate für den Wipe von
-pve01 bewertet werden.
+**Nächster Schritt:** Die Anwendungsebene der Immich- und
+Paperless-Schattenexporte in den exakten Zielversionen prüfen und anschließend
+den finalen hl01-Restore-/Rollback-Ablauf vorbereiten. HAOS und Samba sind aus
+diesem Cutover ausgeklammert. Erst danach darf das Go/No-Go-Gate für den Wipe
+von pve01 bewertet werden.
 
 **Zugriffswege aus dieser Session:**
 - SSH als root auf `pve01` sowie als ecomex auf `hl02` und `hl03`
