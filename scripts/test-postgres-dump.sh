@@ -34,9 +34,14 @@ trap cleanup EXIT
   --locale=C.UTF-8 \
   -D "$data_dir" >/dev/null
 
+server_options="-k $socket_dir -h ''"
+if [[ -e "${postgres_bin%/bin}/lib/vchord.so" ]]; then
+  server_options+=" -c shared_preload_libraries=vchord.so"
+fi
+
 "$postgres_bin/pg_ctl" \
   -D "$data_dir" \
-  -o "-k $socket_dir -h '' -c shared_preload_libraries=vchord.so" \
+  -o "$server_options" \
   -w start >/dev/null
 
 export PGHOST=$socket_dir
