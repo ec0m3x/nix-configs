@@ -625,8 +625,10 @@ bleibt unangetastet.
 - Die deklarative Zielkonfiguration enthält Immich `3.0.3`, Paperless-ngx
   `2.20.15`, natives Open WebUI `0.10.2`, PostgreSQL 16 auf `/srv` und den
   Hermes-Dashboard-Dienst mit Ressourcenlimits. Der vollständige
-  hl01-Systembuild war erfolgreich:
-  `/nix/store/5k9z8pijgqpqvcw6lb7m8mqd0yv0h8qf-nixos-system-hl01-26.05.20260719.fd14620`.
+  hl01-Systembuild einschließlich der Haushaltsbuch-/Honcho-Container,
+  privater GHCR-Anmeldung, Redis und Honcho-PostgreSQL-Provisionierung war
+  erfolgreich:
+  `/nix/store/hgwk71rzq5ac2paksl0mm4abh2jmy167-nixos-system-hl01-26.05.20260719.fd14620`.
 - AVA wurde ohne Dienstunterbrechung aus einem unveränderlichen ZFS-Snapshot
   vollständig gesichert. Das age-verschlüsselte Archiv
   `ava-shadow-20260730-205541/ava-home.tar.zst.age` liegt byteidentisch auf
