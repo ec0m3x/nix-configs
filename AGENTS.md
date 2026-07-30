@@ -17,11 +17,20 @@ those get wrong, omit, or where the live config has drifted.
   module files.
 - **`nix-mac` exists** (`hosts/nix-mac/configuration.nix`), exported via
   `flake.nix` as `darwinConfigurations.nix-mac` (aarch64-darwin). Build with
-  `darwin-rebuild switch --flake .#nix-mac`. It is not in CLAUDE.md.
+  `darwin-rebuild switch --flake .#nix-mac`.
 - **Home-manager runs as a NixOS module**, not standalone. A single
   `sudo nixos-rebuild switch --flake .#nix-ai` applies both system and user
   config. Do **not** run `home-manager switch` — it is not wired up that way.
 - Wolf game streaming is enabled on `nix-ai`; sunshine is commented out.
+- **`nix-server` was removed** (2026-07-30). Do not resurrect it; `nix-ai`
+  already imports every module it used.
+- **Homelab migration in progress** (branch `homelab-migration`): three new
+  hosts `hl01`–`hl03` (ex-Proxmox mini PCs, 10.20.50.11–.13) with disko disk
+  layouts and sops-nix secrets. They are scaffolding — NOT installed yet; the
+  machines still run Proxmox. Read `docs/homelab-migration.md` (plan, status,
+  handover) before touching anything under `hosts/hl0*` or `hosts/homelab/`.
+  The hl hosts share `hosts/homelab/common.nix` and do NOT have a
+  `hardware-configuration.nix` — `nixpkgs.hostPlatform` is set in common.nix.
 
 ## Commands
 
@@ -46,7 +55,9 @@ nix build .#package-name
 ```
 
 There is no test suite, typecheck, or lint beyond `nix fmt`. Verify edits by
-running `nixos-rebuild build --flake .#nix-ai` (or `test`).
+running `nixos-rebuild build --flake .#nix-ai` (or `test`). On hosts without
+nix (e.g. the Windows workstation), push and let CI validate: GitHub Actions
+(`.github/workflows/check.yml`) evaluates every NixOS host config on push.
 
 ## Hard constraints
 
@@ -58,7 +69,11 @@ running `nixos-rebuild build --flake .#nix-ai` (or `test`).
 - **Flakes + nix-command** are enabled system-wide via `configuration.nix`.
 - **User password** is read from `/etc/nixos-secrets/ecomex` (outside the
   repo, mode 600), generated with `mkpasswd -m yescrypt`. Do not inline a
-  hash.
+  hash. The hl hosts use the same pattern (file injected at install time via
+  nixos-anywhere `--extra-files`).
+- **Secrets for hl hosts** go through sops-nix: encrypted files under
+  `secrets/`, recipients in `.sops.yaml` (admin age key + per-host SSH host
+  keys via ssh-to-age). Never commit plaintext secrets.
 - **LUKS root** with TPM2 auto-unlock (PCRs 0+7) is configured in
   `hosts/nix-ai/configuration.nix`. Re-enroll on hardware change with
   `sudo systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs=0+7 /dev/disk/by-uuid/<uuid>`.
