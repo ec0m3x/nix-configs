@@ -4,7 +4,6 @@
   pkgs,
   ...
 }: let
-  haushaltsbuchImage = "ghcr.io/ec0m3x/haushaltsbuch@sha256:500b3d1773d4690c33887ac530c90bd225ab08894e56970f778e4ee2326b59e7";
   honchoImage = "ghcr.io/ec0m3x/honcho@sha256:1013f0208844cfa0add7deab9f8a5f4d158f11f83cd0d3bceccb011daa4d288f";
   ghcrLogin = {
     registry = "ghcr.io";
@@ -16,17 +15,8 @@ in {
     ghcr_pull_token = {
       mode = "0400";
       restartUnits = [
-        "podman-haushaltsbuch-web.service"
-        "podman-haushaltsbuch-scheduler.service"
         "podman-honcho-api.service"
         "podman-honcho-deriver.service"
-      ];
-    };
-    haushaltsbuch_environment = {
-      mode = "0400";
-      restartUnits = [
-        "podman-haushaltsbuch-web.service"
-        "podman-haushaltsbuch-scheduler.service"
       ];
     };
     honcho_environment = {
@@ -44,36 +34,18 @@ in {
     };
   };
 
-  sops.templates = {
-    haushaltsbuch_env = {
-      mode = "0400";
-      restartUnits = [
-        "podman-haushaltsbuch-web.service"
-        "podman-haushaltsbuch-scheduler.service"
-      ];
-      content = ''
-        ${config.sops.placeholder.haushaltsbuch_environment}
-        DATA_DIR=/data
-        HB_BIND_IP=10.20.50.11
-        HB_HOST=0.0.0.0
-        HB_PORT=8787
-        HB_ALLOWED_HOSTS=hb.hl.sk4i.com,10.20.50.11
-        HB_TRUSTED_PROXY_IPS=10.20.50.12
-      '';
-    };
-    honcho_env = {
-      mode = "0400";
-      restartUnits = [
-        "podman-honcho-api.service"
-        "podman-honcho-deriver.service"
-      ];
-      content = ''
-        ${config.sops.placeholder.honcho_environment}
-        DB_CONNECTION_URI=postgresql+psycopg://honcho:${config.sops.placeholder.honcho_postgres_password}@127.0.0.1:5432/honcho
-        CACHE_URL=redis://127.0.0.1:6380/0?suppress=true
-        CACHE_ENABLED=true
-      '';
-    };
+  sops.templates.honcho_env = {
+    mode = "0400";
+    restartUnits = [
+      "podman-honcho-api.service"
+      "podman-honcho-deriver.service"
+    ];
+    content = ''
+      ${config.sops.placeholder.honcho_environment}
+      DB_CONNECTION_URI=postgresql+psycopg://honcho:${config.sops.placeholder.honcho_postgres_password}@127.0.0.1:5432/honcho
+      CACHE_URL=redis://127.0.0.1:6380/0?suppress=true
+      CACHE_ENABLED=true
+    '';
   };
 
   # Immich already adds pgvector and VectorChord to this PostgreSQL 16
@@ -132,10 +104,6 @@ in {
     };
   };
 
-  systemd.tmpfiles.rules = [
-    "d /srv/haushaltsbuch 0750 10001 10001 -"
-  ];
-
   virtualisation.podman = {
     enable = true;
     autoPrune.enable = true;
@@ -143,34 +111,6 @@ in {
   virtualisation.oci-containers = {
     backend = "podman";
     containers = {
-      haushaltsbuch-web = {
-        image = haushaltsbuchImage;
-        login = ghcrLogin;
-        environmentFiles = [config.sops.templates.haushaltsbuch_env.path];
-        volumes = ["/srv/haushaltsbuch:/data:rw"];
-        extraOptions = [
-          "--network=host"
-          "--security-opt=no-new-privileges"
-          "--memory=1g"
-        ];
-      };
-      haushaltsbuch-scheduler = {
-        image = haushaltsbuchImage;
-        login = ghcrLogin;
-        cmd = [
-          "/usr/local/bin/supercronic"
-          "/app/docker/crontab"
-        ];
-        dependsOn = ["haushaltsbuch-web"];
-        environmentFiles = [config.sops.templates.haushaltsbuch_env.path];
-        environment.HB_INIT_DB = "0";
-        volumes = ["/srv/haushaltsbuch:/data:rw"];
-        extraOptions = [
-          "--network=host"
-          "--security-opt=no-new-privileges"
-          "--memory=512m"
-        ];
-      };
       honcho-api = {
         image = honchoImage;
         login = ghcrLogin;
@@ -227,6 +167,4 @@ in {
       ];
     };
   };
-
-  networking.firewall.interfaces.lan0.allowedTCPPorts = [8787];
 }

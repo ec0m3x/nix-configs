@@ -19,8 +19,10 @@ those get wrong, omit, or where the live config has drifted.
   `flake.nix` as `darwinConfigurations.nix-mac` (aarch64-darwin). Build with
   `darwin-rebuild switch --flake .#nix-mac`.
 - **Home-manager runs as a NixOS module**, not standalone. A single
-  `sudo nixos-rebuild switch --flake .#nix-ai` applies both system and user
-  config. Do **not** run `home-manager switch` — it is not wired up that way.
+  `nixos-rebuild switch` applies both system and user config. `nix-ai` uses the
+  headless workstation profile; `hl01`–`hl03` use the minimal shared server
+  profile in `home-manager/home-homelab.nix`. Do **not** run
+  `home-manager switch` — it is not wired up that way.
 - Wolf game streaming is enabled on `nix-ai`; sunshine is commented out.
 - **`nix-server` was removed** (2026-07-30). Do not resurrect it; `nix-ai`
   already imports every module it used.
@@ -113,7 +115,8 @@ Adding a NixOS module:
 3. Import in `hosts/<host>/configuration.nix`: `inputs.self.nixosModules.<name>`
 
 Home-manager is the same pattern: `modules/home-manager/<name>.nix` →
-`modules/home-manager/default.nix` → import in `home-manager/home.nix`.
+`modules/home-manager/default.nix` → import in the appropriate profile under
+`home-manager/`.
 
 A file in `modules/.../` that is not registered in `default.nix` is invisible
 to the flake. Step 2 is the most commonly missed.

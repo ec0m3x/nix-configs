@@ -65,6 +65,8 @@ build all affected hosts, and deploy them individually after reviewing version
 changes. Restore-only application assertions and the temporary Vaultwarden
 package have been removed. Database and Nextcloud major versions remain
 explicit because those upgrades require their own migration steps.
+Home Manager is enabled as part of each homelab NixOS configuration and uses a
+minimal server profile; no standalone Home Manager command is needed.
 
 ## Installation from NixOS Minimal Image
 
@@ -299,9 +301,10 @@ darwin-rebuild check  --flake .#nix-mac  # non-persistent activation check
 
 ## Quick Start
 
-### System Configuration (nix-ai)
+### System Configuration (NixOS)
 
-home-manager runs as a NixOS module — a single rebuild applies both system and user config:
+Home Manager runs as a NixOS module on `nix-ai` and `hl01`–`hl03`, so a single
+rebuild applies both system and user config:
 
 ```bash
 # Apply system + home-manager configuration
@@ -362,7 +365,9 @@ nix shell .#package-name
 │   ├── hl02/              # DNS/proxy host + disko layout
 │   └── hl03/              # Cloud/data host + disko layout
 ├── home-manager/          # Home-manager user configurations
-│   ├── home.nix           # Shared base home config for ecomex
+│   ├── home-base.nix      # Shared identity/state foundation
+│   ├── home.nix           # Shared workstation CLI profile
+│   ├── home-homelab.nix   # Minimal hl01–hl03 server profile
 │   ├── home-nix-ai.nix    # Host-specific config for nix-ai
 │   └── home-nix-mac.nix   # Host-specific config for nix-mac
 ├── modules/               # Reusable modules
@@ -399,12 +404,13 @@ Imported via `inputs.self.nixosModules.<name>` in `configuration.nix`:
 - `tailscale` — VPN networking
 - Homelab application modules include `traefik`, `vaultwarden`, `searxng`,
   `stirling-pdf`, `nextcloud`, `litellm`, `cloudflared`, `restic-target`,
-  `homelab-backup`, `immich`, `paperless`, `open-webui`, `hermes-agent`, and
-  `haushaltsbuch-honcho`
+  `homelab-backup`, `immich`, `paperless`, `open-webui`, `hermes-agent`,
+  `haushaltsbuch`, and `honcho`
 
 ### Home-Manager Modules (`modules/home-manager/`)
 
-Imported via `inputs.self.homeManagerModules.<name>` in `home.nix`:
+Imported via `inputs.self.homeManagerModules.<name>` in the appropriate profile
+under `home-manager/`:
 
 - `bat` — Better `cat` with syntax highlighting
 - `bottom` — System resource monitor
@@ -475,7 +481,7 @@ Overlays are applied via `home-manager.useGlobalPkgs = true`, so both NixOS and 
    ```nix
    new-module = import ./new-module.nix;
    ```
-3. Import in `home-manager/home.nix`:
+3. Import in the appropriate profile under `home-manager/`:
    ```nix
    inputs.self.homeManagerModules.new-module
    ```

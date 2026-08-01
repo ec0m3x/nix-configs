@@ -9,6 +9,7 @@
   ...
 }: {
   imports = [
+    inputs.home-manager.nixosModules.home-manager
     inputs.self.nixosModules.boot
     inputs.self.nixosModules.core-packages
     inputs.self.nixosModules.locale
@@ -68,6 +69,16 @@
   };
 
   programs.zsh.enable = true;
+
+  # Home Manager runs as part of the NixOS activation. Homelab hosts use a
+  # small server profile rather than the nix-ai/macOS workstation profile.
+  home-manager = {
+    useGlobalPkgs = true;
+    useUserPackages = true;
+    backupFileExtension = "hm-backup";
+    extraSpecialArgs = {inherit inputs;};
+    users.ecomex = import ../../home-manager/home-homelab.nix;
+  };
 
   users.users.ecomex = {
     isNormalUser = true;

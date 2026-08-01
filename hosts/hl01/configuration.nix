@@ -13,9 +13,11 @@
   imports = [
     ../homelab/common.nix
     ./disko.nix
+    ./services/postgresql.nix
     inputs.self.nixosModules.haos-vm
-    inputs.self.nixosModules.haushaltsbuch-honcho
+    inputs.self.nixosModules.haushaltsbuch
     inputs.self.nixosModules.hermes-agent
+    inputs.self.nixosModules.honcho
     inputs.self.nixosModules.homelab-backup
     inputs.self.nixosModules.immich
     inputs.self.nixosModules.open-webui
@@ -37,20 +39,9 @@
     }
   ];
 
-  # Immich and Paperless share the source-compatible PostgreSQL 16 instance.
-  # Both databases and all application data live on the dedicated /srv SSD.
-  services.postgresql = {
-    package = pkgs.postgresql_16;
-    dataDir = "/srv/postgresql/16";
-  };
   environment.systemPackages = with pkgs; [
     git
-    postgresql_16
     sqlite
     zstd
-  ];
-  systemd.tmpfiles.rules = [
-    "d /srv/postgresql 0750 postgres postgres -"
-    "d /srv/postgresql/16 0700 postgres postgres -"
   ];
 }
