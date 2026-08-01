@@ -39,6 +39,13 @@ verified generations.
 
 1. Boot the machines needed for the work. Bring up `hl03` before starting or
    manually triggering client backups, because it owns the Restic target.
+   After `nix-ai` is back, fast-forward its checkout because the final handover
+   commit was created on the Mac after the shutdown sequence:
+
+   ```bash
+   ssh nix-ai 'cd /home/ecomex/nix-configs && git pull --ff-only'
+   ```
+
 2. Verify every host before making changes:
 
    ```bash
