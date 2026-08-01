@@ -873,6 +873,8 @@ Phase-5-Abschluss:
   `100.113.0.83`, hl03 `100.65.98.4`. Nur hl02 bewirbt
   `10.20.50.0/24`; hl01 und hl03 setzen `accept-routes=false`, weil die
   Annahme der eigenen LAN-Route sonst ihre direkte LAN-Erreichbarkeit stört.
+- Die verwaisten Tailnet-Geräte `ava`, `docker-vm` und `immich` wurden
+  anschließend vom Betreiber aus dem Tailscale-Adminbereich entfernt.
 
 ### Folgeprojekt — frische HAOS-VM auf hl01 ✅ (2026-08-01)
 
@@ -923,8 +925,7 @@ kontrolliert entfernt und alle sechs Anwendungen erneut per HTTP geprüft.
 
 **Nächster Schritt:** Die eigentliche Proxmox-zu-NixOS-Migration einschließlich
 Phase 5 und die frische HAOS-Einrichtung sind abgeschlossen. Offen bleiben nur
-die optionale Samba-/NAS-Entscheidung und das gesondert freizugebende Entfernen
-der verwaisten Tailnet-Geräte.
+die optionale Samba-/NAS-Entscheidung.
 
 **Zugriffswege aus dieser Session:**
 - Die Mac-SSH-Aliase `hl01`, `hl02` und `hl03` verbinden als `ecomex` direkt
@@ -948,6 +949,4 @@ der verwaisten Tailnet-Geräte.
 
 ## Offene Punkte
 
-- Die verwaisten Tailnet-Geräte `ava`, `docker-vm` und `immich` nach
-  gesonderter Bestätigung im Tailscale-Adminbereich entfernen.
 - Samba/NAS erst nach separater Speicher- und Freigabeentscheidung aktivieren.
