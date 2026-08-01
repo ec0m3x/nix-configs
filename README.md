@@ -55,7 +55,7 @@ nixos-rebuild switch --flake .#hl01 \
   --target-host ecomex@10.20.50.11 \
   --sudo --ask-sudo-password
 
-# Build and deploy all homelab hosts safely (hl03 -> hl02 -> hl01)
+# Build and deploy all homelab hosts safely (one shared sudo prompt)
 ./scripts/deploy-homelab.sh
 ```
 
@@ -66,8 +66,9 @@ secrets; read the migration document before changing `hosts/hl0*` or
 Homelab application updates follow the pinned flake inputs: update the lockfile,
 review version changes, and use `scripts/deploy-homelab.sh` on `nix-ai`. It
 builds all hosts before switching the first one, then deploys `hl03`, `hl02`,
-and `hl01` with health checks between them. Restore-only application assertions
-and the temporary Vaultwarden
+and `hl01` with health checks between them. The shared target sudo password is
+requested once and passed to each remote sudo process through stdin.
+Restore-only application assertions and the temporary Vaultwarden
 package have been removed. Database and Nextcloud major versions remain
 explicit because those upgrades require their own migration steps.
 Home Manager is enabled as part of each homelab NixOS configuration and uses a

@@ -25,7 +25,8 @@ Build and deploy all homelab hosts from nix-ai in this order:
   hl03 -> hl02 -> hl01
 
 The script requires a clean main checkout matching origin/main and an
-interactive terminal for the target hosts' sudo password prompts.
+interactive terminal. The shared target sudo password is requested once after
+all builds have succeeded.
 EOF
 }
 
@@ -81,15 +82,21 @@ for host in "${hosts[@]}"; do
 done
 
 printf '\nAll builds succeeded. Starting staggered deployment...\n'
+printf 'Sudo password for %s on hl01-hl03: ' "$deploy_user" >&2
+IFS= read -r -s sudo_password </dev/tty
+printf '\n' >&2
+[[ -n $sudo_password ]] || die "the sudo password must not be empty"
+trap 'sudo_password=; unset sudo_password' EXIT
+
 for host in "${hosts[@]}"; do
   address=${host_addresses[$host]}
   target="$deploy_user@$address"
 
   printf '\n==> Deploying %s (%s)\n' "$host" "$address"
-  nixos-rebuild switch \
+  printf '%s\n' "$sudo_password" | NIX_SUDOOPTS='--stdin --prompt=' nixos-rebuild switch \
     --flake ".#$host" \
     --target-host "$target" \
-    --ask-sudo-password
+    --sudo
 
   failed_units=$(ssh -o BatchMode=yes "$target" \
     systemctl --failed --no-legend --plain --no-pager)

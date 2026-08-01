@@ -64,7 +64,7 @@ darwin-rebuild switch --flake .#nix-mac
 # Build a homelab host on nix-ai
 ssh nix-ai 'cd /home/ecomex/nix-configs && nixos-rebuild build --flake .#hl01'
 
-# Build and deploy all homelab hosts from nix-ai (interactive target sudo)
+# Build and deploy all homelab hosts from nix-ai (one shared sudo prompt)
 ssh -t nix-ai 'cd /home/ecomex/nix-configs && ./scripts/deploy-homelab.sh'
 
 # Deploy a homelab host from nix-ai (run interactively for target sudo)
