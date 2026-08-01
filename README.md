@@ -34,6 +34,8 @@ restore evidence, phase gates, and handover are maintained in
 The permanent backup schedule, retention policy and disaster-restore runbook
 are documented separately in
 [`docs/homelab-backups.md`](docs/homelab-backups.md).
+The concise current-state and next-session handover is in
+[`docs/next-session.md`](docs/next-session.md).
 
 - `hl01`: Immich, Paperless-ngx, Open WebUI, AVA/Hermes, Haushaltsbuch,
   Honcho, Home Assistant OS (KVM)
