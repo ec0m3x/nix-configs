@@ -43,9 +43,18 @@ fi
 [[ $(hostname -s) == "nix-ai" ]] || die "run this script on nix-ai"
 [[ -t 0 && -t 1 ]] || die "an interactive terminal is required"
 
-for command in git nixos-rebuild setsid ssh; do
+for command in git nixos-rebuild ssh; do
   command -v "$command" >/dev/null || die "required command not found: $command"
 done
+
+readonly rebuild_launcher="$script_dir/nixos-rebuild-with-password.py"
+readonly rebuild_wrapper=$(readlink -f "$(command -v nixos-rebuild)")
+readonly wrapped_rebuild="$(dirname "$rebuild_wrapper")/.nixos-rebuild-wrapped"
+[[ -f $wrapped_rebuild ]] || die "cannot locate the wrapped nixos-rebuild executable"
+
+IFS= read -r python_shebang <"$wrapped_rebuild"
+readonly rebuild_python=${python_shebang#\#!}
+[[ -x $rebuild_python ]] || die "cannot locate nixos-rebuild's Python interpreter"
 
 cd "$repo_root"
 
@@ -93,10 +102,10 @@ for host in "${hosts[@]}"; do
   target="$deploy_user@$address"
 
   printf '\n==> Deploying %s (%s)\n' "$host" "$address"
-  # Detaching the child from the controlling terminal makes Python's getpass
-  # consume the supplied value immediately, before any build or copy command
-  # can read stdin. nixos-rebuild then forwards it to remote sudo itself.
-  printf '%s\n' "$sudo_password" | PYTHONWARNINGS=ignore setsid --wait nixos-rebuild switch \
+  # The launcher supplies the value directly to nixos-rebuild's early getpass
+  # call. Build, copy and SSH subprocesses therefore cannot consume it first.
+  printf '%s\n' "$sudo_password" | "$rebuild_python" "$rebuild_launcher" \
+    "$wrapped_rebuild" switch \
     --flake ".#$host" \
     --target-host "$target" \
     --ask-sudo-password
