@@ -26,7 +26,11 @@
   # the preserved EXCERIA filesystem is absent.
   systemd.services.restic-target-prepare = {
     description = "Prepare the Restic directory on the EXCERIA filesystem";
+    # `nofail` lets hl03 boot without the USB disk, but this preparation must
+    # never race the mount when the disk is present.
+    after = ["srv-backup.mount"];
     before = ["restic-rest-server.service"];
+    unitConfig.RequiresMountsFor = "/srv/backup";
     serviceConfig.Type = "oneshot";
     script = ''
       ${pkgs.util-linux}/bin/mountpoint --quiet /srv/backup
