@@ -25,6 +25,7 @@
   nvidia = import ./nvidia.nix;
   ollama = import ./ollama.nix;
   open-webui = import ./open-webui.nix;
+  offline-backup-mirror = import ./offline-backup-mirror.nix;
   paperless = import ./paperless.nix;
   pipewire = import ./pipewire.nix;
   restic-target = import ./restic-target.nix;

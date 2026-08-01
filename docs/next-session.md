@@ -83,10 +83,12 @@ size 1,000,204,885,504 bytes and stable path
 `/dev/disk/by-id/usb-Seagate_M3_Portable_NM15KS34-0:0`. It now contains one
 unmounted ext4 filesystem labeled `HOMELAB_OFFLINE` with UUID
 `cc005762-01f1-4cbd-94af-a158819e3b80`. The previous EFI/APFS layout was
-explicitly accepted for deletion. Offline retention and completion signalling
-still need to be selected.
+explicitly accepted for deletion. The declarative hotplug job accepts only
+this serial plus filesystem UUID, uses independent Restic repositories without
+offline pruning, warns at 80%, records status locally and powers the device off
+after a successful copy and check.
 
-The implementation should then:
+The implementation does the following:
 
 1. Match only the verified UUID/device identity.
 2. Mount the disk at a private path through systemd.
@@ -96,8 +98,9 @@ The implementation should then:
 5. Check the destination repositories and report failure clearly.
 6. On success, flush writes, record the completion time, unmount the filesystem
    and power down the USB device so it is explicitly safe to remove.
-7. Test interrupted-copy recovery, a second incremental copy and an actual
-   restore from the unplugged/offline repository before accepting the design.
+7. Commissioning still needs to test the first full copy, interrupted-copy
+   recovery, a second incremental copy and an actual restore from the
+   unplugged/offline repository before accepting the design.
 
 NAS/Samba remains intentionally out of scope unless the user reopens that
 decision. HAOS remains excluded from backups because it is rebuilt fresh.

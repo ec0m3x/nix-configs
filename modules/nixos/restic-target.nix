@@ -59,6 +59,9 @@
       set -Eeuo pipefail
       export RESTIC_PASSWORD_FILE=${config.sops.secrets.homelab_restic_repository_password.path}
 
+      exec 9>/run/lock/homelab-restic-target.lock
+      ${pkgs.util-linux}/bin/flock --exclusive 9
+
       for host in hl01 hl02 hl03; do
         repository="/srv/backup/restic/restic/''${host}"
         [[ -f "''${repository}/config" ]] || continue
@@ -97,6 +100,9 @@
     script = ''
       set -Eeuo pipefail
       export RESTIC_PASSWORD_FILE=${config.sops.secrets.homelab_restic_repository_password.path}
+
+      exec 9>/run/lock/homelab-restic-target.lock
+      ${pkgs.util-linux}/bin/flock --exclusive 9
 
       for host in hl01 hl02 hl03; do
         repository="/srv/backup/restic/restic/''${host}"

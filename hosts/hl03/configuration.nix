@@ -8,6 +8,7 @@
     inputs.self.nixosModules.homelab-backup
     inputs.self.nixosModules.litellm
     inputs.self.nixosModules.nextcloud
+    inputs.self.nixosModules.offline-backup-mirror
     inputs.self.nixosModules.restic-target
   ];
 

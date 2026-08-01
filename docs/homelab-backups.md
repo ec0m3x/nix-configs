@@ -119,11 +119,11 @@ proves repository integrity, not that an application-level restore works.
 ## Removable offline mirror
 
 The second backup tier uses a USB HDD that normally remains unplugged and is
-stored away from the homelab. The physical medium was commissioned on
-2026-08-01; the hot-plug automation is not implemented yet. It must be an
-independent Restic target rather than a destructive block-level or
-`rsync --delete` mirror. `restic copy` transfers valid snapshots without
-propagating deletions from the online target.
+stored away from the homelab. The physical medium was commissioned and the
+hot-plug automation implemented on 2026-08-01. It is an independent Restic
+target rather than a destructive block-level or `rsync --delete` mirror.
+`restic copy` transfers valid snapshots without propagating deletions from the
+online target.
 
 The accepted offline medium is exactly:
 
@@ -136,24 +136,50 @@ It was left unmounted after formatting. The previous EFI/APFS partition table
 was intentionally erased after model, serial, exact size, mount state and the
 separate online EXCERIA UUID had all been checked.
 
-The intended hot-plug workflow is:
+The hot-plug workflow is:
 
 1. A dedicated filesystem label and UUID identify the one accepted offline
    disk. No generic USB disk may trigger the job.
 2. Inserting that disk activates a systemd unit on `hl03`, which mounts it at a
    private path and takes an exclusive lock so only one copy can run.
 3. The unit copies new snapshots from all three local repositories into three
-   repositories on the removable disk. Source and destination stay encrypted.
-4. Restic checks the destination repositories. A failure leaves the source
-   untouched and must not report the disk as ready for removal.
+   independent repositories on the removable disk. Source and destination
+   stay encrypted. New repositories copy the source chunker parameters so
+   subsequent copies deduplicate consistently.
+4. Restic reads and checks all destination data during commissioning. Later
+   runs check repository metadata plus 10% of stored packs. A failure leaves
+   the source untouched and does not report the disk as ready for removal.
 5. On success the unit flushes all writes, records the completion time,
    unmounts the filesystem and powers down the USB device. Only then is the
    disk safe to unplug and return to storage.
 
-The copy job must not start while weekly pruning or a full check is running;
-all three target operations will share one systemd/flock lock. The
-implementation still needs the desired offline retention and completion
-notification policy. No broad udev rule or automatic formatting is configured.
+The copy job, weekly prune and integrity checks share
+`/run/lock/homelab-restic-target.lock`; only one can operate on the target at a
+time. Offline snapshots are not forgotten or pruned. This intentionally keeps
+snapshots that later disappear from the online repositories. A usage of 80%
+or more is recorded as a warning and is the point to review retention manually.
+No broad udev rule or automatic formatting exists.
+
+The current state is written atomically to
+`/var/lib/homelab-backup/offline-mirror.status`. Inspect a run with:
+
+```bash
+cat /var/lib/homelab-backup/offline-mirror.status
+systemctl status restic-offline-mirror.service
+journalctl -u restic-offline-mirror.service --since today
+```
+
+To start or retry while the verified disk is attached:
+
+```bash
+sudo systemctl reset-failed restic-offline-mirror.service
+sudo systemctl start restic-offline-mirror.service
+```
+
+Only `state=success` together with `safe to unplug` means the unit completed,
+unmounted the filesystem and powered off the USB device. On failure the unit
+attempts to unmount but deliberately leaves the device powered so it can be
+inspected and retried.
 
 ## Commissioning evidence (2026-08-01)
 
