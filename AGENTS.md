@@ -24,13 +24,28 @@ those get wrong, omit, or where the live config has drifted.
 - Wolf game streaming is enabled on `nix-ai`; sunshine is commented out.
 - **`nix-server` was removed** (2026-07-30). Do not resurrect it; `nix-ai`
   already imports every module it used.
-- **Homelab migration in progress** (branch `homelab-migration`): three new
-  hosts `hl01`–`hl03` (ex-Proxmox mini PCs, 10.20.50.11–.13) with disko disk
-  layouts and sops-nix secrets. They are scaffolding — NOT installed yet; the
-  machines still run Proxmox. Read `docs/homelab-migration.md` (plan, status,
-  handover) before touching anything under `hosts/hl0*` or `hosts/homelab/`.
-  The hl hosts share `hosts/homelab/common.nix` and do NOT have a
-  `hardware-configuration.nix` — `nixpkgs.hostPlatform` is set in common.nix.
+- **The homelab migration is complete** (2026-08-01, branch `main`). The former
+  Proxmox mini PCs now run bare-metal NixOS as `hl01`–`hl03` at
+  `10.20.50.11`–`.13`; do not treat their files as scaffolding or resurrect
+  Proxmox assumptions. `hl01` hosts the applications and a fresh HAOS VM,
+  `hl02` provides DNS/proxy/Vaultwarden, and `hl03` hosts Nextcloud/LiteLLM and
+  the Restic target. Read `docs/next-session.md` first for the concise current
+  handover, `docs/homelab-backups.md` for backup/restore operations, and
+  `docs/homelab-migration.md` for full history before touching `hosts/hl0*` or
+  `hosts/homelab/`. The hosts share `hosts/homelab/common.nix` and do NOT have
+  a `hardware-configuration.nix`; `nixpkgs.hostPlatform` is set in common.nix.
+- **Permanent homelab backups are active.** Each host writes daily to its own
+  encrypted append-only Restic repository on the external EXCERIA filesystem
+  at `hl03:/srv/backup`. Retention/prune and integrity checks run locally on
+  hl03. Database/SQLite preparation, actual restores and a full repository
+  read were verified on 2026-08-01. HAOS and NAS/Samba are intentionally not
+  backed up. Do not remove the encrypted migration exports until the planned
+  removable offline copy has several verified generations.
+- **The removable offline mirror is planned, not implemented.** When the real
+  USB HDD is available, inventory it read-only and match only its verified
+  UUID/device identity. The intended flow is `restic copy`, check, flush,
+  unmount and USB power-off. Never add a generic hotplug/format rule or use a
+  destructive `rsync --delete` mirror.
 
 ## Commands
 
@@ -43,6 +58,15 @@ sudo nixos-rebuild test --flake .#nix-ai
 
 # macOS host
 darwin-rebuild switch --flake .#nix-mac
+
+# Build a homelab host on nix-ai
+ssh nix-ai 'cd /home/ecomex/nix-configs && nixos-rebuild build --flake .#hl01'
+
+# Deploy a homelab host from nix-ai (run interactively for target sudo)
+ssh -t nix-ai
+cd /home/ecomex/nix-configs
+nixos-rebuild switch --flake .#hl01 \
+  --target-host ecomex@10.20.50.11 --ask-sudo-password
 
 # Format (alejandra via nix fmt)
 nix fmt
@@ -58,6 +82,9 @@ There is no test suite, typecheck, or lint beyond `nix fmt`. Verify edits by
 running `nixos-rebuild build --flake .#nix-ai` (or `test`). On hosts without
 nix (e.g. the Windows workstation), push and let CI validate: GitHub Actions
 (`.github/workflows/check.yml`) evaluates every NixOS host config on push.
+For homelab changes, build every affected `hl0*` configuration on `nix-ai`.
+When a change rotates Restic server credentials or alters the target, deploy
+`hl03` before the clients and verify the target before starting backups.
 
 ## Hard constraints
 
