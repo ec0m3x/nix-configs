@@ -5,6 +5,7 @@
     host = "10.20.50.11";
     port = 8080;
     environment = {
+      HOME = "/var/lib/open-webui";
       SCARF_NO_ANALYTICS = "True";
       DO_NOT_TRACK = "True";
       ANONYMIZED_TELEMETRY = "False";

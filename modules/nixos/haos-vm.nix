@@ -151,7 +151,16 @@ in {
         config_temp=""
       fi
 
-      qemu-img check --format=qcow2 ${haosDisk}
+      domain_state="$(virsh --connect qemu:///system domstate haos 2>/dev/null || true)"
+      case "''${domain_state}" in
+        running | paused | "in shutdown" | pmsuspended)
+          # qemu-img must not inspect a disk while QEMU holds its write lock.
+          ;;
+        *)
+          qemu-img check --format=qcow2 ${haosDisk}
+          ;;
+      esac
+
       virsh --connect qemu:///system define ${haosDomain}
       virsh --connect qemu:///system autostart haos
 
