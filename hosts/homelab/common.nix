@@ -57,6 +57,13 @@
     # erfolgreichem Umzug als Resolver eingetragen.
     nameservers = ["10.20.50.1"];
     firewall.enable = true;
+    # Der Service-Wildcard *.hl.sk4i.com zeigt auf Traefik im Tailnet. Die
+    # Host-FQDNs bleiben deshalb als explizite LAN-Ziele davon ausgenommen.
+    hosts = {
+      "10.20.50.11" = ["hl01.hl.sk4i.com"];
+      "10.20.50.12" = ["hl02.hl.sk4i.com"];
+      "10.20.50.13" = ["hl03.hl.sk4i.com"];
+    };
   };
 
   programs.zsh.enable = true;

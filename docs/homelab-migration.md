@@ -2,8 +2,8 @@
 
 Migration der drei Proxmox-Mini-PCs (`pve01`–`pve03`) auf bare-metal NixOS
 (`hl01`–`hl03`), zentral verwaltet über dieses Repo. Referenz für Netzplan
-und bisherige Architektur: Repo `homelab-kubernetes` (wird nach Abschluss
-archiviert).
+und bisherige Architektur: das inzwischen archivierte Repo
+[`homelab-kubernetes`](https://github.com/ec0m3x/homelab-kubernetes).
 
 ## Beschlossene Architektur
 
@@ -851,10 +851,23 @@ Disko darf ausschließlich die PM871b und die 860 EVO neu partitionieren.
 - [x] Fachliche App-Abnahme durch den Betreiber.
 - [x] Klartext-Restoreinputs und Pre-Restore-Zielstände kontrolliert mit
       `sudo /home/ecomex/cleanup-hl01-phase4.sh` entfernen.
-- [ ] homelab-kubernetes archivieren und README-Verweis hierher ergänzen.
-- [ ] SSH-Config und DNS-Einträge vollständig auf hl-Namen umstellen.
+- [x] homelab-kubernetes archivieren und README-Verweis hierher ergänzen.
+- [x] SSH-Config und DNS-Einträge vollständig auf hl-Namen umstellen.
 - [x] CLAUDE.md und README auf den abgeschlossenen Bare-Metal-Stand bringen.
 - [x] RAM-/OOM-Check und Restore-/Rollback-Test dokumentieren.
+
+Phase-5-Abschluss:
+- Das alte Repo erhielt mit Commit `e5a3a66` einen Archivhinweis auf diesen
+  Migrationsnachweis und wurde anschließend auf GitHub schreibgeschützt
+  archiviert.
+- Die Mac-SSH-Konfiguration verwendet nur noch `hl01`–`hl03` mit dem Benutzer
+  `ecomex`; die entfallenen Aliase `pve01`–`pve03`, `pbs01`, `ava` und
+  `docker-vm` wurden entfernt und alle drei neuen Aliase praktisch geprüft.
+- `hosts/homelab/common.nix` hält die Host-FQDNs explizit auf den LAN-Adressen,
+  damit sie nicht vom `*.hl.sk4i.com`-Service-Wildcard erfasst werden. Die
+  Konfiguration wurde für alle drei Hosts gebaut und aktiviert. AdGuard
+  antwortet mit `hl01.hl.sk4i.com` → `10.20.50.11`, entsprechend `.12` und
+  `.13`; alle drei Hosts melden danach 0 fehlgeschlagene Units.
 
 ## Stand & Übergabe (2026-08-01)
 
@@ -876,15 +889,14 @@ erfolgreich. Auch die fachliche Prüfung aller Benutzeroberflächen ist
 abgeschlossen. Die temporären Klartext- und Rollback-Daten wurden anschließend
 kontrolliert entfernt und alle sechs Anwendungen erneut per HTTP geprüft.
 
-**Nächster Schritt:** Phase 5 mit Repository-, SSH- und DNS-Aufräumarbeiten
-weiter abarbeiten. HAOS und Samba
-bleiben separate Folgearbeiten; HAOS wird ohne Übernahme des alten Stands neu
-eingerichtet.
+**Nächster Schritt:** Die eigentliche Proxmox-zu-NixOS-Migration einschließlich
+Phase 5 ist abgeschlossen. Tailscale auf hl01, HAOS und Samba bleiben separate
+Folgearbeiten; HAOS wird ohne Übernahme des alten Stands neu eingerichtet.
 
 **Zugriffswege aus dieser Session:**
-- SSH als ecomex auf `hl01`, `hl02` und `hl03` funktioniert. Die bekannten
-  hl01-Hostkey-Einträge auf Mac und nix-ai wurden gegen den dokumentierten
-  Fingerprint erneuert.
+- Die Mac-SSH-Aliase `hl01`, `hl02` und `hl03` verbinden als `ecomex` direkt
+  auf die LAN-Adressen. Die bekannten hl01-Hostkey-Einträge auf Mac und nix-ai
+  wurden gegen den dokumentierten Fingerprint erneuert.
 - `gh` ist authentifiziert (Repo: ec0m3x/nix-configs, Branch homelab-migration).
 - nix-ai (10.20.50.20) ist der Buildhost für die Homelab-Migration.
 
