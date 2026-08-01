@@ -116,13 +116,25 @@ Run this restore verification after the initial backup, after material changes
 to the backup module, and at least quarterly. A successful `restic check` alone
 proves repository integrity, not that an application-level restore works.
 
-## Planned removable offline mirror
+## Removable offline mirror
 
-The next backup tier will be a second USB HDD that normally remains unplugged
-and is stored away from the homelab. It must be implemented as an independent
-Restic target rather than a destructive block-level or `rsync --delete`
-mirror. `restic copy` transfers valid snapshots without propagating deletions
-from the online target.
+The second backup tier uses a USB HDD that normally remains unplugged and is
+stored away from the homelab. The physical medium was commissioned on
+2026-08-01; the hot-plug automation is not implemented yet. It must be an
+independent Restic target rather than a destructive block-level or
+`rsync --delete` mirror. `restic copy` transfers valid snapshots without
+propagating deletions from the online target.
+
+The accepted offline medium is exactly:
+
+- Seagate M3 Portable, 1,000,204,885,504 bytes, serial `NM15KS34`;
+- `/dev/disk/by-id/usb-Seagate_M3_Portable_NM15KS34-0:0`;
+- one ext4 partition labeled `HOMELAB_OFFLINE`;
+- filesystem UUID `cc005762-01f1-4cbd-94af-a158819e3b80`.
+
+It was left unmounted after formatting. The previous EFI/APFS partition table
+was intentionally erased after model, serial, exact size, mount state and the
+separate online EXCERIA UUID had all been checked.
 
 The intended hot-plug workflow is:
 
@@ -139,10 +151,9 @@ The intended hot-plug workflow is:
    disk safe to unplug and return to storage.
 
 The copy job must not start while weekly pruning or a full check is running;
-all three target operations will share one systemd/flock lock. The first
-implementation needs the attached disk's verified device identity, size,
-filesystem UUID and desired offline retention. Until then, no broad udev rule
-or automatic formatting is configured.
+all three target operations will share one systemd/flock lock. The
+implementation still needs the desired offline retention and completion
+notification policy. No broad udev rule or automatic formatting is configured.
 
 ## Commissioning evidence (2026-08-01)
 

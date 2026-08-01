@@ -71,27 +71,20 @@ verified generations.
    boot. Inspect `systemctl status restic-backups-$(hostname).service` before
    starting another backup manually.
 
-## Next project: removable offline backup disk
+## Current project: removable offline backup disk
 
 The requested workflow is: attach a second USB HDD, let `hl03` copy and verify
 the backups automatically, wait until the disk is automatically unmounted and
 powered down, then unplug it and store it in a cupboard.
 
-Do not implement a generic USB rule or format anything before identifying the
-real disk. With the new disk attached, begin with read-only inventory:
-
-```bash
-ssh hl03 'lsblk -o NAME,PATH,MODEL,SERIAL,SIZE,TYPE,FSTYPE,LABEL,UUID,MOUNTPOINTS'
-```
-
-Record and decide:
-
-- exact model, serial number, capacity and stable `/dev/disk/by-id` path;
-- whether existing data must be preserved;
-- filesystem, label and UUID (Restic already encrypts repository contents);
-- offline retention policy;
-- how completion should be signalled, for example an ntfy message in addition
-  to the systemd journal.
+The real disk was inventoried read-only and intentionally reformatted on
+2026-08-01. It is the 1 TB Seagate M3 Portable with serial `NM15KS34`, exact
+size 1,000,204,885,504 bytes and stable path
+`/dev/disk/by-id/usb-Seagate_M3_Portable_NM15KS34-0:0`. It now contains one
+unmounted ext4 filesystem labeled `HOMELAB_OFFLINE` with UUID
+`cc005762-01f1-4cbd-94af-a158819e3b80`. The previous EFI/APFS layout was
+explicitly accepted for deletion. Offline retention and completion signalling
+still need to be selected.
 
 The implementation should then:
 

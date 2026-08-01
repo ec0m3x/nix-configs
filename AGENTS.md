@@ -43,10 +43,13 @@ those get wrong, omit, or where the live config has drifted.
   read were verified on 2026-08-01. HAOS and NAS/Samba are intentionally not
   backed up. Do not remove the encrypted migration exports until the planned
   removable offline copy has several verified generations.
-- **The removable offline mirror is planned, not implemented.** When the real
-  USB HDD is available, inventory it read-only and match only its verified
-  UUID/device identity. The intended flow is `restic copy`, check, flush,
-  unmount and USB power-off. Never add a generic hotplug/format rule or use a
+- **The removable offline mirror disk is commissioned; automation is not yet
+  implemented.** It is the 1 TB Seagate M3 Portable with serial `NM15KS34`,
+  stable by-id path `usb-Seagate_M3_Portable_NM15KS34-0:0`, ext4 label
+  `HOMELAB_OFFLINE` and filesystem UUID
+  `cc005762-01f1-4cbd-94af-a158819e3b80`. Match both the device identity and
+  filesystem UUID. The intended flow is `restic copy`, check, flush, unmount
+  and USB power-off. Never add a generic hotplug/format rule or use a
   destructive `rsync --delete` mirror.
 
 ## Commands
