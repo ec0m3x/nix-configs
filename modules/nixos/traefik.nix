@@ -157,7 +157,7 @@ in {
     # A router/repeater outage can delay the Tailnet address for several
     # minutes after boot. Keep retrying instead of leaving Traefik failed at
     # systemd's default start limit.
-    unitConfig.StartLimitIntervalSec = 0;
+    unitConfig.StartLimitIntervalSec = lib.mkForce 0;
     serviceConfig.ExecStartPre = lib.mkBefore [
       (pkgs.writeShellScript "wait-for-traefik-tailnet-address" ''
         for _ in $(${pkgs.coreutils}/bin/seq 1 300); do
