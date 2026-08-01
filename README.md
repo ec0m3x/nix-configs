@@ -54,6 +54,9 @@ nixos-rebuild build --flake .#hl01
 nixos-rebuild switch --flake .#hl01 \
   --target-host ecomex@10.20.50.11 \
   --sudo --ask-sudo-password
+
+# Build and deploy all homelab hosts safely (hl03 -> hl02 -> hl01)
+./scripts/deploy-homelab.sh
 ```
 
 The hosts use disko layouts and sops-nix secrets. Never commit plaintext
@@ -61,8 +64,10 @@ secrets; read the migration document before changing `hosts/hl0*` or
 `hosts/homelab/`.
 
 Homelab application updates follow the pinned flake inputs: update the lockfile,
-build all affected hosts, and deploy them individually after reviewing version
-changes. Restore-only application assertions and the temporary Vaultwarden
+review version changes, and use `scripts/deploy-homelab.sh` on `nix-ai`. It
+builds all hosts before switching the first one, then deploys `hl03`, `hl02`,
+and `hl01` with health checks between them. Restore-only application assertions
+and the temporary Vaultwarden
 package have been removed. Database and Nextcloud major versions remain
 explicit because those upgrades require their own migration steps.
 Home Manager is enabled as part of each homelab NixOS configuration and uses a
