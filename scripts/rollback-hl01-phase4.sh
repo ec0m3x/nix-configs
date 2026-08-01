@@ -1,7 +1,8 @@
-#!/usr/bin/env bash
+#!/run/current-system/sw/bin/bash
 
 set -Eeuo pipefail
 umask 077
+export PATH="/run/current-system/sw/bin:/run/wrappers/bin"
 
 readonly state_file="/srv/.hl01-phase4-restore-state"
 readonly complete_file="/srv/.hl01-phase4-restore-complete"

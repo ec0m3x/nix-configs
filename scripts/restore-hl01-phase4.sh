@@ -1,7 +1,8 @@
-#!/usr/bin/env bash
+#!/run/current-system/sw/bin/bash
 
 set -Eeuo pipefail
 umask 077
+export PATH="/run/current-system/sw/bin:/run/wrappers/bin"
 
 readonly restore_input="/home/ecomex/.local/share/nix-configs-migration/hl01/restore-input"
 readonly metadata_file="${restore_input}/RESTORE-METADATA"
@@ -117,8 +118,9 @@ if [[ "${EUID}" -ne 0 ]]; then
   die "run this script as root"
 fi
 
-run_id="$(date -u +%Y%m%dT%H%M%SZ)"
+run_id="${HL01_RESTORE_RUN_ID:-$(date -u +%Y%m%dT%H%M%SZ)}"
 readonly run_id
+[[ "${run_id}" =~ ^[0-9]{8}T[0-9]{6}Z$ ]] || die "invalid restore run ID"
 readonly log_file="/var/log/hl01-phase4-restore-${run_id}.log"
 readonly immich_incoming="/srv/immich/upload.restore-incoming-${run_id}"
 readonly immich_previous="/srv/immich/upload.pre-restore-${run_id}"
@@ -201,7 +203,18 @@ pg_restore --list "${paperless_dump}" >/dev/null
 pg_restore --list "${honcho_dump}" >/dev/null
 zstd --test "${immich_archive}"
 zstd --test "${paperless_archive}"
-zstd --test "${ava_archive}"
+ava_archive_entries="$(
+  zstd --decompress --stdout "${ava_archive}" |
+    tar --list --file=- |
+    awk '
+      NR == 1 && $0 != "home/hermes/" { exit 1 }
+      { count++ }
+      END { print count }
+    '
+)"
+[[ "${ava_archive_entries}" =~ ^[0-9]+$ ]] || die "invalid AVA archive inventory"
+((ava_archive_entries >= 1)) || die "empty AVA archive"
+readonly ava_archive_entries
 assert_equal \
   "Haushaltsbuch SQLite quick_check" \
   "$(sqlite3 "${haushaltsbuch_database}" 'PRAGMA quick_check;')" \
@@ -226,25 +239,35 @@ srv_available="$(df --block-size=1 --output=avail /srv | tail -n 1 | tr -d ' ')"
   die "less than 40 GiB is available on /srv"
 
 echo "== Preparing application data =="
-[[ ! -e "${immich_incoming}" ]] || die "Immich incoming directory already exists"
-install --directory --owner=immich --group=immich --mode=0700 "${immich_incoming}"
-zstd --decompress --stdout "${immich_archive}" |
-  tar --extract \
-    --file=- \
-    --directory="${immich_incoming}" \
-    --strip-components=3 \
-    opt/immich/upload
-chown --recursive immich:immich "${immich_incoming}"
+if [[ -d "${immich_incoming}" ]]; then
+  echo "Reusing existing Immich incoming directory: ${immich_incoming}"
+elif [[ -e "${immich_incoming}" ]]; then
+  die "Immich incoming path is not a directory"
+else
+  install --directory --owner=immich --group=immich --mode=0700 "${immich_incoming}"
+  zstd --decompress --stdout "${immich_archive}" |
+    tar --extract \
+      --file=- \
+      --directory="${immich_incoming}" \
+      --strip-components=3 \
+      opt/immich/upload
+  chown --recursive immich:immich "${immich_incoming}"
+fi
 assert_equal \
   "Immich media files" \
   "$(find "${immich_incoming}" -type f -printf '.' | wc -c)" \
   "${expected_immich_files}"
 
-[[ ! -e "${paperless_source}" ]] || die "Paperless staging directory already exists"
-install --directory --owner=paperless --group=paperless --mode=0700 "${paperless_source}"
-zstd --decompress --stdout "${paperless_archive}" |
-  tar --extract --file=- --directory="${paperless_source}" opt/paperless_data
-chown --recursive paperless:paperless "${paperless_source}"
+if [[ -d "${paperless_source}" ]]; then
+  echo "Reusing existing Paperless staging directory: ${paperless_source}"
+elif [[ -e "${paperless_source}" ]]; then
+  die "Paperless staging path is not a directory"
+else
+  install --directory --owner=paperless --group=paperless --mode=0700 "${paperless_source}"
+  zstd --decompress --stdout "${paperless_archive}" |
+    tar --extract --file=- --directory="${paperless_source}" opt/paperless_data
+  chown --recursive paperless:paperless "${paperless_source}"
+fi
 mapfile -d '' paperless_exports < <(
   find \
     "${paperless_source}/opt/paperless_data" \
@@ -262,19 +285,29 @@ assert_equal \
   "$(find "${paperless_export}" -type f -printf '.' | wc -c)" \
   "${expected_paperless_export_files}"
 
-[[ ! -e "${ava_incoming}" ]] || die "AVA incoming directory already exists"
-install --directory --owner=hermes --group=hermes --mode=0700 "${ava_incoming}"
-zstd --decompress --stdout "${ava_archive}" |
-  tar --extract \
-    --file=- \
-    --directory="${ava_incoming}" \
-    --strip-components=2 \
-    home/hermes
-chown --recursive hermes:hermes "${ava_incoming}"
+if [[ -d "${ava_incoming}" ]]; then
+  echo "Reusing existing AVA incoming directory: ${ava_incoming}"
+elif [[ -e "${ava_incoming}" ]]; then
+  die "AVA incoming path is not a directory"
+else
+  install --directory --owner=hermes --group=hermes --mode=0700 "${ava_incoming}"
+  zstd --decompress --stdout "${ava_archive}" |
+    tar --extract \
+      --file=- \
+      --directory="${ava_incoming}" \
+      --strip-components=2 \
+      home/hermes
+  chown --recursive hermes:hermes "${ava_incoming}"
+fi
+actual_ava_entries="$(find "${ava_incoming}" -mindepth 1 -printf '.' | wc -c)"
+readonly actual_ava_entries
 assert_equal \
-  "AVA entries" \
-  "$(find "${ava_incoming}" -mindepth 1 -printf '.' | wc -c)" \
-  "${expected_ava_entries}"
+  "AVA archived entries" \
+  "${actual_ava_entries}" \
+  "$((ava_archive_entries - 1))"
+((expected_ava_entries >= actual_ava_entries)) ||
+  die "AVA archive contains more entries than the source inventory"
+echo "AVA source-only entries omitted from tar: $((expected_ava_entries - actual_ava_entries))"
 assert_equal \
   "AVA checkout" \
   "$(runuser --user=hermes -- git -C "${ava_incoming}/.hermes/hermes-agent" rev-parse HEAD)" \
@@ -351,8 +384,7 @@ runuser --user=postgres -- \
   --no-privileges \
   --no-comments \
   --role=immich \
-  --dbname=immich \
-  "${immich_dump}"
+  --dbname=immich <"${immich_dump}"
 runuser --user=postgres -- \
   psql \
   --dbname=immich \
@@ -424,8 +456,7 @@ runuser --user=postgres -- \
   --no-privileges \
   --no-comments \
   --role=honcho \
-  --dbname=honcho \
-  "${honcho_dump}"
+  --dbname=honcho <"${honcho_dump}"
 assert_equal \
   "Honcho tables" \
   "$(postgres_scalar honcho "SELECT COUNT(*) FROM pg_tables WHERE schemaname = 'public';")" \

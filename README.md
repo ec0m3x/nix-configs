@@ -1,23 +1,57 @@
 # NixOS Configuration
 
-Personal NixOS flake-based configuration for `nix-ai` (hostname) and `ecomex` (user).
+Personal flake-based configuration for the `nix-ai`, `nix-mac`, and homelab
+hosts, managed for user `ecomex`.
 
 ## System Overview
 
 - **Active hosts**:
   - `nix-ai` — AI/desktop workstation (NixOS, x86_64-linux)
   - `nix-mac` — MacBook (nix-darwin, aarch64-darwin)
+  - `hl01` — application host (NixOS, x86_64-linux, `10.20.50.11`)
+  - `hl02` — DNS/proxy host (NixOS, x86_64-linux, `10.20.50.12`)
+  - `hl03` — cloud/data host (NixOS, x86_64-linux, `10.20.50.13`)
 - **User**: `ecomex`
 - **NixOS Version**: 26.05 (stable)
 - **Kernel**: Stock (Linux)
-- **Desktop**: Niri (scrollable-tiling Wayland compositor) + Noctalia shell
+- **Desktop**: Niri/Noctalia and Plasma modules are available but currently
+  inactive
   > Note: `nix-ai` is currently running **headless** — the desktop modules
   > (Niri, Noctalia, greetd, etc.) are commented out in `configuration.nix`
   > and `home.nix`. Re-enable by uncommenting the import lines.
-- **Display Manager**: greetd + tuigreet
+- **Display Manager**: greetd + tuigreet when desktop imports are enabled
 - **Graphics**: NVIDIA with CUDA support
 - **Shell**: Zsh
-- **Networking**: NetworkManager
+- **Networking**: NetworkManager on `nix-ai`; static networking on the
+  bare-metal homelab hosts
+
+## Homelab
+
+The former Proxmox hosts `pve01`–`pve03` have been migrated to bare-metal
+NixOS as `hl01`–`hl03`. The complete architecture, disk inventory, backup and
+restore evidence, phase gates, and handover are maintained in
+[`docs/homelab-migration.md`](docs/homelab-migration.md).
+
+- `hl01`: Immich, Paperless-ngx, Open WebUI, AVA/Hermes, Haushaltsbuch, Honcho
+- `hl02`: AdGuard Home, Traefik, Vaultwarden, SearXNG, Stirling-PDF
+- `hl03`: Nextcloud, LiteLLM, PostgreSQL/MariaDB, cloudflared, restic target
+
+Home Assistant is intentionally not restored from the old HAOS VM. It will be
+installed fresh as a later, separate virtualization step on `hl01`.
+
+```bash
+# Build a homelab host on nix-ai
+nixos-rebuild build --flake .#hl01
+
+# Normal remote update from nix-ai (prompts for the target sudo password)
+nixos-rebuild switch --flake .#hl01 \
+  --target-host ecomex@10.20.50.11 \
+  --sudo --ask-sudo-password
+```
+
+The hosts use disko layouts and sops-nix secrets. Never commit plaintext
+secrets; read the migration document before changing `hosts/hl0*` or
+`hosts/homelab/`.
 
 ## Installation from NixOS Minimal Image
 
@@ -308,8 +342,12 @@ nix shell .#package-name
 │   ├── nix-ai/            # AI/desktop workstation (active, NixOS)
 │   │   ├── configuration.nix
 │   │   └── hardware-configuration.nix
-│   └── nix-mac/           # MacBook (active, nix-darwin)
-│       └── configuration.nix
+│   ├── nix-mac/           # MacBook (active, nix-darwin)
+│   │   └── configuration.nix
+│   ├── homelab/           # Shared bare-metal homelab configuration
+│   ├── hl01/              # Application host + disko layout
+│   ├── hl02/              # DNS/proxy host + disko layout
+│   └── hl03/              # Cloud/data host + disko layout
 ├── home-manager/          # Home-manager user configurations
 │   ├── home.nix           # Shared base home config for ecomex
 │   ├── home-nix-ai.nix    # Host-specific config for nix-ai
@@ -344,7 +382,12 @@ Imported via `inputs.self.nixosModules.<name>` in `configuration.nix`:
 - `pipewire` — Audio
 - `ssh` — SSH daemon
 - `sunshine` — Game streaming server
+- `wolf` — Active game streaming service on `nix-ai`
 - `tailscale` — VPN networking
+- Homelab application modules include `traefik`, `vaultwarden`, `searxng`,
+  `stirling-pdf`, `nextcloud`, `litellm`, `cloudflared`, `restic-target`,
+  `immich`, `paperless`, `open-webui`, `hermes-agent`, and
+  `haushaltsbuch-honcho`
 
 ### Home-Manager Modules (`modules/home-manager/`)
 
@@ -395,6 +438,8 @@ Overlays are applied via `home-manager.useGlobalPkgs = true`, so both NixOS and 
 | noctalia-shell | — | Wayland desktop shell |
 | zen-browser | — | Zen Browser |
 | comfyui-nix | — | ComfyUI AI image generation (CUDA) |
+| disko | — | Declarative homelab disk layouts and nixos-anywhere installs |
+| sops-nix | — | Encrypted per-host homelab secrets |
 
 ## Adding Components
 

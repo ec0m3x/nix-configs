@@ -13,8 +13,9 @@ archiviert).
   Die konkrete Betriebsform wird pro Dienst vor der Migration festgelegt.
 - **Home Assistant** läuft später als VM auf hl01, nicht als nativer
   NixOS-Dienst. HAOS ist ausdrücklich nicht Teil des ersten
-  Phase-4-Cutovers; Virtualisierung, Restore und USB-Passthrough folgen nach
-  der Hostmigration als eigener Schritt.
+  Phase-4-Cutovers; Virtualisierung, Neueinrichtung und USB-Passthrough folgen
+  nach der Hostmigration als eigener Schritt. Der bisherige HAOS-Stand wird
+  auf ausdrückliche Entscheidung vom 2026-08-01 nicht übernommen.
 - **Backups** über restic (NixOS-Module) statt PBS; Ziel: 1-TB-Platte auf hl03.
 - IP-Adressen bleiben: hl01 = 10.20.50.11, hl02 = .12, hl03 = .13.
 - **Tailscale läuft nativ auf allen drei NixOS-Hosts.** Das gemeinsame
@@ -547,7 +548,7 @@ bleibt unangetastet.
   hat `onboot=0`, damit die alte LiteLLM-Datenbank nicht erneut schreibend
   startet.
 
-### Phase 4 — pve01 → hl01 (der große Brocken)
+### Phase 4 — pve01 → hl01 (der große Brocken) ✅ (2026-08-01)
 
 **Live-Inventar vom 2026-07-30:**
 
@@ -579,7 +580,7 @@ bleibt unangetastet.
 | OpenWebUI-CT 105 | Open WebUI `0.11.0`; SQLite `webui.db` 3,6 MiB, `quick_check=ok`, 44 Tabellen. Gesamter `.open-webui`-State 147 MiB; der übrige Platz ist überwiegend reproduzierbarer uv-/Modellcache. | Natives NixOS-Modul mit `pkgs.unstable.open-webui` `0.10.2`. Wegen der älteren Zielversion startet die Anwendung frisch; der vollständige Quell-State wird archiviert, aber nicht rückwärts migriert. |
 | AVA-CT 100 | Hermes Agent `0.19.0`/Build `2026.7.20`; `/home/hermes` 10 GiB, davon 3,4 GiB Dokumente und 2,2 GiB Hermes-State. `state.db` ist 110 MiB. | Dedizierter Benutzer und systemd-Dienst; das komplette Benutzerhome einschließlich uv-Python, venv, Git-Checkout, Dokumenten, Konfiguration und State wird verschlüsselt übernommen. Der bisherige Environment-File-Inhalt liegt in SOPS. |
 | docker-vm 110 | Aktiv: Haushaltsbuch (SQLite 360 KiB, `quick_check=ok`, 14 Tabellen), Honcho (PostgreSQL 15.18, 93 MiB, 12 Tabellen), Redis und Portainer. Haushaltsbuch- und Honcho-Compose bauen lokale Images aus den Source-Trees. Weitere große Projekt-/Cache-Verzeichnisse sind nicht aktiv. | Haushaltsbuch und Honcho deklarativ als OCI-Container; DBs/Source/Compose sichern. Sonstige Projekte archivieren, aber nicht automatisch deployen. |
-| HAOS-VM 101 | HAOS `18.1`, Core `2026.7.4`, Supervisor `2026.07.5`; 50-GiB-Disk mit 5,72 GiB belegt. Kein USB-Gerät ist aktuell durchgereicht. Es existiert nur ein älteres partielles 13-MiB-Backup. | Bleibt aus dem ersten Phase-4-Cutover heraus. Neue HAOS-VM und frischer vollständiger Restore folgen später als eigener, separat abgenommener Schritt. |
+| HAOS-VM 101 | HAOS `18.1`, Core `2026.7.4`, Supervisor `2026.07.5`; 50-GiB-Disk mit 5,72 GiB belegt. Kein USB-Gerät ist aktuell durchgereicht. Es existiert nur ein älteres partielles 13-MiB-Backup. | Bleibt aus dem ersten Phase-4-Cutover heraus. Die alte VM wird bewusst ohne Backup verworfen; eine neue HAOS-VM wird später frisch eingerichtet. |
 
 **Verbindliche Export-/Restore-Regeln:**
 
@@ -602,9 +603,9 @@ bleibt unangetastet.
   uv-Python-Laufzeit, das venv und der bisherige Environment-File-Inhalt.
   Das Archiv muss verschlüsselt außerhalb pve01 liegen und vor dem Cutover
   vollständig testentpackt werden.
-- Für den späteren HAOS-Schritt bleibt ein frisches vollständiges Backup
-  Pflicht. Der Restore erfolgt dann nach dem offiziellen
-  [Home-Assistant-Backup-Verfahren](https://www.home-assistant.io/common-tasks/general/#backups).
+- HAOS ist eine ausdrücklich freigegebene Ausnahme von den allgemeinen
+  Backup-Regeln: Der bestehende Stand wird nicht gesichert oder restauriert.
+  Home Assistant wird nach der Hostmigration neu eingerichtet.
 - Konfigurationen mit Zugangsdaten werden nicht offen in das Repo kopiert.
   Die Quellsysteme enthalten derzeit mehrere zu weit lesbare Dateien
   (`paperless.conf`, Honcho `.env`, Hermes-Defaults); relevante Werte werden
@@ -729,8 +730,41 @@ bleibt unangetastet.
   Artefakt; `stage-hl01-phase4-inputs.sh` entschlüsselt erst nach der
   Installation direkt auf hl01; `restore-hl01-phase4.sh` importiert und
   validiert alle Anwendungen; `rollback-hl01-phase4.sh` setzt einen
-  fehlgeschlagenen Zielrestore auf den frischen NixOS-Stand zurück. Die
-  Skripte wurden noch nicht im Wartungsmodus ausgeführt.
+  fehlgeschlagenen Zielrestore auf den frischen NixOS-Stand zurück.
+
+**Finales Wartungsfenster und Wipe-Preflight (2026-08-01):**
+
+- Der finale Exportlauf `20260801T035736Z` liegt verschlüsselt und mit
+  identischen SHA-256-Prüfungen auf dem Mac und auf nix-ai unter
+  `~/.local/share/nix-configs-migration/hl01/final-20260801/`. Er enthält
+  Immich-PostgreSQL und 16.440 Mediendateien, Paperless-PostgreSQL und den
+  offiziellen Export mit 508 Dateien, das vollständige AVA-Home,
+  Open-WebUI-State, Haushaltsbuch-SQLite und Honcho-PostgreSQL.
+- Alle acht Einträge aus `SHA256SUMS` wurden auf beiden Systemen geprüft.
+  Zusätzlich ließen sich alle drei PostgreSQL-Dumps vollständig entschlüsseln
+  und mit `pg_restore --list` lesen; alle vier komprimierten Archive wurden
+  vollständig entschlüsselt und mit `tar --list` geprüft. Haushaltsbuch
+  meldete erneut `quick_check=ok` und 14 Tabellen. Inventar: 5.646
+  Immich-Assets, 2 Immich-Benutzer, 169 Paperless-Dokumente, 4
+  Paperless-Benutzer, 12 Honcho-Tabellen und AVA-Commit `1dfe781e`.
+- Beim AVA-Endexport wurden zusätzlich zum Dashboard die User-Dienste
+  `hermes-gateway`, ProtonMail Bridge und Syncthing kontrolliert gestoppt;
+  danach blieb `/home/hermes` während des vollständigen Exports unverändert.
+- Alle CTs 100, 102, 104, 105 und 210 sowie die VMs 101 und 110 wurden sauber
+  heruntergefahren; k3s01/VM 301 war bereits gestoppt. Für HAOS hat der
+  Betreiber ausdrücklich entschieden, auf ein Backup zu verzichten und die
+  Anwendung später neu einzurichten.
+- Der finale Disko-Preflight ordnet die PM871b mit Seriennummer
+  `S3U0NE1K918382` eindeutig `/dev/sdb` und damit dem Root-Ziel zu. Die 860 EVO
+  mit Seriennummer `S3YJNX0KB91294E` ist `/dev/sda` und das `/srv`-Ziel. Beide
+  sind die einzigen Mitglieder des noch gesunden `rpool`-Mirrors; der Wipe
+  zerstört diesen Mirror vollständig. UEFI sowie die produktive USB-NIC mit
+  MAC `00:24:9b:49:70:91` wurden erneut bestätigt.
+- nix-ai steht auf Commit `89ccd72`. Passwortdatei und privater hl01-Hostkey
+  liegen mit Modus 600 im `extra-files`-Baum; privater und öffentlicher Key
+  ergeben den erwarteten Fingerprint
+  `SHA256:A7EclpYxNb6oxdnytOi7ibgrZJQjOa33V6vchYZZxTE`. Der finale Build ist
+  `/nix/store/c3ib4351c728lpf4lsjmqx6czg7pq7rw-nixos-system-hl01-26.05.20260719.fd14620`.
 
 **Go/No-Go vor dem Wipe:**
 
@@ -750,52 +784,108 @@ bleibt unangetastet.
 - [x] Zielkonfiguration vollständig evaluieren und bauen; Images beziehungsweise
       Startmechanismen für Haushaltsbuch und Honcho sowie Rollback-Befehle
       vorbereiten.
-- [ ] Finales Wartungsfenster: Dienste stoppen, finale Exporte prüfen, alle
+- [x] Finales Wartungsfenster: Dienste stoppen, finale Exporte prüfen, alle
       Gäste sauber herunterfahren und Disko-Preflight wiederholen.
-- [ ] Erst wenn alle Punkte erfüllt sind: **Go für den Wipe von pve01**.
+- [x] Erst wenn alle Punkte erfüllt sind: **Go für den Wipe von pve01**.
+
+**Go erteilt am 2026-08-01:** Alle verbindlichen Phase-4-Gates sind erfüllt.
+Disko darf ausschließlich die PM871b und die 860 EVO neu partitionieren.
+
+**Installation, Restore und Abnahme (2026-08-01):**
+
+- nixos-anywhere hat hl01 erfolgreich per kexec installiert. Der erste
+  Installer-Boot erhielt wegen der zuvor auf physischer USB-NIC und
+  Proxmox-Bridge sichtbaren gleichen MAC per DHCP vorübergehend
+  `10.20.50.196`; Disko, Installation und Reboot wurden deshalb gegen diese
+  verifizierte Installer-Adresse fortgesetzt. Disko formatierte ausschließlich
+  die per Seriennummer geprüfte PM871b für Root/EFI und die 860 EVO für
+  `/srv`; der frühere ZFS-Mirror und Proxmox wurden damit vollständig ersetzt.
+- Der vorab erzeugte SSH-Hostkey ist aktiv und meldet weiterhin
+  `SHA256:A7EclpYxNb6oxdnytOi7ibgrZJQjOa33V6vchYZZxTE`. Nach dem ersten Boot
+  erhielt `lan0` statisch `10.20.50.11/24`; Root, EFI und `/srv` waren auf den
+  vorgesehenen ext4-/vfat-Dateisystemen eingehängt.
+- Die sieben finalen Restore-Payloads wurden auf hl01 direkt vom Mac
+  entschlüsselt, dort erneut per SHA-256 geprüft und bis zur fachlichen
+  Abnahme mit Modus 0600 aufbewahrt. Der private Age-/SSH-Key verließ den Mac
+  nicht. Der Open-WebUI-Quellstand bleibt wie geplant nur verschlüsseltes
+  Archiv; die ältere native Zielversion startete frisch.
+- Der Restore validierte 5.646 Immich-Assets, 2 Benutzer und 16.440
+  Mediendateien einschließlich aller referenzierten Originale und Derivate.
+  Paperless importierte 169 Dokumente, 4 Benutzer und 507 Mediendateien; der
+  Dokumenten-Sanity-Check meldete keine Fehler. Haushaltsbuch meldete erneut
+  14 Tabellen, Honcho 12 Tabellen.
+- AVA wurde mit Commit `1dfe781edd5e96d09511cf27d800a03e63b09789`
+  und konsistenter SQLite-Datenbank übernommen. Das tar-Archiv enthält einen
+  Wurzeleintrag plus 220.246 extrahierte Objekte; drei nur im Quell-Inventar
+  gezählte Spezialobjekte waren nicht Bestandteil des tar-Archivs. Die
+  Debian-uv-Laufzeit funktioniert über nix-ld. Die Hermes-Unit setzt ihren
+  Nix-PATH nach dem migrierten Environment-File und baut das mitgelieferte
+  Web-Frontend bei fehlendem `hermes_cli/web_dist` einmalig mit Node.js.
+- Ein kontrolliert fehlgeschlagener Teilrestore wurde mit
+  `rollback-hl01-phase4.sh` vollständig auf den frischen NixOS-Zielstand
+  zurückgesetzt; anschließend lief der korrigierte Restore vollständig durch.
+  Damit ist auch der vorbereitete Rollback praktisch geprüft.
+- Der finale deklarative Closure ist
+  `/nix/store/wndpl51v77n6mcyrfb34ijvi24radiyz-nixos-system-hl01-26.05.20260719.fd14620`.
+  Er wurde als Systemprofil gesetzt und nach einem echten Reboot identisch als
+  `/run/booted-system`, `/run/current-system` und
+  `/nix/var/nix/profiles/system` bestätigt.
+- Post-Reboot-Abnahme: alle 16 Datenbank-, Redis- und Anwendungsdienste sind
+  aktiv; Immich, Paperless, AVA, Haushaltsbuch, Honcho und Open WebUI
+  antworten direkt auf ihren Zielports. Es gibt 0 fehlgeschlagene Units und 0
+  OOM-Ereignisse; von 15 GiB RAM waren rund 11 GiB verfügbar. Der
+  Abschlussmarker liegt unter `/srv/.hl01-phase4-restore-complete`.
+- Open WebUI zeigt wie geplant die Initialregistrierung der frischen Instanz;
+  dieses Verhalten wurde vom Betreiber am 2026-08-01 fachlich akzeptiert.
+  Der verschlüsselte Quell-State bleibt als Archiv erhalten.
+- Die fachliche Prüfung aller übrigen Anwendungen wurde vom Betreiber am
+  2026-08-01 ebenfalls erfolgreich abgeschlossen.
+- Nach der fachlichen App-Abnahme entfernte
+  `cleanup-hl01-phase4.sh` die Klartext-Restoreinputs und alle sechs
+  Pre-Restore-Zielstände. Ein anschließender Pfad- und HTTP-Check war
+  erfolgreich; die externen verschlüsselten Endexporte bleiben erhalten.
+  HAOS wurde auf ausdrückliche Betreiberentscheidung nicht gesichert und wird
+  später vollständig neu eingerichtet.
 
 ### Phase 5 — Aufräumen
-- homelab-kubernetes archivieren (README-Verweis hierher), SSH-Config +
-  DNS-Einträge auf hl-Namen, CLAUDE.md/README aktualisieren,
-  RAM/OOM-Check, Restore-Test dokumentieren.
+- [x] Fachliche App-Abnahme durch den Betreiber.
+- [x] Klartext-Restoreinputs und Pre-Restore-Zielstände kontrolliert mit
+      `sudo /home/ecomex/cleanup-hl01-phase4.sh` entfernen.
+- [ ] homelab-kubernetes archivieren und README-Verweis hierher ergänzen.
+- [ ] SSH-Config und DNS-Einträge vollständig auf hl-Namen umstellen.
+- [x] CLAUDE.md und README auf den abgeschlossenen Bare-Metal-Stand bringen.
+- [x] RAM-/OOM-Check und Restore-/Rollback-Test dokumentieren.
 
-## Stand & Übergabe (2026-07-31)
+## Stand & Übergabe (2026-08-01)
 
-**Wo wir stehen:** Phase 1, Phase 2 und Phase 3 sind abgeschlossen und
-abgenommen.
+**Wo wir stehen:** Phase 1 bis einschließlich Phase 4 sind technisch
+abgeschlossen und abgenommen.
 Vaultwarden, SearXNG, Stirling-PDF und Traefik laufen nativ auf hl02;
 öffentlicher Tunnel und interner Wildcard-DNS zeigen auf den neuen Proxy.
 Nextcloud, LiteLLM, PostgreSQL, MariaDB, cloudflared und das restic-Ziel laufen
 auf dem neuen hl03. Der hl02-Proxy leitet die produktiven Nextcloud- und
 LiteLLM-Routen nach hl03; öffentliche und interne Pfade sind geprüft. Die
-EXCERIA samt PBS-Datastore blieb unverändert erhalten. pve01 ist nach dem
-Entfernen des migrierten pve03 wieder quorate; alle noch benötigten
-Phase-4-Quellgäste laufen, während k3s01 bewusst gestoppt bleibt.
+EXCERIA samt PBS-Datastore blieb unverändert erhalten. hl01 läuft nun ebenfalls
+bare-metal mit Immich, Paperless, AVA, Haushaltsbuch, Honcho und einer frischen
+Open-WebUI-Instanz. Damit existiert kein Proxmox-Host mehr im Homelab.
 
-Die Anwendungsebene der Immich- und Paperless-Schattenexporte wurde in den
-exakten Zielversionen erfolgreich geprüft. Immich `3.0.3` startete mit dem
-restaurierten PostgreSQL- und Medienbestand, Paperless-ngx `2.20.15`
-importierte den offiziellen Export vollständig und bestand seinen
-Dokumenten-Sanity-Check.
+Der finale Phase-4-Datenstand ist verschlüsselt auf Mac und nix-ai verifiziert.
+Der produktive Restore und ein echter Rollback wurden auf hl01 geprüft; die
+abschließende Boot-, Mount-, Dienst-, HTTP-, RAM- und OOM-Abnahme ist
+erfolgreich. Auch die fachliche Prüfung aller Benutzeroberflächen ist
+abgeschlossen. Die temporären Klartext- und Rollback-Daten wurden anschließend
+kontrolliert entfernt und alle sechs Anwendungen erneut per HTTP geprüft.
 
-**Nächster Schritt:** Nach bewusster Freigabe das finale Wartungsfenster mit
-`scripts/export-pve01-phase4-final.sh` beginnen, die verifizierten Endstände
-zusätzlich extern kopieren und erst dann den Disko-Preflight ausführen. HAOS
-und Samba sind aus diesem Cutover ausgeklammert. Ohne diese Freigabe bleibt
-pve01 unverändert.
+**Nächster Schritt:** Phase 5 mit Repository-, SSH- und DNS-Aufräumarbeiten
+weiter abarbeiten. HAOS und Samba
+bleiben separate Folgearbeiten; HAOS wird ohne Übernahme des alten Stands neu
+eingerichtet.
 
 **Zugriffswege aus dieser Session:**
-- SSH als root auf `pve01` sowie als ecomex auf `hl02` und `hl03`
-  funktioniert; nix-ai ist für beide NixOS-Hosts deklarativ autorisiert.
-- Der Kontext `pve-k3s` ist bewusst nicht erreichbar, solange k3s01 gestoppt
-  ist. Die VM bleibt mit ihrer etcd-Datenbank als manueller Rollback erhalten,
-  darf aber wegen des inzwischen produktiven LiteLLM auf hl03 nicht
-  unkontrolliert gestartet werden.
+- SSH als ecomex auf `hl01`, `hl02` und `hl03` funktioniert. Die bekannten
+  hl01-Hostkey-Einträge auf Mac und nix-ai wurden gegen den dokumentierten
+  Fingerprint erneuert.
 - `gh` ist authentifiziert (Repo: ec0m3x/nix-configs, Branch homelab-migration).
-- k3s01 und docker-vm (ecomex@.46) akzeptieren den Windows-Key NICHT —
-  Zugriff nur vom Mac (Ansible-Key) beziehungsweise via
-  `ssh pve01 "qm guest exec 110 -- …"` (Guest-Agent, funktioniert). k3s03
-  existiert nach der Migration von pve03 nicht mehr.
 - nix-ai (10.20.50.20) ist der Buildhost für die Homelab-Migration.
 
 **Gotchas:**
@@ -803,15 +893,17 @@ pve01 unverändert.
 - flake.lock wurde von Hand um disko/sops-nix ergänzt (Pins aus CI-Log +
   GitHub-API-Timestamps) — bei nächster Gelegenheit auf einem Nix-Host
   `nix flake lock` gegenprüfen.
-- pve01 ist das einzige verbleibende Proxmox-Mitglied. pve03 wurde aus
-  Corosync entfernt; erwartete Stimmen und Quorum stehen persistent auf 1.
-- Claude-Session-Tasks #1–#6 bilden die Phasen ab (Task #1 = Phase 0 done).
+- hl01 hängt wegen der defekten Onboard-NIC vollständig am USB-Adapter mit MAC
+  `00:24:9b:49:70:91`; bei einem Austausch muss die deklarative `.link`-Regel
+  angepasst werden.
+- Einen extern gebauten Closure nicht nur direkt mit
+  `switch-to-configuration` aktivieren: Vor einem Reboot muss er auch als
+  `/nix/var/nix/profiles/system` gesetzt sein. Der normale
+  `nixos-rebuild switch`-Ablauf erledigt beides.
 
 ## Offene Punkte
 
-- SSH-Zugang docker-vm (ecomex@10.20.50.46 lehnt Standard-Key ab) — nötig
-  für Datenexport haushaltsbuch/honcho. Workaround: `qm guest exec` via pve01.
-- AVA: restaurierte Debian-uv-Laufzeit mit nix-ld auf dem gebauten
-  NixOS-Ziel testen; vollständiges Home bleibt bis dahin unverändert erhalten.
-- Home Assistant auf hl01: nach Phase 4 als separaten Schritt mit
-  Virtualisierung, frischem HAOS-Backup und Restore-Test planen.
+- Tailscale auf hl01 ist aktiviert, aber noch nicht am Tailnet angemeldet.
+- Home Assistant auf hl01 als separaten Schritt mit Virtualisierung und
+  frischer HAOS-Einrichtung ohne Übernahme des alten Stands planen.
+- Samba/NAS erst nach separater Speicher- und Freigabeentscheidung aktivieren.

@@ -91,6 +91,10 @@
   homebrew = {
     enable = true;
     brews = [
+      "age"
+      "ansible"
+      "kubernetes-cli"
+      "sops"
       # syncthing bleibt via Brew, weil `brew services` den LaunchAgent
       # verwaltet (`homebrew.mxcl.syncthing`). Nix-Pendant wäre ein eigener
       # launchd-Job — auf Wunsch nachrüsten.
@@ -102,6 +106,7 @@
       "discord"
       "dolphin"
       "google-chrome"
+      "headlamp"
       "microsoft-excel"
       "microsoft-powerpoint"
       "microsoft-teams"
@@ -204,7 +209,13 @@
     '';
     serviceConfig = {
       RunAtLoad = false;
-      StartCalendarInterval = [{Weekday = 0; Hour = 3; Minute = 0;}];
+      StartCalendarInterval = [
+        {
+          Weekday = 0;
+          Hour = 3;
+          Minute = 0;
+        }
+      ];
       StandardOutPath = "/var/log/nix-gc.log";
       StandardErrorPath = "/var/log/nix-gc.log";
     };
@@ -216,7 +227,13 @@
     '';
     serviceConfig = {
       RunAtLoad = false;
-      StartCalendarInterval = [{Weekday = 0; Hour = 3; Minute = 30;}];
+      StartCalendarInterval = [
+        {
+          Weekday = 0;
+          Hour = 3;
+          Minute = 30;
+        }
+      ];
       StandardOutPath = "/tmp/brew-cleanup.log";
       StandardErrorPath = "/tmp/brew-cleanup.log";
     };
@@ -227,7 +244,15 @@
   # macOS hat dafür keine eingebaute Option; das Script umgeht das.
   launchd.daemons.eth-wifi-switch = {
     script = ''
-      wifi_dev=$(networksetup -listallhardwareports | awk '/^Wi-Fi/{getline;print $NF}')
+      wifi_dev=$(
+        networksetup -listallhardwareports |
+          awk '/^Hardware Port: (Wi-Fi|AirPort)$/{getline; print $2; exit}'
+      )
+      if [ -z "$wifi_dev" ]; then
+        echo "Wi-Fi device not found; leaving its state unchanged" >&2
+        exit 0
+      fi
+
       default_if=$(route -n get default 2>/dev/null | awk '/interface:/{print $2}')
       if [ -z "$default_if" ] || [ "$default_if" = "$wifi_dev" ]; then
         networksetup -setairportpower "$wifi_dev" on

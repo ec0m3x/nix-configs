@@ -72,6 +72,9 @@ scp \
 scp \
   "${script_dir}/restore-hl01-phase4.sh" \
   "${script_dir}/rollback-hl01-phase4.sh" \
+  "${script_dir}/recover-hl01-phase4.sh" \
+  "${script_dir}/finish-hl01-phase4.sh" \
+  "${script_dir}/cleanup-hl01-phase4.sh" \
   "${target}:${target_root}/"
 
 ssh "${target}" "
@@ -88,7 +91,10 @@ ssh "${target}" "
   chmod 600 SHA256SUMS RESTORE-METADATA
   chmod 700 \
     '${target_root}/restore-hl01-phase4.sh' \
-    '${target_root}/rollback-hl01-phase4.sh'
+    '${target_root}/rollback-hl01-phase4.sh' \
+    '${target_root}/recover-hl01-phase4.sh' \
+    '${target_root}/finish-hl01-phase4.sh' \
+    '${target_root}/cleanup-hl01-phase4.sh'
 "
 
 echo

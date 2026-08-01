@@ -39,14 +39,31 @@
     wantedBy = ["multi-user.target"];
     after = ["network-online.target"];
     wants = ["network-online.target"];
-    unitConfig.ConditionPathIsExecutable = "/home/hermes/.local/bin/hermes";
+    path = [
+      pkgs.bash
+      pkgs.nodejs
+    ];
+    preStart = ''
+      export PATH="${pkgs.bash}/bin:${pkgs.nodejs}/bin:$PATH"
+      if [[ ! -f /home/hermes/.hermes/hermes-agent/hermes_cli/web_dist/index.html ]]; then
+        cd /home/hermes/.hermes/hermes-agent/web
+        npm run build
+      fi
+    '';
+    script = ''
+      export PATH="${pkgs.bash}/bin:${pkgs.nodejs}/bin:$PATH"
+      exec /home/hermes/.local/bin/hermes dashboard \
+        --host 10.20.50.11 \
+        --port 9119 \
+        --no-open
+    '';
+    unitConfig.ConditionFileIsExecutable = "/home/hermes/.local/bin/hermes";
     serviceConfig = {
       Type = "simple";
       User = "hermes";
       Group = "hermes";
       UMask = "0077";
       WorkingDirectory = "/home/hermes";
-      ExecStart = "/home/hermes/.local/bin/hermes dashboard --host 10.20.50.11 --port 9119 --no-open";
       EnvironmentFile = config.sops.secrets.hermes_environment.path;
       Restart = "on-failure";
       RestartSec = 5;

@@ -6,14 +6,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a NixOS flake-based configuration repository. It manages both system-wide NixOS configuration and user-level home-manager configuration for user `ecomex`.
 
-- **`nix-ai`**: AI/desktop workstation (NixOS, x86_64-linux) with both the Niri (scrollable-tiling Wayland) and KDE Plasma desktops enabled.
+- **`nix-ai`**: AI workstation (NixOS, x86_64-linux), currently headless. Its
+  desktop imports remain commented out and are re-enabled by uncommenting the
+  import lines.
 - **`nix-mac`**: MacBook (nix-darwin, aarch64-darwin).
+- **`hl01`–`hl03`**: bare-metal NixOS homelab hosts. The Proxmox migration is
+  technically complete; read `docs/homelab-migration.md` before changing
+  `hosts/hl0*` or `hosts/homelab/`.
 
 ## Common Commands
 
 ### System Configuration
 ```bash
-# Rebuild NixOS system configuration (nix-ai is the active host)
+# Rebuild NixOS system configuration (applies system + home-manager)
 sudo nixos-rebuild switch --flake .#nix-ai
 
 # Test system configuration without switching
@@ -21,16 +26,21 @@ sudo nixos-rebuild test --flake .#nix-ai
 
 # Build system configuration without activating
 sudo nixos-rebuild build --flake .#nix-ai
+
+# Build a homelab host on nix-ai
+nixos-rebuild build --flake .#hl01
+
+# Apply a homelab host remotely
+nixos-rebuild switch --flake .#hl01 \
+  --target-host ecomex@10.20.50.11 \
+  --sudo --ask-sudo-password
 ```
 
 ### Home Manager Configuration
-```bash
-# Apply home-manager configuration
-home-manager switch --flake .#ecomex@nix-ai
 
-# Build home-manager configuration without switching
-home-manager build --flake .#ecomex@nix-ai
-```
+Home-manager is integrated as a NixOS or nix-darwin module. Do not run a
+standalone `home-manager switch`; use the host's `nixos-rebuild` or
+`darwin-rebuild` command.
 
 ### Flake Management
 ```bash
@@ -65,8 +75,10 @@ The `flake.nix` file is the entry point that defines:
   - niri-flake (scrollable-tiling Wayland compositor)
   - noctalia-shell (desktop shell for Wayland)
   - zen-browser (privacy-focused Firefox fork)
-- **Outputs**: NixOS configurations, home-manager configurations, custom packages, overlays, and reusable modules
-- **Systems**: `nix-ai` (NixOS) and `nix-mac` (nix-darwin), each with home-manager for `ecomex` integrated as a module
+- **Outputs**: NixOS configurations, the nix-darwin configuration, custom
+  packages, overlays, and reusable modules
+- **Systems**: `nix-ai`, `hl01`, `hl02`, and `hl03` (NixOS) plus `nix-mac`
+  (nix-darwin); home-manager is integrated for the workstation/Mac user
 
 ### Directory Layout
 
@@ -74,11 +86,15 @@ The `flake.nix` file is the entry point that defines:
 .
 ├── flake.nix              # Main flake configuration
 ├── hosts/                 # Per-host NixOS configurations
-│   ├── nix-ai/            # AI/desktop workstation (Niri + Plasma)
+│   ├── nix-ai/            # AI workstation (currently headless)
 │   │   ├── configuration.nix
 │   │   └── hardware-configuration.nix
-│   └── nix-mac/           # MacBook (nix-darwin)
-│       └── configuration.nix
+│   ├── nix-mac/           # MacBook (nix-darwin)
+│   │   └── configuration.nix
+│   ├── homelab/           # Shared hl01-hl03 base configuration
+│   ├── hl01/              # Application host + disko layout
+│   ├── hl02/              # DNS/proxy host + disko layout
+│   └── hl03/              # Cloud/data host + disko layout
 ├── home-manager/          # Home-manager user configurations
 │   ├── home.nix           # Shared base home config for ecomex
 │   ├── home-nix-ai.nix    # Host-specific config for nix-ai (imports home.nix)
@@ -100,7 +116,11 @@ This configuration uses a modular approach where functionality is split into foc
 **NixOS Modules** (`modules/nixos/`):
 - Imported via `inputs.self.nixosModules.<name>` in configuration.nix
 - Each module file must be registered in `modules/nixos/default.nix`
-- Available: boot, core-packages, docker, gaming, latex, locale, nh, niri, nvidia, ollama, pipewire, plasma, ssh, sunshine, tailscale
+- The registry includes workstation modules plus homelab services such as
+  Traefik, Vaultwarden, SearXNG, Stirling-PDF, Nextcloud, LiteLLM,
+  cloudflared, restic, Immich, Paperless, Open WebUI, Hermes/AVA,
+  Haushaltsbuch, and Honcho. Treat `modules/nixos/default.nix` as the current
+  source of truth.
 
 **Home-Manager Modules** (`modules/home-manager/`):
 - Imported via `inputs.self.homeManagerModules.<name>` in home.nix
@@ -118,7 +138,9 @@ Both NixOS and home-manager configurations apply these overlays automatically.
 
 ### Niri Compositor & Noctalia Shell
 
-This configuration includes a complete Wayland desktop environment setup using Niri compositor and Noctalia shell:
+This repository includes a complete Wayland desktop environment setup using
+Niri compositor and Noctalia shell. The module imports are currently disabled
+on headless `nix-ai`:
 
 **Niri Compositor**:
 - Scrollable-tiling Wayland compositor with unique layout paradigm
@@ -163,13 +185,15 @@ Docker virtualization is configured via `modules/nixos/docker.nix`:
 
 ### Key System Details
 
-- **Networking**: NetworkManager.
+- **Networking**: NetworkManager on `nix-ai`; static networking on hl01-hl03.
 - **Shell**: Zsh (system-level enabled), user `ecomex` in groups audio/video/input/render/networkmanager/wheel.
-- **Desktop** (`nix-ai`): both **KDE Plasma** (KWin) and **Niri + Noctalia** (scrollable-tiling Wayland) enabled.
+- **Desktop** (`nix-ai`): Plasma, Niri, Noctalia, greetd, PipeWire, gaming,
+  and other desktop imports are currently commented out.
 - **Browser**: Zen Browser (privacy-focused Firefox fork)
 - **Graphics**: NVIDIA drivers with CUDA support (`cudatoolkit`, `nvtop`), VAAPI enabled
 - **Virtualization**: Docker with auto-pruning enabled
-- **Game streaming**: Sunshine + Wolf, with udev rules for virtual input devices (`/dev/uinput`, `/dev/uhid`, virtual gamepads)
+- **Game streaming**: Wolf is active on `nix-ai`; Sunshine is currently
+  commented out.
 - **VSCode server**: `programs.nix-ld.enable` for dynamic linking
 
 Note: the XanMod kernel line in the host configs is currently commented out (stock kernel in use).
@@ -200,5 +224,8 @@ Modify existing package versions or apply patches in `overlays/default.nix` unde
 - **Git staging required**: Nix flakes only see files tracked by git. Always `git add` new files before building.
 - **Flake lock**: Dependencies are pinned in `flake.lock`. Run `nix flake update` to update.
 - **State version**: 26.05 across all hosts (NixOS `system.stateVersion`) and home-manager (`home.stateVersion`). Do not change this after initial installation.
+- **Homelab secrets**: encrypted with sops-nix under `secrets/`; never commit
+  plaintext. Host password hashes and SSH hostkeys are injected during
+  nixos-anywhere installation.
 - **Unfree packages**: Enabled in both NixOS and home-manager configurations.
 - **Experimental features**: Flakes and nix-command are enabled system-wide.

@@ -53,7 +53,7 @@ done
 ssh "${pve_host}" 'pvecm status >/dev/null'
 ssh "${pve_host}" 'pct status 100; pct status 102; pct status 104; pct status 105'
 ssh "${docker_host}" 'docker ps >/dev/null'
-install --directory --mode=0700 "${output_dir}"
+install -d -m 0700 "${output_dir}"
 
 echo "== Stopping application writers =="
 maintenance_started=1
@@ -68,6 +68,19 @@ ssh "${pve_host}" '
   pct exec 100 -- systemctl stop hermes-dashboard.service
   pct exec 105 -- systemctl stop open-webui.service
 '
+ssh "${pve_host}" '
+  set -e
+  if pct exec 100 -- pgrep -u hermes >/dev/null; then
+    pct exec 100 -- runuser -u hermes -- \
+      env XDG_RUNTIME_DIR=/run/user/1000 \
+      systemctl --user stop \
+        hermes-gateway.service \
+        protonmail-bridge.service \
+        syncthing.service
+    pct exec 100 -- loginctl terminate-user hermes
+  fi
+  ! pct exec 100 -- pgrep -u hermes >/dev/null
+'
 ssh "${docker_host}" '
   set -e
   docker stop \
@@ -81,6 +94,7 @@ echo "== Creating final Paperless exporter =="
 ssh "${pve_host}" "
   set -e
   pct exec 104 -- test ! -e '${paperless_export}'
+  pct exec 104 -- install -d -m 0700 '${paperless_export}'
   pct exec 104 -- bash -lc '
     set -e
     export PAPERLESS_DATA_DIR=/opt/paperless_data/data
@@ -94,22 +108,12 @@ ssh "${pve_host}" "
 echo "== Creating consistent Haushaltsbuch SQLite copy =="
 ssh "${docker_host}" "install -d -m 700 '${docker_stage}'"
 ssh "${docker_host}" \
-  python3 - \
-  /var/lib/docker/volumes/haushaltsbuch_hb-data/_data/haushaltsbuch.db \
-  "${docker_stage}/haushaltsbuch.sqlite" <<'PYTHON'
-import sqlite3
-import sys
-
-source_path, target_path = sys.argv[1:3]
-with sqlite3.connect(f"file:{source_path}?mode=ro", uri=True) as source:
-    with sqlite3.connect(target_path) as target:
-        source.backup(target)
-PYTHON
+  "docker cp haushaltsbuch-web-1:/data/haushaltsbuch.db '${docker_stage}/haushaltsbuch.sqlite'"
 
 echo "== Recording stopped-source inventory =="
 immich_files="$(
   ssh "${pve_host}" \
-    "pct exec 102 -- bash -lc \"find /opt/immich/upload -type f -printf . | wc -c\""
+    "pct exec 102 -- bash -c \"find /opt/immich/upload -type f -printf . | wc -c\""
 )"
 immich_assets="$(
   ssh "${pve_host}" \
@@ -121,7 +125,7 @@ immich_users="$(
 )"
 paperless_export_files="$(
   ssh "${pve_host}" \
-    "pct exec 104 -- bash -lc \"find '${paperless_export}' -type f -printf . | wc -c\""
+    "pct exec 104 -- bash -c \"find '${paperless_export}' -type f -printf . | wc -c\""
 )"
 paperless_documents="$(
   ssh "${pve_host}" \
@@ -133,11 +137,11 @@ paperless_users="$(
 )"
 paperless_media_files="$(
   ssh "${pve_host}" \
-    "pct exec 104 -- bash -lc \"find /opt/paperless_data/media -type f -printf . | wc -c\""
+    "pct exec 104 -- bash -c \"find /opt/paperless_data/media -type f -printf . | wc -c\""
 )"
 ava_entries="$(
   ssh "${pve_host}" \
-    "pct exec 100 -- bash -lc \"find /home/hermes -mindepth 1 -printf . | wc -c\""
+    "pct exec 100 -- bash -c \"find /home/hermes -mindepth 1 -printf . | wc -c\""
 )"
 ava_commit="$(
   ssh "${pve_host}" \
@@ -257,12 +261,18 @@ ssh "${docker_host}" "find '${docker_stage}' -depth -delete"
 )
 
 echo "== Verifying every final encrypted artifact =="
-age --decrypt --identity "${age_identity}" "${output_dir}/immich-postgres.dump.age" |
-  pg_restore --list - >/dev/null
-age --decrypt --identity "${age_identity}" "${output_dir}/paperless-postgres.dump.age" |
-  pg_restore --list - >/dev/null
-age --decrypt --identity "${age_identity}" "${output_dir}/honcho-postgres.dump.age" |
-  pg_restore --list - >/dev/null
+verify_root="$(mktemp -d /tmp/hl01-final-export-verify.XXXXXX)"
+for database in \
+  immich-postgres.dump.age \
+  paperless-postgres.dump.age \
+  honcho-postgres.dump.age; do
+  age \
+    --decrypt \
+    --identity "${age_identity}" \
+    --output "${verify_root}/${database%.age}" \
+    "${output_dir}/${database}"
+  pg_restore --list "${verify_root}/${database%.age}" >/dev/null
+done
 
 for archive in \
   immich-upload.tar.zst.age \
@@ -274,7 +284,6 @@ for archive in \
     tar --list --file=- >/dev/null
 done
 
-verify_root="$(mktemp -d /tmp/hl01-final-export-verify.XXXXXX)"
 age \
   --decrypt \
   --identity "${age_identity}" \
