@@ -31,6 +31,9 @@ The former Proxmox hosts `pve01`–`pve03` have been migrated to bare-metal
 NixOS as `hl01`–`hl03`. The complete architecture, disk inventory, backup and
 restore evidence, phase gates, and handover are maintained in
 [`docs/homelab-migration.md`](docs/homelab-migration.md).
+The permanent backup schedule, retention policy and disaster-restore runbook
+are documented separately in
+[`docs/homelab-backups.md`](docs/homelab-backups.md).
 
 - `hl01`: Immich, Paperless-ngx, Open WebUI, AVA/Hermes, Haushaltsbuch,
   Honcho, Home Assistant OS (KVM)
@@ -394,7 +397,7 @@ Imported via `inputs.self.nixosModules.<name>` in `configuration.nix`:
 - `tailscale` — VPN networking
 - Homelab application modules include `traefik`, `vaultwarden`, `searxng`,
   `stirling-pdf`, `nextcloud`, `litellm`, `cloudflared`, `restic-target`,
-  `immich`, `paperless`, `open-webui`, `hermes-agent`, and
+  `homelab-backup`, `immich`, `paperless`, `open-webui`, `hermes-agent`, and
   `haushaltsbuch-honcho`
 
 ### Home-Manager Modules (`modules/home-manager/`)

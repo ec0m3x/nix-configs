@@ -922,6 +922,24 @@ Phase-5-Abschluss:
   Tags anbietet. LiteLLM bleibt zur Vermeidung unkontrollierter
   Datenbankschema-Upgrades auf dem abgenommenen Release-Image.
 
+### Dauerhafte Backupstrategie (2026-08-01)
+
+- hl01 bis hl03 schreiben täglich zeitversetzt in getrennte verschlüsselte
+  Restic-Repositories auf der externen EXCERIA an hl03. Der Clientzugang ist
+  append-only; Aufbewahrung, Pruning und Integritätsprüfungen laufen lokal auf
+  hl03 außerhalb dieses Zugangs.
+- Vor jedem Snapshot entstehen konsistente PostgreSQL-, MariaDB- und
+  SQLite-Exporte. Vaultwarden verwendet seinen nativen Backupdienst;
+  Nextcloud wird während seines Datei- und Datenbank-Snapshots kontrolliert in
+  den Wartungsmodus gesetzt.
+- Die Aufbewahrung umfasst sieben tägliche, fünf wöchentliche und sechs
+  monatliche Stände. Wöchentlich werden 10 Prozent, monatlich alle gespeicherten
+  Datenblöcke gelesen und geprüft.
+- HAOS sowie NAS/Samba sind wie vereinbart nicht enthalten. Die EXCERIA ist ein
+  separates Backupmedium, aber noch kein Off-site-Backup. Zeitplan,
+  Datenumfang, Betrieb und vollständiger Restore-Ablauf stehen in
+  [`homelab-backups.md`](homelab-backups.md).
+
 ## Stand & Übergabe (2026-08-01)
 
 **Wo wir stehen:** Phase 1 bis einschließlich Phase 4 sind technisch
@@ -944,8 +962,9 @@ abgeschlossen. Die temporären Klartext- und Rollback-Daten wurden anschließend
 kontrolliert entfernt und alle sechs Anwendungen erneut per HTTP geprüft.
 
 **Nächster Schritt:** Die eigentliche Proxmox-zu-NixOS-Migration einschließlich
-Phase 5 und die frische HAOS-Einrichtung sind abgeschlossen. Offen bleiben nur
-die optionale Samba-/NAS-Entscheidung.
+Phase 5, die frische HAOS-Einrichtung und die dauerhafte Backupkonfiguration
+sind abgeschlossen. Offen bleiben die optionale Samba-/NAS-Entscheidung und
+als zusätzliche Resilienzstufe eine zweite verschlüsselte Off-site-Kopie.
 
 **Zugriffswege aus dieser Session:**
 - Die Mac-SSH-Aliase `hl01`, `hl02` und `hl03` verbinden als `ecomex` direkt

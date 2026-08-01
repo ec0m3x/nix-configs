@@ -6,6 +6,7 @@
   imports = [
     ../homelab/common.nix
     ./disko.nix
+    inputs.self.nixosModules.homelab-backup
     inputs.self.nixosModules.searxng
     inputs.self.nixosModules.stirling-pdf
     inputs.self.nixosModules.traefik

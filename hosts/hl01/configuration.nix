@@ -16,6 +16,7 @@
     inputs.self.nixosModules.haos-vm
     inputs.self.nixosModules.haushaltsbuch-honcho
     inputs.self.nixosModules.hermes-agent
+    inputs.self.nixosModules.homelab-backup
     inputs.self.nixosModules.immich
     inputs.self.nixosModules.open-webui
     inputs.self.nixosModules.paperless
