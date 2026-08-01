@@ -51,8 +51,10 @@ those get wrong, omit, or where the live config has drifted.
   filesystem UUID. Hotplug triggers independent `restic copy` repositories,
   verification, flush, unmount and USB power-off. There is deliberately no
   offline prune; warn at 80% usage. The copy, online prune and checks share one
-  lock. Never add a generic hotplug/format rule or use a destructive
-  `rsync --delete` mirror.
+  lock. The initial full copy/read check and a second udev-triggered
+  incremental run were verified on 2026-08-01; both ended unmounted, powered
+  off and safe to unplug. Never add a generic hotplug/format rule or use a
+  destructive `rsync --delete` mirror.
 
 ## Commands
 

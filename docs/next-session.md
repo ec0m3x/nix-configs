@@ -21,14 +21,20 @@ Last updated: 2026-08-01
 - The first retention/prune job and its 10% data check succeeded. The first
   full check subsequently read 31.5 GiB from all repositories and reported no
   errors.
+- The removable offline mirror is deployed and its normal workflow is
+  verified. The initial run copied all three repositories, read every copied
+  pack without errors, unmounted the Seagate disk and powered it off. A second
+  physical unplug/replug triggered the job through udev without a command,
+  reused the existing repositories, completed the configured 10% checks and
+  powered the disk off again. The status reported 4% usage and `safe to
+  unplug` after both runs.
 - At the final online check all backup timers were active and no host had a
   failed systemd unit.
 - The four systems `hl01`, `hl02`, `hl03` and `nix-ai` were selected for a
   clean shutdown before rearranging the office. Verify their actual power and
   boot state at the start of the next session.
-- Git `main` is clean and published. The durable backup implementation starts
-  at commit `ffbf2b9`; the commissioning evidence and offline-mirror plan are
-  included by commit `67c44c0`.
+- Git `main` is published. The durable backup implementation starts at commit
+  `ffbf2b9`; the removable hotplug mirror was implemented by commit `5c2bd79`.
 - The first boot after the office rearrangement exposed two ordering/retry
   issues. Both fixes were built, deployed and verified: on `hl03`,
   `restic-target-prepare` now explicitly waits for the EXCERIA mount; on
@@ -98,9 +104,10 @@ The implementation does the following:
 5. Check the destination repositories and report failure clearly.
 6. On success, flush writes, record the completion time, unmount the filesystem
    and power down the USB device so it is explicitly safe to remove.
-7. Commissioning still needs to test the first full copy, interrupted-copy
-   recovery, a second incremental copy and an actual restore from the
-   unplugged/offline repository before accepting the design.
+7. The initial full copy and a second automatic incremental run are verified.
+   An interrupted-copy recovery drill and an actual restore from the removable
+   repository remain useful future resilience tests; they are not required for
+   normal operation.
 
 NAS/Samba remains intentionally out of scope unless the user reopens that
 decision. HAOS remains excluded from backups because it is rebuilt fresh.

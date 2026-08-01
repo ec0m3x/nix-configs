@@ -195,6 +195,14 @@ inspected and retried.
 - The first retention/prune run completed successfully and read a 10% sample
   of every repository. The subsequent full check read 31.5 GiB across all
   repositories and reported no errors.
+- The first removable-mirror run copied the three online repositories to the
+  Seagate disk. Full destination checks read all 1,716 `hl01`, 2 `hl02` and
+  211 `hl03` data packs without errors. The unit then synced, unmounted and
+  powered off the disk, recording 4% usage and `safe to unplug`.
+- After a physical unplug/replug, udev started the second run automatically.
+  Restic reused the existing snapshots, checked 10% of each destination
+  repository (171, 1 and 21 packs), found no errors and powered the disk off
+  again. The incremental run took 1 minute 16 seconds.
 
 ## Disaster restore order
 
