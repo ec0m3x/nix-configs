@@ -103,11 +103,13 @@ for host in "${hosts[@]}"; do
 
   printf '\n==> Deploying %s (%s)\n' "$host" "$address"
   # The launcher supplies the value directly to nixos-rebuild's early getpass
-  # call. Build, copy and SSH subprocesses therefore cannot consume it first.
+  # call. --no-reexec keeps that hook active when switching; the configuration
+  # itself is still built normally from the flake.
   printf '%s\n' "$sudo_password" | "$rebuild_python" "$rebuild_launcher" \
     "$wrapped_rebuild" switch \
     --flake ".#$host" \
     --target-host "$target" \
+    --no-reexec \
     --ask-sudo-password
 
   failed_units=$(ssh -o BatchMode=yes "$target" \
