@@ -1,15 +1,4 @@
-{
-  lib,
-  pkgs,
-  ...
-}: {
-  assertions = [
-    {
-      assertion = pkgs.unstable.immich.version == "3.0.3";
-      message = "hl01 expects Immich 3.0.3 for the Phase-4 restore";
-    }
-  ];
-
+{pkgs, ...}: {
   services.immich = {
     enable = true;
     package = pkgs.unstable.immich;

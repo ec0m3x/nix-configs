@@ -902,6 +902,26 @@ Phase-5-Abschluss:
   für die laufende VM rund 8,2 GiB verfügbaren RAM, keine OOM-Ereignisse und
   ebenso wie hl02 und hl03 keine fehlgeschlagenen Units.
 
+### Folgeprojekt — regulärer Updatepfad ✅ (2026-08-01)
+
+- Die nur für den Restore benötigten Versions-Assertions von Immich,
+  Paperless-ngx und Open WebUI wurden entfernt. Immich folgt weiterhin dem
+  im Flake gepinnten `nixpkgs-unstable`; Paperless und Open WebUI verwenden
+  die regulären Pakete des stabilen Nixpkgs-Inputs.
+- Vaultwarden verwendet wieder das reguläre NixOS-Paket samt zugehörigem Web
+  Vault. Das während der Migration benötigte lokale Paket
+  `vaultwarden-1_37_1` wurde entfernt, nachdem Version 1.37.1 im stabilen
+  Nixpkgs-Kanal verfügbar war.
+- Anwendungsupdates erfolgen kontrolliert über `flake.lock`: Inputs
+  aktualisieren, alle Hostkonfigurationen evaluieren bzw. bauen und danach
+  hostweise ausrollen. Datenbank-Majorversionen, Nextcloud 34 und das
+  HAOS-Bootstrap-Image bleiben absichtlich explizit, weil ihre Änderung einen
+  eigenen Migrations- oder Neuinstallationsschritt erfordert.
+- Die privaten Haushaltsbuch-/Honcho-Images bleiben auf den veröffentlichten
+  unveränderlichen Digests, solange die Registry keine gepflegten rollenden
+  Tags anbietet. LiteLLM bleibt zur Vermeidung unkontrollierter
+  Datenbankschema-Upgrades auf dem abgenommenen Release-Image.
+
 ## Stand & Übergabe (2026-08-01)
 
 **Wo wir stehen:** Phase 1 bis einschließlich Phase 4 sind technisch

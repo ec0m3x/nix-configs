@@ -1,15 +1,4 @@
-{
-  lib,
-  pkgs,
-  ...
-}: {
-  assertions = [
-    {
-      assertion = pkgs.paperless-ngx.version == "2.20.15";
-      message = "hl01 expects Paperless-ngx 2.20.15 for the Phase-4 restore";
-    }
-  ];
-
+{pkgs, ...}: {
   services.paperless = {
     enable = true;
     package = pkgs.paperless-ngx;

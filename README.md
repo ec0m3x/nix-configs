@@ -55,6 +55,12 @@ The hosts use disko layouts and sops-nix secrets. Never commit plaintext
 secrets; read the migration document before changing `hosts/hl0*` or
 `hosts/homelab/`.
 
+Homelab application updates follow the pinned flake inputs: update the lockfile,
+build all affected hosts, and deploy them individually after reviewing version
+changes. Restore-only application assertions and the temporary Vaultwarden
+package have been removed. Database and Nextcloud major versions remain
+explicit because those upgrades require their own migration steps.
+
 ## Installation from NixOS Minimal Image
 
 This guide assumes you are booting from a fresh [NixOS minimal ISO](https://nixos.org/download/#nixos-iso) and want to apply this flake to your machine. The process is broken into four phases: preparing the disk, installing the system, post-install configuration, and notes for different hardware.

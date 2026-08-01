@@ -1,8 +1,4 @@
-{
-  config,
-  pkgs,
-  ...
-}: {
+{config, ...}: {
   sops.secrets = {
     vaultwarden_admin_token = {};
     vaultwarden_smtp_username = {};
@@ -22,8 +18,6 @@
 
   services.vaultwarden = {
     enable = true;
-    package = pkgs.vaultwarden-1_37_1;
-    webVaultPackage = pkgs.vaultwarden-1_37_1.webvault;
     dbBackend = "sqlite";
     environmentFile = config.sops.templates.vaultwarden_env.path;
     backupDir = "/var/backup/vaultwarden";
