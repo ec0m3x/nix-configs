@@ -144,6 +144,21 @@ implementation needs the attached disk's verified device identity, size,
 filesystem UUID and desired offline retention. Until then, no broad udev rule
 or automatic formatting is configured.
 
+## Commissioning evidence (2026-08-01)
+
+- `hl01` created snapshot `f495d13c`: 194,267 files, 38.840 GiB processed
+  and 28.150 GiB stored. Streaming its PostgreSQL cluster dump back through
+  `restic dump` produced the same SHA-256 as the staged source dump.
+- `hl02` created snapshot `a30bb561`: 323 files, 38.866 MiB processed and
+  8.359 MiB stored. A real restore of the Vaultwarden SQLite backup produced
+  the same SHA-256 as the source backup.
+- `hl03` created snapshot `c1846fa1`: 26,311 files, 4.482 GiB processed and
+  3.467 GiB stored. Nextcloud entered and left maintenance mode automatically;
+  streaming the MariaDB dump back produced the same SHA-256 as its source.
+- The first retention/prune run completed successfully and read a 10% sample
+  of every repository. The subsequent full check read 31.5 GiB across all
+  repositories and reported no errors.
+
 ## Disaster restore order
 
 1. Reinstall the affected NixOS host from this flake and restore its SOPS/SSH
