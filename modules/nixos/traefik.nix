@@ -154,9 +154,13 @@ in {
   systemd.services.traefik = {
     after = lib.mkAfter ["tailscaled.service"];
     wants = lib.mkAfter ["tailscaled.service"];
+    # A router/repeater outage can delay the Tailnet address for several
+    # minutes after boot. Keep retrying instead of leaving Traefik failed at
+    # systemd's default start limit.
+    unitConfig.StartLimitIntervalSec = 0;
     serviceConfig.ExecStartPre = lib.mkBefore [
       (pkgs.writeShellScript "wait-for-traefik-tailnet-address" ''
-        for _ in $(${pkgs.coreutils}/bin/seq 1 30); do
+        for _ in $(${pkgs.coreutils}/bin/seq 1 300); do
           if ${pkgs.iproute2}/bin/ip -4 address show dev tailscale0 |
             ${pkgs.gnugrep}/bin/grep -q "100.113.0.83/"; then
             exit 0

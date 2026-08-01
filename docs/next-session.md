@@ -29,6 +29,12 @@ Last updated: 2026-08-01
 - Git `main` is clean and published. The durable backup implementation starts
   at commit `ffbf2b9`; the commissioning evidence and offline-mirror plan are
   included by commit `67c44c0`.
+- The first boot after the office rearrangement exposed two ordering/retry
+  issues. Fixes are committed on `main` but are not deployed yet because
+  `nix-ai` remained off: `restic-target-prepare` now explicitly waits for the
+  EXCERIA mount, and Traefik keeps retrying while a delayed repeater prevents
+  the Tailscale address from appearing. The live services were restarted
+  manually after the mount and network became available.
 
 The complete operating and restore runbook is
 [`homelab-backups.md`](homelab-backups.md). Do not remove the encrypted
@@ -45,6 +51,9 @@ verified generations.
    ```bash
    ssh nix-ai 'cd /home/ecomex/nix-configs && git pull --ff-only'
    ```
+
+   Build and deploy the pending boot fixes to `hl02` and `hl03` before starting
+   the offline-mirror work.
 
 2. Verify every host before making changes:
 
