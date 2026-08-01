@@ -43,7 +43,7 @@ fi
 [[ $(hostname -s) == "nix-ai" ]] || die "run this script on nix-ai"
 [[ -t 0 && -t 1 ]] || die "an interactive terminal is required"
 
-for command in git nixos-rebuild ssh; do
+for command in git nixos-rebuild setsid ssh; do
   command -v "$command" >/dev/null || die "required command not found: $command"
 done
 
@@ -93,10 +93,13 @@ for host in "${hosts[@]}"; do
   target="$deploy_user@$address"
 
   printf '\n==> Deploying %s (%s)\n' "$host" "$address"
-  printf '%s\n' "$sudo_password" | NIX_SUDOOPTS='--stdin --prompt=' nixos-rebuild switch \
+  # Detaching the child from the controlling terminal makes Python's getpass
+  # consume the supplied value immediately, before any build or copy command
+  # can read stdin. nixos-rebuild then forwards it to remote sudo itself.
+  printf '%s\n' "$sudo_password" | PYTHONWARNINGS=ignore setsid --wait nixos-rebuild switch \
     --flake ".#$host" \
     --target-host "$target" \
-    --sudo
+    --ask-sudo-password
 
   failed_units=$(ssh -o BatchMode=yes "$target" \
     systemctl --failed --no-legend --plain --no-pager)
