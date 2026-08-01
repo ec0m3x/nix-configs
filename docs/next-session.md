@@ -30,11 +30,13 @@ Last updated: 2026-08-01
   unplug` after both runs.
 - At the final online check all backup timers were active and no host had a
   failed systemd unit.
-- The four systems `hl01`, `hl02`, `hl03` and `nix-ai` were selected for a
-  clean shutdown before rearranging the office. Verify their actual power and
-  boot state at the start of the next session.
-- Git `main` is published. The durable backup implementation starts at commit
-  `ffbf2b9`; the removable hotplug mirror was implemented by commit `5c2bd79`.
+- `hl01`, `hl02`, `hl03` and `nix-ai` came back cleanly after the office
+  rearrangement. The network/repeater issue is resolved, all hosts are
+  reachable and there are no pending configuration deployments.
+- Git `main` is published and synchronized on the Mac and `nix-ai`. The durable
+  backup implementation starts at commit `ffbf2b9`; the removable hotplug
+  mirror was implemented by commit `5c2bd79` and its verified commissioning is
+  documented by commit `b8b00d7`.
 - The first boot after the office rearrangement exposed two ordering/retry
   issues. Both fixes were built, deployed and verified: on `hl03`,
   `restic-target-prepare` now explicitly waits for the EXCERIA mount; on
@@ -51,8 +53,8 @@ verified generations.
 
 1. Boot the machines needed for the work. Bring up `hl03` before starting or
    manually triggering client backups, because it owns the Restic target.
-   After `nix-ai` is back, fast-forward its checkout because the final handover
-   commit was created on the Mac after the shutdown sequence:
+   Fast-forward the `nix-ai` checkout before building or deploying later
+   changes:
 
    ```bash
    ssh nix-ai 'cd /home/ecomex/nix-configs && git pull --ff-only'
@@ -77,7 +79,7 @@ verified generations.
    boot. Inspect `systemctl status restic-backups-$(hostname).service` before
    starting another backup manually.
 
-## Current project: removable offline backup disk
+## Completed project: removable offline backup disk
 
 The requested workflow is: attach a second USB HDD, let `hl03` copy and verify
 the backups automatically, wait until the disk is automatically unmounted and
@@ -92,7 +94,9 @@ unmounted ext4 filesystem labeled `HOMELAB_OFFLINE` with UUID
 explicitly accepted for deletion. The declarative hotplug job accepts only
 this serial plus filesystem UUID, uses independent Restic repositories without
 offline pruning, warns at 80%, records status locally and powers the device off
-after a successful copy and check.
+after a successful copy and check. At the end of this session it was unmounted,
+powered off and reported `safe to unplug`; it may be physically removed and
+stored offline.
 
 The implementation does the following:
 
