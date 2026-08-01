@@ -57,7 +57,14 @@ nixos-rebuild switch --flake .#hl01 \
 
 # Build and deploy all homelab hosts safely (one shared sudo prompt)
 ./scripts/deploy-homelab.sh
+
+# Remove Nix generations older than seven days on nix-ai and hl01-hl03
+./scripts/cleanup-homelab.sh
 ```
+
+After applying Home Manager, both commands are also available as
+`deploy-homelab` and `cleanup-homelab` aliases on `nix-ai` and `nix-mac`. The
+Mac aliases open an interactive SSH session to `nix-ai`, where the scripts run.
 
 The hosts use disko layouts and sops-nix secrets. Never commit plaintext
 secrets; read the migration document before changing `hosts/hl0*` or

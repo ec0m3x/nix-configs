@@ -5,4 +5,9 @@
   imports = [
     ./home.nix
   ];
+
+  programs.zsh.shellAliases = {
+    deploy-homelab = "ssh -t nix-ai 'cd /home/ecomex/nix-configs && ./scripts/deploy-homelab.sh'";
+    cleanup-homelab = "ssh -t nix-ai 'cd /home/ecomex/nix-configs && ./scripts/cleanup-homelab.sh'";
+  };
 }

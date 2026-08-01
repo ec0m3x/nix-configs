@@ -67,6 +67,9 @@ ssh nix-ai 'cd /home/ecomex/nix-configs && nixos-rebuild build --flake .#hl01'
 # Build and deploy all homelab hosts from nix-ai (one shared sudo prompt)
 ssh -t nix-ai 'cd /home/ecomex/nix-configs && ./scripts/deploy-homelab.sh'
 
+# Clean Nix generations older than seven days on nix-ai and hl01-hl03
+ssh -t nix-ai 'cd /home/ecomex/nix-configs && ./scripts/cleanup-homelab.sh'
+
 # Deploy a homelab host from nix-ai (run interactively for target sudo)
 ssh -t nix-ai
 cd /home/ecomex/nix-configs
