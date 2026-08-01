@@ -16,7 +16,8 @@ jobs live in `modules/nixos/restic-target.nix`.
   append-only client interface.
 - The target filesystem is separate from every host's system and application
   SSDs. It is not off-site, however. A second encrypted copy at another
-  location remains the next resilience improvement.
+  location remains the next resilience improvement; the planned removable
+  mirror is described below.
 - The intended recovery point is at most 24 hours old. Recovery is manual;
   the required time depends mainly on the amount of Immich and Nextcloud data.
 - HAOS is deliberately excluded because Home Assistant is rebuilt as a fresh
@@ -96,14 +97,15 @@ sudo find /var/tmp/restic-restore-test -xdev -maxdepth 3 -type f | head
 Useful integrity checks on the restored exports include:
 
 ```bash
-# hl01
+# hl01 (sqlite3 is installed on this host)
 sudo sqlite3 /var/tmp/restic-restore-test/var/lib/homelab-backup/haushaltsbuch.sqlite \
   'PRAGMA quick_check;'
 sudo test -s /var/tmp/restic-restore-test/var/lib/homelab-backup/postgresql/cluster.sql
 
-# hl02
-sudo sqlite3 /var/tmp/restic-restore-test/var/backup/vaultwarden/db.sqlite3 \
-  'PRAGMA quick_check;'
+# hl02: compare immediately after a backup; its preparation already ran
+# SQLite quick_check on the source database.
+sudo sha256sum /var/backup/vaultwarden/db.sqlite3 \
+  /var/tmp/restic-restore-test/var/backup/vaultwarden/db.sqlite3
 
 # hl03
 sudo test -s /var/tmp/restic-restore-test/var/lib/homelab-backup/mariadb.sql
@@ -113,6 +115,34 @@ sudo test -s /var/tmp/restic-restore-test/var/lib/homelab-backup/postgresql/clus
 Run this restore verification after the initial backup, after material changes
 to the backup module, and at least quarterly. A successful `restic check` alone
 proves repository integrity, not that an application-level restore works.
+
+## Planned removable offline mirror
+
+The next backup tier will be a second USB HDD that normally remains unplugged
+and is stored away from the homelab. It must be implemented as an independent
+Restic target rather than a destructive block-level or `rsync --delete`
+mirror. `restic copy` transfers valid snapshots without propagating deletions
+from the online target.
+
+The intended hot-plug workflow is:
+
+1. A dedicated filesystem label and UUID identify the one accepted offline
+   disk. No generic USB disk may trigger the job.
+2. Inserting that disk activates a systemd unit on `hl03`, which mounts it at a
+   private path and takes an exclusive lock so only one copy can run.
+3. The unit copies new snapshots from all three local repositories into three
+   repositories on the removable disk. Source and destination stay encrypted.
+4. Restic checks the destination repositories. A failure leaves the source
+   untouched and must not report the disk as ready for removal.
+5. On success the unit flushes all writes, records the completion time,
+   unmounts the filesystem and powers down the USB device. Only then is the
+   disk safe to unplug and return to storage.
+
+The copy job must not start while weekly pruning or a full check is running;
+all three target operations will share one systemd/flock lock. The first
+implementation needs the attached disk's verified device identity, size,
+filesystem UUID and desired offline retention. Until then, no broad udev rule
+or automatic formatting is configured.
 
 ## Disaster restore order
 

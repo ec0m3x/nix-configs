@@ -939,6 +939,13 @@ Phase-5-Abschluss:
   separates Backupmedium, aber noch kein Off-site-Backup. Zeitplan,
   Datenumfang, Betrieb und vollständiger Restore-Ablauf stehen in
   [`homelab-backups.md`](homelab-backups.md).
+- Als nächste Ausbaustufe ist eine normalerweise getrennte USB-HDD vorgesehen.
+  Beim Einstecken soll hl03 sie ausschließlich anhand ihrer festen UUID
+  erkennen, neue Snapshots per `restic copy` in unabhängige Repositories
+  übertragen, diese prüfen und die Platte danach automatisch synchronisieren,
+  aushängen und abschalten. Details und Sicherheitsbedingungen sind im
+  Backup-Runbook festgehalten; ohne die geprüfte Zielplatte existiert bewusst
+  noch keine generische Hotplug-Regel.
 
 ## Stand & Übergabe (2026-08-01)
 
