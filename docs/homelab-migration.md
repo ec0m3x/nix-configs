@@ -868,6 +868,11 @@ Phase-5-Abschluss:
   Konfiguration wurde für alle drei Hosts gebaut und aktiviert. AdGuard
   antwortet mit `hl01.hl.sk4i.com` → `10.20.50.11`, entsprechend `.12` und
   `.13`; alle drei Hosts melden danach 0 fehlgeschlagene Units.
+- hl01 und hl03 wurden frisch im Tailnet angemeldet. hl01 verwendet
+  `100.121.108.52`, hl02 weiterhin seine migrierte Identität
+  `100.113.0.83`, hl03 `100.65.98.4`. Nur hl02 bewirbt
+  `10.20.50.0/24`; hl01 und hl03 setzen `accept-routes=false`, weil die
+  Annahme der eigenen LAN-Route sonst ihre direkte LAN-Erreichbarkeit stört.
 
 ## Stand & Übergabe (2026-08-01)
 
@@ -890,8 +895,8 @@ abgeschlossen. Die temporären Klartext- und Rollback-Daten wurden anschließend
 kontrolliert entfernt und alle sechs Anwendungen erneut per HTTP geprüft.
 
 **Nächster Schritt:** Die eigentliche Proxmox-zu-NixOS-Migration einschließlich
-Phase 5 ist abgeschlossen. Tailscale auf hl01, HAOS und Samba bleiben separate
-Folgearbeiten; HAOS wird ohne Übernahme des alten Stands neu eingerichtet.
+Phase 5 ist abgeschlossen. HAOS und Samba bleiben separate Folgearbeiten;
+HAOS wird ohne Übernahme des alten Stands neu eingerichtet.
 
 **Zugriffswege aus dieser Session:**
 - Die Mac-SSH-Aliase `hl01`, `hl02` und `hl03` verbinden als `ecomex` direkt
@@ -915,7 +920,8 @@ Folgearbeiten; HAOS wird ohne Übernahme des alten Stands neu eingerichtet.
 
 ## Offene Punkte
 
-- Tailscale auf hl01 ist aktiviert, aber noch nicht am Tailnet angemeldet.
+- Die verwaisten Tailnet-Geräte `ava`, `docker-vm` und `immich` nach
+  gesonderter Bestätigung im Tailscale-Adminbereich entfernen.
 - Home Assistant auf hl01 als separaten Schritt mit Virtualisierung und
   frischer HAOS-Einrichtung ohne Übernahme des alten Stands planen.
 - Samba/NAS erst nach separater Speicher- und Freigabeentscheidung aktivieren.
