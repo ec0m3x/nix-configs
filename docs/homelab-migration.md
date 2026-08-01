@@ -11,11 +11,11 @@ und bisherige Architektur: das inzwischen archivierte Repo
   NixOS-Modulen werden nativ betrieben. Schnelllebige oder unter NixOS
   schwer wartbare Anwendungen dürfen als deklarative OCI-Container laufen.
   Die konkrete Betriebsform wird pro Dienst vor der Migration festgelegt.
-- **Home Assistant** läuft später als VM auf hl01, nicht als nativer
-  NixOS-Dienst. HAOS ist ausdrücklich nicht Teil des ersten
-  Phase-4-Cutovers; Virtualisierung, Neueinrichtung und USB-Passthrough folgen
-  nach der Hostmigration als eigener Schritt. Der bisherige HAOS-Stand wird
-  auf ausdrückliche Entscheidung vom 2026-08-01 nicht übernommen.
+- **Home Assistant** läuft als frische HAOS-VM auf hl01, nicht als nativer
+  NixOS-Dienst. HAOS war ausdrücklich nicht Teil des ersten
+  Phase-4-Cutovers und wurde danach als eigener Virtualisierungsschritt neu
+  eingerichtet. Der bisherige HAOS-Stand wurde auf ausdrückliche Entscheidung
+  vom 2026-08-01 nicht übernommen.
 - **Backups** über restic (NixOS-Module) statt PBS; Ziel: 1-TB-Platte auf hl03.
 - IP-Adressen bleiben: hl01 = 10.20.50.11, hl02 = .12, hl03 = .13.
 - **Tailscale läuft nativ auf allen drei NixOS-Hosts.** Das gemeinsame
@@ -54,7 +54,7 @@ Alle drei: Intel i5-4590T (4 Cores), UEFI-Boot.
 
 | Host | Dienste |
 |---|---|
-| hl01 (16 GiB) | immich, paperless-ngx, open-webui, haushaltsbuch + honcho, ava; später Samba-NAS und Home Assistant (VM) |
+| hl01 (16 GiB) | immich, paperless-ngx, open-webui, haushaltsbuch + honcho, ava, Home Assistant (HAOS-VM); später ggf. Samba-NAS |
 | hl02 (8 GiB) | AdGuard Home, Tailscale-Subnet-Router, Vaultwarden, SearXNG, Stirling-PDF, Reverse-Proxy (Wildcard `*.hl.sk4i.com`, Tailnet-Einstieg) |
 | hl03 (8 GiB) | Nextcloud, LiteLLM + Postgres, cloudflared (Cloudflare-Tunnel), restic-Backup-Ziel |
 
@@ -844,8 +844,8 @@ Disko darf ausschließlich die PM871b und die 860 EVO neu partitionieren.
   `cleanup-hl01-phase4.sh` die Klartext-Restoreinputs und alle sechs
   Pre-Restore-Zielstände. Ein anschließender Pfad- und HTTP-Check war
   erfolgreich; die externen verschlüsselten Endexporte bleiben erhalten.
-  HAOS wurde auf ausdrückliche Betreiberentscheidung nicht gesichert und wird
-  später vollständig neu eingerichtet.
+  HAOS wurde auf ausdrückliche Betreiberentscheidung nicht gesichert; die alte
+  VM wurde verworfen und anschließend eine neue Instanz eingerichtet.
 
 ### Phase 5 — Aufräumen
 - [x] Fachliche App-Abnahme durch den Betreiber.
@@ -874,6 +874,32 @@ Phase-5-Abschluss:
   `10.20.50.0/24`; hl01 und hl03 setzen `accept-routes=false`, weil die
   Annahme der eigenen LAN-Route sonst ihre direkte LAN-Erreichbarkeit stört.
 
+### Folgeprojekt — frische HAOS-VM auf hl01 ✅ (2026-08-01)
+
+- Das offizielle KVM-Image von HAOS 18.2 ist mit festem Hash im neuen
+  NixOS-Modul `modules/nixos/haos-vm.nix` gepinnt. Die VM läuft über
+  libvirt/QEMU mit OVMF, zwei vCPUs, 4 GiB RAM und einer auf 32 GiB
+  vergrößerten Sparse-qcow2 unter `/srv/haos/haos.qcow2`.
+- Der Provisionierungsdienst definiert die VM persistent, aktiviert Autostart
+  und legt Datendisk sowie CONFIG-Disk nur bei der Ersteinrichtung an. Dadurch
+  ersetzen spätere NixOS-Aktivierungen den laufenden Home-Assistant-Stand
+  nicht.
+- HAOS verwendet die statische LAN-Adresse `10.20.50.14/24`, Gateway
+  `10.20.50.1`, DNS `10.20.50.49` mit Fallback `.1` und die feste MAC
+  `02:00:00:20:50:14`. Der NetworkManager-Import der CONFIG-Disk wurde einmal
+  über die HAOS-Konsole ausgelöst.
+- Home Assistant vertraut dem Traefik-Proxy `10.20.50.12` für
+  `X-Forwarded-For`. Die direkte Oberfläche unter `10.20.50.14:8123` und
+  `https://ha.hl.sk4i.com` antworten beide mit HTTP 200.
+- Die Traefik-Ziele der migrierten Anwendungen wurden auf den neuen Stand
+  gebracht: Immich, Paperless, Open WebUI, AVA und Haushaltsbuch zeigen nun
+  auf hl01; Home Assistant auf `.14`. Die alten PVE-, PBS- und
+  Portainer-Routen wurden entfernt und liefern HTTP 404. Interne und
+  öffentliche Produktivpfade wurden anschließend geprüft.
+- Die Konfigurationen aller drei Homelab-Hosts sind aktiviert. hl01 meldet
+  für die laufende VM rund 8,2 GiB verfügbaren RAM, keine OOM-Ereignisse und
+  ebenso wie hl02 und hl03 keine fehlgeschlagenen Units.
+
 ## Stand & Übergabe (2026-08-01)
 
 **Wo wir stehen:** Phase 1 bis einschließlich Phase 4 sind technisch
@@ -884,8 +910,9 @@ Nextcloud, LiteLLM, PostgreSQL, MariaDB, cloudflared und das restic-Ziel laufen
 auf dem neuen hl03. Der hl02-Proxy leitet die produktiven Nextcloud- und
 LiteLLM-Routen nach hl03; öffentliche und interne Pfade sind geprüft. Die
 EXCERIA samt PBS-Datastore blieb unverändert erhalten. hl01 läuft nun ebenfalls
-bare-metal mit Immich, Paperless, AVA, Haushaltsbuch, Honcho und einer frischen
-Open-WebUI-Instanz. Damit existiert kein Proxmox-Host mehr im Homelab.
+bare-metal mit Immich, Paperless, AVA, Haushaltsbuch, Honcho, einer frischen
+Open-WebUI-Instanz und der neuen HAOS-VM. Damit existiert kein Proxmox-Host
+mehr im Homelab.
 
 Der finale Phase-4-Datenstand ist verschlüsselt auf Mac und nix-ai verifiziert.
 Der produktive Restore und ein echter Rollback wurden auf hl01 geprüft; die
@@ -895,8 +922,9 @@ abgeschlossen. Die temporären Klartext- und Rollback-Daten wurden anschließend
 kontrolliert entfernt und alle sechs Anwendungen erneut per HTTP geprüft.
 
 **Nächster Schritt:** Die eigentliche Proxmox-zu-NixOS-Migration einschließlich
-Phase 5 ist abgeschlossen. HAOS und Samba bleiben separate Folgearbeiten;
-HAOS wird ohne Übernahme des alten Stands neu eingerichtet.
+Phase 5 und die frische HAOS-Einrichtung sind abgeschlossen. Offen bleiben nur
+die optionale Samba-/NAS-Entscheidung und das gesondert freizugebende Entfernen
+der verwaisten Tailnet-Geräte.
 
 **Zugriffswege aus dieser Session:**
 - Die Mac-SSH-Aliase `hl01`, `hl02` und `hl03` verbinden als `ecomex` direkt
@@ -922,6 +950,4 @@ HAOS wird ohne Übernahme des alten Stands neu eingerichtet.
 
 - Die verwaisten Tailnet-Geräte `ava`, `docker-vm` und `immich` nach
   gesonderter Bestätigung im Tailscale-Adminbereich entfernen.
-- Home Assistant auf hl01 als separaten Schritt mit Virtualisierung und
-  frischer HAOS-Einrichtung ohne Übernahme des alten Stands planen.
 - Samba/NAS erst nach separater Speicher- und Freigabeentscheidung aktivieren.

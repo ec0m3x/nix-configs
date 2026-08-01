@@ -32,12 +32,14 @@ NixOS as `hl01`–`hl03`. The complete architecture, disk inventory, backup and
 restore evidence, phase gates, and handover are maintained in
 [`docs/homelab-migration.md`](docs/homelab-migration.md).
 
-- `hl01`: Immich, Paperless-ngx, Open WebUI, AVA/Hermes, Haushaltsbuch, Honcho
+- `hl01`: Immich, Paperless-ngx, Open WebUI, AVA/Hermes, Haushaltsbuch,
+  Honcho, Home Assistant OS (KVM)
 - `hl02`: AdGuard Home, Traefik, Vaultwarden, SearXNG, Stirling-PDF
 - `hl03`: Nextcloud, LiteLLM, PostgreSQL/MariaDB, cloudflared, restic target
 
-Home Assistant is intentionally not restored from the old HAOS VM. It will be
-installed fresh as a later, separate virtualization step on `hl01`.
+Home Assistant was intentionally not restored from the old HAOS VM. A fresh
+HAOS 18.2 VM now runs on `hl01` at `10.20.50.14` and is available through
+`https://ha.hl.sk4i.com`.
 
 ```bash
 # Build a homelab host on nix-ai

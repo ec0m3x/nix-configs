@@ -18,13 +18,6 @@
     loadBalancer.servers = [{inherit url;}];
   };
 
-  mkInsecureServer = url: {
-    loadBalancer = {
-      servers = [{inherit url;}];
-      serversTransport = "insecure";
-    };
-  };
-
   mkInternalRouter = host: service: {
     rule = "Host(`${host}`)";
     entryPoints = [
@@ -98,8 +91,6 @@ in {
       http = {
         middlewares.deny-admin.ipAllowList.sourceRange = ["127.0.0.1/32"];
 
-        serversTransports.insecure.insecureSkipVerify = true;
-
         services = {
           vaultwarden = mkServer "http://127.0.0.1:8222";
           searxng = mkServer "http://127.0.0.1:8081";
@@ -107,16 +98,16 @@ in {
           litellm = mkServer "http://10.20.50.13:4000";
 
           adguard = mkServer "http://10.20.50.49:80";
-          docs = mkServer "http://10.20.50.54:8000";
-          haushaltsbuch = mkServer "http://10.20.50.46:8787";
+          ava = mkServer "http://10.20.50.11:9119";
+          home-assistant = mkServer "http://10.20.50.14:8123";
+          haushaltsbuch = mkServer "http://10.20.50.11:8787";
+          immich = mkServer "http://10.20.50.11:2283";
           llama = mkServer "http://10.20.50.20:9292";
           ollama = mkServer "http://10.20.50.20:11434";
+          open-webui = mkServer "http://10.20.50.11:8080";
+          paperless = mkServer "http://10.20.50.11:8000";
 
-          immich = mkServer "http://10.20.50.53:2283";
           nextcloud = mkServer "http://10.20.50.13:80";
-          pbs = mkInsecureServer "https://10.20.50.40:8007";
-          pmox = mkInsecureServer "https://10.20.50.11:8006";
-          portainer = mkInsecureServer "https://10.20.50.46:9443";
         };
 
         routers = {
@@ -126,13 +117,13 @@ in {
           litellm = mkInternalRouter "litellm.hl.sk4i.com" "litellm";
 
           adguard = mkInternalRouter "dns.hl.sk4i.com" "adguard";
-          docs = mkInternalRouter "docs.hl.sk4i.com" "docs";
+          ava = mkInternalRouter "ava.hl.sk4i.com" "ava";
+          home-assistant = mkInternalRouter "ha.hl.sk4i.com" "home-assistant";
           haushaltsbuch = mkInternalRouter "hb.hl.sk4i.com" "haushaltsbuch";
           llama = mkInternalRouter "llama.hl.sk4i.com" "llama";
           ollama = mkInternalRouter "ollama.hl.sk4i.com" "ollama";
-          pbs = mkInternalRouter "pbs.hl.sk4i.com" "pbs";
-          pmox = mkInternalRouter "pmox.hl.sk4i.com" "pmox";
-          portainer = mkInternalRouter "docker.hl.sk4i.com" "portainer";
+          open-webui = mkInternalRouter "openwebui.hl.sk4i.com" "open-webui";
+          paperless = mkInternalRouter "docs.hl.sk4i.com" "paperless";
 
           vault-public = mkPublicRouter "vault.sk4i.com" "vaultwarden";
           vault-public-secure = {

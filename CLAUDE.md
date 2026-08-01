@@ -12,7 +12,8 @@ This is a NixOS flake-based configuration repository. It manages both system-wid
 - **`nix-mac`**: MacBook (nix-darwin, aarch64-darwin).
 - **`hl01`–`hl03`**: bare-metal NixOS homelab hosts. The Proxmox migration is
   technically complete; read `docs/homelab-migration.md` before changing
-  `hosts/hl0*` or `hosts/homelab/`.
+  `hosts/hl0*` or `hosts/homelab/`. `hl01` also runs a declaratively
+  provisioned Home Assistant OS VM via libvirt/KVM.
 
 ## Common Commands
 
@@ -191,7 +192,8 @@ Docker virtualization is configured via `modules/nixos/docker.nix`:
   and other desktop imports are currently commented out.
 - **Browser**: Zen Browser (privacy-focused Firefox fork)
 - **Graphics**: NVIDIA drivers with CUDA support (`cudatoolkit`, `nvtop`), VAAPI enabled
-- **Virtualization**: Docker with auto-pruning enabled
+- **Virtualization**: Docker with auto-pruning on `nix-ai`; libvirt/KVM for
+  the HAOS VM on `hl01`
 - **Game streaming**: Wolf is active on `nix-ai`; Sunshine is currently
   commented out.
 - **VSCode server**: `programs.nix-ld.enable` for dynamic linking

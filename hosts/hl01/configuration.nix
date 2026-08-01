@@ -1,6 +1,6 @@
 # hl01 — ehemals pve01 (10.20.50.11, 16 GiB RAM, i5-4590T).
 # Phase 4: Immich, Paperless-ngx, Open WebUI, Haushaltsbuch + Honcho und AVA.
-# Home Assistant als HAOS-VM und Samba folgen bewusst in einer späteren Phase.
+# Eine frische Home-Assistant-OS-VM ist aktiv; Samba folgt bei Bedarf später.
 #
 # ACHTUNG: Die Onboard-NIC dieses Hosts ist defekt/down — das System läuft
 # über einen USB-Ethernet-Adapter (MAC 00:24:9b:49:70:91). Bei Adaptertausch
@@ -13,6 +13,7 @@
   imports = [
     ../homelab/common.nix
     ./disko.nix
+    inputs.self.nixosModules.haos-vm
     inputs.self.nixosModules.haushaltsbuch-honcho
     inputs.self.nixosModules.hermes-agent
     inputs.self.nixosModules.immich
