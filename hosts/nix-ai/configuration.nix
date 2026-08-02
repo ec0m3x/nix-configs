@@ -234,9 +234,13 @@
       secret_file="$secret_dir/ecomex"
 
       if [[ ! -e "$secret_file" ]]; then
-        shadow_record="$(${pkgs.glibc.bin}/bin/getent shadow ecomex || true)"
-        password_hash="''${shadow_record#*:}"
-        password_hash="''${password_hash%%:*}"
+        password_hash=
+        while IFS=: read -r account_name account_hash _; do
+          if [[ "$account_name" == ecomex ]]; then
+            password_hash="$account_hash"
+            break
+          fi
+        done </etc/shadow
 
         if [[ "$password_hash" =~ ^\$[[:alnum:]./]+\$ ]]; then
           ${pkgs.coreutils}/bin/install -d -m 0700 -o root -g root "$secret_dir"
