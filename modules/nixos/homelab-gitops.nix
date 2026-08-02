@@ -166,7 +166,9 @@
         ''
         else ''
           echo "==> copying and activating ${target.name} (${target.address})"
-          nix copy --to "ssh-ng://$deploy_user@${target.address}" "''${system_paths[${target.name}]}"
+          nix copy --no-check-sigs \
+            --to "ssh-ng://$deploy_user@${target.address}" \
+            "''${system_paths[${target.name}]}"
           ssh "''${ssh_options[@]}" "$deploy_user@${target.address}" \
             sudo -n "$activation_command" "''${system_paths[${target.name}]}" "$revision"
           failed_units=$(ssh "''${ssh_options[@]}" "$deploy_user@${target.address}" \
