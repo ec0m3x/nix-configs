@@ -99,7 +99,6 @@ in {
 
           adguard = mkServer "http://10.20.50.49:80";
           home-assistant = mkServer "http://10.20.50.14:8123";
-          haushaltsbuch = mkServer "http://10.20.50.11:8787";
           immich = mkServer "http://10.20.50.11:2283";
           llama = mkServer "http://10.20.50.20:9292";
           ollama = mkServer "http://10.20.50.20:11434";
@@ -117,7 +116,6 @@ in {
 
           adguard = mkInternalRouter "dns.hl.sk4i.com" "adguard";
           home-assistant = mkInternalRouter "ha.hl.sk4i.com" "home-assistant";
-          haushaltsbuch = mkInternalRouter "hb.hl.sk4i.com" "haushaltsbuch";
           llama = mkInternalRouter "llama.hl.sk4i.com" "llama";
           ollama = mkInternalRouter "ollama.hl.sk4i.com" "ollama";
           open-webui = mkInternalRouter "openwebui.hl.sk4i.com" "open-webui";

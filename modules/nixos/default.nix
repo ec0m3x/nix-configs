@@ -10,9 +10,7 @@
   docker = import ./docker.nix;
   gaming = import ./gaming.nix;
   haos-vm = import ./haos-vm.nix;
-  haushaltsbuch = import ./haushaltsbuch.nix;
   homelab-gitops = import ./homelab-gitops.nix;
-  honcho = import ./honcho.nix;
   latex = import ./latex.nix;
   homelab-backup = import ./homelab-backup.nix;
   immich = import ./immich.nix;

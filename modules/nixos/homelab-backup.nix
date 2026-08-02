@@ -16,7 +16,6 @@
 
   hostPaths = {
     hl01 = [
-      "/srv/haushaltsbuch"
       "/srv/immich/upload"
       "/srv/paperless"
       "/var/lib/private/open-webui"
@@ -63,18 +62,6 @@
         ${backupRoot}/postgresql/cluster.sql
       ${pkgs.coreutils}/bin/chown root:root ${backupRoot}/postgresql/cluster.sql
       ${pkgs.coreutils}/bin/chmod 0600 ${backupRoot}/postgresql/cluster.sql
-
-      ${pkgs.coreutils}/bin/test -s /srv/haushaltsbuch/haushaltsbuch.db
-      ${pkgs.coreutils}/bin/rm -f ${backupRoot}/haushaltsbuch.sqlite.new
-      ${pkgs.sqlite}/bin/sqlite3 \
-        /srv/haushaltsbuch/haushaltsbuch.db \
-        ".backup '${backupRoot}/haushaltsbuch.sqlite.new'"
-      ${pkgs.sqlite}/bin/sqlite3 \
-        ${backupRoot}/haushaltsbuch.sqlite.new \
-        "PRAGMA quick_check;" | ${pkgs.gnugrep}/bin/grep --quiet --line-regexp ok
-      ${pkgs.coreutils}/bin/mv \
-        ${backupRoot}/haushaltsbuch.sqlite.new \
-        ${backupRoot}/haushaltsbuch.sqlite
 
       if [[ -s /var/lib/private/open-webui/data/webui.db ]]; then
         ${pkgs.coreutils}/bin/rm -f ${backupRoot}/open-webui.sqlite.new

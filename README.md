@@ -37,8 +37,7 @@ are documented separately in
 The concise current-state and next-session handover is in
 [`docs/next-session.md`](docs/next-session.md).
 
-- `hl01`: Immich, Paperless-ngx, Open WebUI, Haushaltsbuch, Honcho,
-  Home Assistant OS (KVM)
+- `hl01`: Immich, Paperless-ngx, Open WebUI and Home Assistant OS (KVM)
 - `hl02`: AdGuard Home, Traefik, Vaultwarden, SearXNG, Stirling-PDF
 - `hl03`: Nextcloud, LiteLLM, PostgreSQL/MariaDB, cloudflared, restic target
 
@@ -423,8 +422,7 @@ Imported via `inputs.self.nixosModules.<name>` in `configuration.nix`:
 - `tailscale` — VPN networking
 - Homelab application modules include `traefik`, `vaultwarden`, `searxng`,
   `stirling-pdf`, `nextcloud`, `litellm`, `cloudflared`, `restic-target`,
-  `homelab-backup`, `immich`, `paperless`, `open-webui`,
-  `haushaltsbuch`, and `honcho`
+  `homelab-backup`, `immich`, `paperless`, and `open-webui`
 
 ### Home-Manager Modules (`modules/home-manager/`)
 
