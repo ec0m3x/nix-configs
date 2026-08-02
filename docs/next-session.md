@@ -61,6 +61,14 @@ Last updated: 2026-08-02
   `/home/ecomex/ava-config-export` with private permissions for a fresh,
   user-managed installation as `ecomex`. Older encrypted Restic snapshots and
   the migration exports remain available as recovery sources.
+- The migrated Haushaltsbuch and Honcho installations were also completely
+  removed from `hl01` on 2026-08-02. Their services, container images, SOPS
+  secrets, proxy/firewall declarations, live data, Honcho PostgreSQL
+  database/role and Redis state no longer exist, and the backup schedule no
+  longer includes Haushaltsbuch. The complete effective Haushaltsbuch
+  environment remains privately at `/home/ecomex/haushaltsbuch.env` for a
+  fresh user-managed deployment. Older encrypted Restic snapshots and
+  migration exports remain available as recovery sources.
 
 The complete operating and restore runbook is
 [`homelab-backups.md`](homelab-backups.md). Do not remove the encrypted

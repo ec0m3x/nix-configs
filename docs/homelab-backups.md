@@ -36,7 +36,7 @@ daily timer adds a random delay of up to ten minutes.
 
 | Host | Daily start | Consistent application state | File data |
 | --- | --- | --- | --- |
-| `hl01` | 02:15 | PostgreSQL cluster dump; SQLite online backups for Haushaltsbuch and Open WebUI | Immich uploads, Paperless data/media/consume, Haushaltsbuch and Open WebUI state |
+| `hl01` | 02:15 | PostgreSQL cluster dump; SQLite online backup for Open WebUI | Immich uploads, Paperless data/media/consume and Open WebUI state |
 | `hl02` | 03:15 | Native Vaultwarden backup plus SQLite integrity check | Vaultwarden, AdGuard Home, Stirling-PDF and Traefik state |
 | `hl03` | 04:15 | Nextcloud maintenance mode; MariaDB and PostgreSQL cluster dumps | Complete Nextcloud home/data directory |
 
@@ -96,9 +96,7 @@ sudo find /var/tmp/restic-restore-test -xdev -maxdepth 3 -type f | head
 Useful integrity checks on the restored exports include:
 
 ```bash
-# hl01 (sqlite3 is installed on this host)
-sudo sqlite3 /var/tmp/restic-restore-test/var/lib/homelab-backup/haushaltsbuch.sqlite \
-  'PRAGMA quick_check;'
+# hl01
 sudo test -s /var/tmp/restic-restore-test/var/lib/homelab-backup/postgresql/cluster.sql
 
 # hl02: compare immediately after a backup; its preparation already ran
