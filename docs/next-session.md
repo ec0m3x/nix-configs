@@ -54,10 +54,13 @@ Last updated: 2026-08-02
   gateway was not declared on `hl01`. `hermes-gateway.service` now runs beside
   the dashboard. On `nix-ai`, activation also recovers an accidentally removed
   `/etc/nixos-secrets/ecomex` atomically from the existing shadow password hash
-  before user reconciliation; the hash remains outside the repository. The
-  current account uses an older modular-crypt scheme, so rotating it to
-  yescrypt still requires setting the password again with a freshly generated
-  `mkpasswd -m yescrypt` hash.
+  before user reconciliation; the hash remains outside the repository. Fresh
+  installations and intentional password rotations must continue to use a
+  freshly generated `mkpasswd -m yescrypt` hash.
+- Hermes' gateway and Telegram connection are healthy. Its Home Assistant
+  integration currently retries because `10.20.50.57:8123` is unreachable,
+  and the configured `n8n` MCP process closes during startup. These integration
+  failures do not stop the gateway or dashboard.
 
 The complete operating and restore runbook is
 [`homelab-backups.md`](homelab-backups.md). Do not remove the encrypted
