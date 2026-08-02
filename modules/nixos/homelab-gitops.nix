@@ -63,7 +63,6 @@
       pkgs.git
       pkgs.jq
       pkgs.openssh
-      pkgs.sudo
       config.systemd.package
     ];
     text = ''
@@ -158,7 +157,7 @@
         if target.local
         then ''
           echo "==> activating ${target.name} locally"
-          sudo -n "$activation_command" "''${system_paths[${target.name}]}" "$revision"
+          /run/wrappers/bin/sudo -n "$activation_command" "''${system_paths[${target.name}]}" "$revision"
           failed_units=$(systemctl --failed --no-legend --plain --no-pager)
           if [[ -n "$failed_units" ]]; then
             printf 'Failed units on ${target.name}:\n%s\n' "$failed_units" >&2
