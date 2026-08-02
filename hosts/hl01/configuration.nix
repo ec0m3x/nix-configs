@@ -44,46 +44,4 @@
     sqlite
     zstd
   ];
-
-  # One-time handoff for a clean Hermes installation under the ecomex account.
-  # Remove this activation snippet after the private export has been verified.
-  system.activationScripts.exportAvaConfig = {
-    deps = [
-      "setupSecrets"
-      "users"
-    ];
-    text = ''
-      source_soul=/home/hermes/.hermes/SOUL.md
-      source_environment=/run/secrets/hermes_environment
-      destination=/home/ecomex/ava-config-export
-
-      [[ -f "$source_soul" ]] || {
-        echo "AVA export source SOUL.md is missing" >&2
-        exit 1
-      }
-      [[ -f "$source_environment" ]] || {
-        echo "AVA export source environment is missing" >&2
-        exit 1
-      }
-      [[ ! -e "$destination" ]] || {
-        echo "refusing to overwrite existing AVA export" >&2
-        exit 1
-      }
-
-      temporary_dir="$(${pkgs.coreutils}/bin/mktemp -d --tmpdir=/home/ecomex .ava-config-export.XXXXXX)"
-      trap '
-        ${pkgs.coreutils}/bin/rm -f "$temporary_dir/SOUL.md" "$temporary_dir/.env"
-        ${pkgs.coreutils}/bin/rmdir "$temporary_dir"
-      ' EXIT
-
-      ${pkgs.coreutils}/bin/install -m 0600 -o ecomex -g users \
-        "$source_soul" "$temporary_dir/SOUL.md"
-      ${pkgs.coreutils}/bin/install -m 0600 -o ecomex -g users \
-        "$source_environment" "$temporary_dir/.env"
-      ${pkgs.coreutils}/bin/chown ecomex:users "$temporary_dir"
-      ${pkgs.coreutils}/bin/chmod 0700 "$temporary_dir"
-      ${pkgs.coreutils}/bin/mv "$temporary_dir" "$destination"
-      trap - EXIT
-    '';
-  };
 }

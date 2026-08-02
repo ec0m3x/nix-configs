@@ -61,6 +61,12 @@ Last updated: 2026-08-02
   integration currently retries because `10.20.50.57:8123` is unreachable,
   and the configured `n8n` MCP process closes during startup. These integration
   failures do not stop the gateway or dashboard.
+- For the planned clean Hermes installation as `ecomex`, AVA's `SOUL.md` and
+  live SOPS-derived `.env` were exported to the private directory
+  `/home/ecomex/ava-config-export` on `hl01`. The directory is mode 0700 and
+  both files are mode 0600. The temporary activation hook was removed again;
+  the old `hermes` user, home and services remain untouched until the new
+  installation has been configured and accepted.
 
 The complete operating and restore runbook is
 [`homelab-backups.md`](homelab-backups.md). Do not remove the encrypted
