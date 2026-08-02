@@ -16,7 +16,6 @@
 
   hostPaths = {
     hl01 = [
-      "/home/hermes"
       "/srv/haushaltsbuch"
       "/srv/immich/upload"
       "/srv/paperless"
@@ -35,7 +34,6 @@
 
   hostExcludes = {
     hl01 = [
-      "/home/hermes/.cache"
       "/var/lib/private/open-webui/hf_home"
       "/var/lib/private/open-webui/transformers_home"
     ];

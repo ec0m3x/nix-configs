@@ -423,7 +423,7 @@ Imported via `inputs.self.nixosModules.<name>` in `configuration.nix`:
 - `tailscale` — VPN networking
 - Homelab application modules include `traefik`, `vaultwarden`, `searxng`,
   `stirling-pdf`, `nextcloud`, `litellm`, `cloudflared`, `restic-target`,
-  `homelab-backup`, `immich`, `paperless`, `open-webui`, `hermes-agent`,
+  `homelab-backup`, `immich`, `paperless`, `open-webui`,
   `haushaltsbuch`, and `honcho`
 
 ### Home-Manager Modules (`modules/home-manager/`)

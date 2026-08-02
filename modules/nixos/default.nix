@@ -14,7 +14,6 @@
   homelab-gitops = import ./homelab-gitops.nix;
   honcho = import ./honcho.nix;
   latex = import ./latex.nix;
-  hermes-agent = import ./hermes-agent.nix;
   homelab-backup = import ./homelab-backup.nix;
   immich = import ./immich.nix;
   llama-swap = import ./llama-swap.nix;

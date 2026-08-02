@@ -1,5 +1,5 @@
 # hl01 — ehemals pve01 (10.20.50.11, 16 GiB RAM, i5-4590T).
-# Phase 4: Immich, Paperless-ngx, Open WebUI, Haushaltsbuch + Honcho und AVA.
+# Phase 4: Immich, Paperless-ngx, Open WebUI, Haushaltsbuch + Honcho.
 # Eine frische Home-Assistant-OS-VM ist aktiv; Samba folgt bei Bedarf später.
 #
 # ACHTUNG: Die Onboard-NIC dieses Hosts ist defekt/down — das System läuft
@@ -16,7 +16,6 @@
     ./services/postgresql.nix
     inputs.self.nixosModules.haos-vm
     inputs.self.nixosModules.haushaltsbuch
-    inputs.self.nixosModules.hermes-agent
     inputs.self.nixosModules.honcho
     inputs.self.nixosModules.homelab-backup
     inputs.self.nixosModules.immich
@@ -38,6 +37,19 @@
       prefixLength = 24;
     }
   ];
+
+  # Keep compatibility for user-managed Python environments that expect the
+  # conventional Linux dynamic linker (for example a fresh Hermes install).
+  programs.nix-ld = {
+    enable = true;
+    libraries = with pkgs; [
+      stdenv.cc.cc.lib
+      zlib
+      openssl
+      libffi
+      sqlite
+    ];
+  };
 
   environment.systemPackages = with pkgs; [
     git
