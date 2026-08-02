@@ -16,6 +16,7 @@
     inputs.self.nixosModules.comfyui
     inputs.self.nixosModules.core-packages
     inputs.self.nixosModules.docker
+    inputs.self.nixosModules.homelab-gitops
     inputs.self.nixosModules.llama-swap
     inputs.self.nixosModules.locale
     inputs.self.nixosModules.nh
@@ -167,6 +168,34 @@
 
   # Zsh shell
   programs.zsh.enable = true;
+
+  # Pull-basiertes GitOps: erst alle Hosts bauen, dann hl03 -> hl02 -> hl01
+  # und zuletzt den lokalen Buildhost aktivieren. GitHub muss check.yml für
+  # den exakten main-Commit erfolgreich abgeschlossen haben.
+  services.homelabGitOps = {
+    target.enable = true;
+    controller = {
+      enable = true;
+      targets = [
+        {
+          name = "hl03";
+          address = "10.20.50.13";
+        }
+        {
+          name = "hl02";
+          address = "10.20.50.12";
+        }
+        {
+          name = "hl01";
+          address = "10.20.50.11";
+        }
+        {
+          name = "nix-ai";
+          local = true;
+        }
+      ];
+    };
+  };
 
   # Configure your system-wide user settings (groups, etc), add more users as needed.
   users.users = {

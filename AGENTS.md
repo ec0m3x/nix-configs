@@ -55,6 +55,12 @@ those get wrong, omit, or where the live config has drifted.
   incremental run were verified on 2026-08-01; both ended unmounted, powered
   off and safe to unplug. Never add a generic hotplug/format rule or use a
   destructive `rsync --delete` mirror.
+- **GitOps deployment is declared on `nix-ai`.** After the one-time bootstrap
+  in `docs/gitops.md`, `homelab-gitops.timer` polls public `main`, waits for the
+  successful `flake-check` run for the exact commit, builds all four NixOS
+  configurations, then deploys `hl03` -> `hl02` -> `hl01` -> `nix-ai`. It does
+  not manage `nix-mac`. Keep the CI gate, build-before-switch invariant,
+  deployment order and restricted activation wrapper intact.
 
 ## Commands
 
@@ -82,6 +88,11 @@ ssh -t nix-ai
 cd /home/ecomex/nix-configs
 nixos-rebuild switch --flake .#hl01 \
   --target-host ecomex@10.20.50.11 --ask-sudo-password
+
+# Inspect or manually trigger the GitOps controller on nix-ai
+systemctl status homelab-gitops.timer --no-pager
+sudo systemctl start homelab-gitops.service
+journalctl -u homelab-gitops.service -n 200 --no-pager
 
 # Format (alejandra via nix fmt)
 nix fmt

@@ -81,6 +81,12 @@ explicit because those upgrades require their own migration steps.
 Home Manager is enabled as part of each homelab NixOS configuration and uses a
 minimal server profile; no standalone Home Manager command is needed.
 
+After the one-time bootstrap, pushes to `main` are deployed automatically by
+the pull-based controller on `nix-ai`. It waits for the successful GitHub check,
+builds every NixOS configuration before the first activation and preserves the
+safe `hl03` -> `hl02` -> `hl01` -> `nix-ai` order. Bootstrap, monitoring and
+rollback are documented in [`docs/gitops.md`](docs/gitops.md).
+
 ## Installation from NixOS Minimal Image
 
 This guide assumes you are booting from a fresh [NixOS minimal ISO](https://nixos.org/download/#nixos-iso) and want to apply this flake to your machine. The process is broken into four phases: preparing the disk, installing the system, post-install configuration, and notes for different hardware.

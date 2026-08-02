@@ -12,6 +12,7 @@
     inputs.home-manager.nixosModules.home-manager
     inputs.self.nixosModules.boot
     inputs.self.nixosModules.core-packages
+    inputs.self.nixosModules.homelab-gitops
     inputs.self.nixosModules.locale
     inputs.self.nixosModules.nh
     inputs.self.nixosModules.ssh
@@ -69,6 +70,10 @@
   };
 
   programs.zsh.enable = true;
+
+  # Der GitOps-Controller auf nix-ai darf ausschließlich bereits kopierte,
+  # zum Host passende NixOS-Closures über den validierenden Wrapper aktivieren.
+  services.homelabGitOps.target.enable = true;
 
   # Home Manager runs as part of the NixOS activation. Homelab hosts use a
   # small server profile rather than the nix-ai/macOS workstation profile.
