@@ -36,14 +36,13 @@ daily timer adds a random delay of up to ten minutes.
 
 | Host | Daily start | Consistent application state | File data |
 | --- | --- | --- | --- |
-| `hl01` | 02:15 | PostgreSQL cluster dump; SQLite online backups for Haushaltsbuch and Open WebUI | Immich uploads, Paperless data/media/consume, Hermes, Haushaltsbuch and Open WebUI state |
+| `hl01` | 02:15 | PostgreSQL cluster dump; SQLite online backups for Haushaltsbuch and Open WebUI | Immich uploads, Paperless data/media/consume, Haushaltsbuch and Open WebUI state |
 | `hl02` | 03:15 | Native Vaultwarden backup plus SQLite integrity check | Vaultwarden, AdGuard Home, Stirling-PDF and Traefik state |
 | `hl03` | 04:15 | Nextcloud maintenance mode; MariaDB and PostgreSQL cluster dumps | Complete Nextcloud home/data directory |
 
 Every repository also contains `/etc/nixos-secrets`, `/etc/ssh`, the Tailscale
 state and `/var/lib/homelab-backup`, where the consistent database exports are
-staged. Regenerable caches such as Hermes' cache and Open WebUI model caches
-are excluded.
+staged. Regenerable Open WebUI model caches are excluded.
 
 Retention runs on `hl03` every Sunday at 06:00 and keeps seven daily, five
 weekly and six monthly snapshots. The same job prunes unused data and reads a

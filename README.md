@@ -37,8 +37,8 @@ are documented separately in
 The concise current-state and next-session handover is in
 [`docs/next-session.md`](docs/next-session.md).
 
-- `hl01`: Immich, Paperless-ngx, Open WebUI, AVA/Hermes, Haushaltsbuch,
-  Honcho, Home Assistant OS (KVM)
+- `hl01`: Immich, Paperless-ngx, Open WebUI, Haushaltsbuch, Honcho,
+  Home Assistant OS (KVM)
 - `hl02`: AdGuard Home, Traefik, Vaultwarden, SearXNG, Stirling-PDF
 - `hl03`: Nextcloud, LiteLLM, PostgreSQL/MariaDB, cloudflared, restic target
 

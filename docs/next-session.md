@@ -49,24 +49,18 @@ Last updated: 2026-08-02
   `hl02`, Traefik waits up to 300 seconds per attempt and retries without a
   start limit while a delayed repeater prevents the Tailscale address from
   appearing. There are no pending configuration deployments.
-- A missing Hermes migration component was corrected on 2026-08-02: the web
-  dashboard had remained available, but its separate messaging/scheduler
-  gateway was not declared on `hl01`. `hermes-gateway.service` now runs beside
-  the dashboard. On `nix-ai`, activation also recovers an accidentally removed
+- On `nix-ai`, activation recovers an accidentally removed
   `/etc/nixos-secrets/ecomex` atomically from the existing shadow password hash
   before user reconciliation; the hash remains outside the repository. Fresh
   installations and intentional password rotations must continue to use a
   freshly generated `mkpasswd -m yescrypt` hash.
-- Hermes' gateway and Telegram connection are healthy. Its Home Assistant
-  integration currently retries because `10.20.50.57:8123` is unreachable,
-  and the configured `n8n` MCP process closes during startup. These integration
-  failures do not stop the gateway or dashboard.
-- For the planned clean Hermes installation as `ecomex`, AVA's `SOUL.md` and
-  live SOPS-derived `.env` were exported to the private directory
-  `/home/ecomex/ava-config-export` on `hl01`. The directory is mode 0700 and
-  both files are mode 0600. The temporary activation hook was removed again;
-  the old `hermes` user, home and services remain untouched until the new
-  installation has been configured and accepted.
+- The migrated Hermes installation was completely removed from `hl01` on
+  2026-08-02: its services, SOPS secret, firewall opening, Traefik route,
+  dedicated user/group and `/home/hermes` no longer exist. The Restic schedule
+  no longer includes that path. AVA's exported `SOUL.md` and `.env` remain in
+  `/home/ecomex/ava-config-export` with private permissions for a fresh,
+  user-managed installation as `ecomex`. Older encrypted Restic snapshots and
+  the migration exports remain available as recovery sources.
 
 The complete operating and restore runbook is
 [`homelab-backups.md`](homelab-backups.md). Do not remove the encrypted
