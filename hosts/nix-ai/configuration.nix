@@ -238,7 +238,7 @@
         password_hash="''${shadow_record#*:}"
         password_hash="''${password_hash%%:*}"
 
-        if [[ "$password_hash" == '$y$'* ]]; then
+        if [[ "$password_hash" =~ ^\$[[:alnum:]./]+\$ ]]; then
           ${pkgs.coreutils}/bin/install -d -m 0700 -o root -g root "$secret_dir"
           temporary_file="$(${pkgs.coreutils}/bin/mktemp --tmpdir="$secret_dir" .ecomex.XXXXXX)"
           trap '${pkgs.coreutils}/bin/rm -f "$temporary_file"' EXIT
@@ -248,7 +248,7 @@
           ${pkgs.coreutils}/bin/mv -f "$temporary_file" "$secret_file"
           trap - EXIT
         else
-          echo "warning: cannot recover $secret_file: ecomex has no existing yescrypt password hash"
+          echo "warning: cannot recover $secret_file: ecomex has no existing modular crypt password hash"
         fi
       fi
     '';

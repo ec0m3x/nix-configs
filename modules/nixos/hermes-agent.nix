@@ -98,6 +98,7 @@
       VIRTUAL_ENV = "/home/hermes/.hermes/hermes-agent/venv";
     };
     script = ''
+      export PATH="/home/hermes/.hermes/hermes-agent/venv/bin:/home/hermes/.local/bin:$PATH"
       exec /home/hermes/.hermes/hermes-agent/venv/bin/python3 \
         -m hermes_cli.main gateway run
     '';

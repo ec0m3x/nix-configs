@@ -53,8 +53,11 @@ Last updated: 2026-08-02
   dashboard had remained available, but its separate messaging/scheduler
   gateway was not declared on `hl01`. `hermes-gateway.service` now runs beside
   the dashboard. On `nix-ai`, activation also recovers an accidentally removed
-  `/etc/nixos-secrets/ecomex` atomically from the existing yescrypt shadow hash
-  before user reconciliation; the hash remains outside the repository.
+  `/etc/nixos-secrets/ecomex` atomically from the existing shadow password hash
+  before user reconciliation; the hash remains outside the repository. The
+  current account uses an older modular-crypt scheme, so rotating it to
+  yescrypt still requires setting the password again with a freshly generated
+  `mkpasswd -m yescrypt` hash.
 
 The complete operating and restore runbook is
 [`homelab-backups.md`](homelab-backups.md). Do not remove the encrypted
