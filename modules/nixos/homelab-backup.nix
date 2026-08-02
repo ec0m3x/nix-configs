@@ -16,6 +16,7 @@
 
   hostPaths = {
     hl01 = [
+      "/srv/haushaltsbuch"
       "/srv/immich/upload"
       "/srv/paperless"
       "/var/lib/private/open-webui"
@@ -62,6 +63,24 @@
         ${backupRoot}/postgresql/cluster.sql
       ${pkgs.coreutils}/bin/chown root:root ${backupRoot}/postgresql/cluster.sql
       ${pkgs.coreutils}/bin/chmod 0600 ${backupRoot}/postgresql/cluster.sql
+
+      # Konsistente SQLite-Kopie statt Datei-Snapshot des laufenden WAL.
+      # Guard, weil die DB erst beim ersten Start des Containers entsteht —
+      # ein Backup-Lauf davor darf nicht fehlschlagen.
+      if [[ -s /srv/haushaltsbuch/haushaltsbuch.db ]]; then
+        ${pkgs.coreutils}/bin/rm -f ${backupRoot}/haushaltsbuch.sqlite.new
+        ${pkgs.sqlite}/bin/sqlite3 \
+          /srv/haushaltsbuch/haushaltsbuch.db \
+          ".backup '${backupRoot}/haushaltsbuch.sqlite.new'"
+        ${pkgs.sqlite}/bin/sqlite3 \
+          ${backupRoot}/haushaltsbuch.sqlite.new \
+          "PRAGMA quick_check;" | ${pkgs.gnugrep}/bin/grep --quiet --line-regexp ok
+        ${pkgs.coreutils}/bin/mv \
+          ${backupRoot}/haushaltsbuch.sqlite.new \
+          ${backupRoot}/haushaltsbuch.sqlite
+      else
+        ${pkgs.coreutils}/bin/rm -f ${backupRoot}/haushaltsbuch.sqlite
+      fi
 
       if [[ -s /var/lib/private/open-webui/data/webui.db ]]; then
         ${pkgs.coreutils}/bin/rm -f ${backupRoot}/open-webui.sqlite.new

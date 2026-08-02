@@ -1,5 +1,5 @@
 # hl01 — ehemals pve01 (10.20.50.11, 16 GiB RAM, i5-4590T).
-# Phase 4: Immich, Paperless-ngx and Open WebUI.
+# Phase 4: Immich, Paperless-ngx, Open WebUI und Haushaltsbuch.
 # Eine frische Home-Assistant-OS-VM ist aktiv; Samba folgt bei Bedarf später.
 #
 # ACHTUNG: Die Onboard-NIC dieses Hosts ist defekt/down — das System läuft
@@ -15,6 +15,7 @@
     ./disko.nix
     ./services/postgresql.nix
     inputs.self.nixosModules.haos-vm
+    inputs.self.nixosModules.haushaltsbuch
     inputs.self.nixosModules.homelab-backup
     inputs.self.nixosModules.immich
     inputs.self.nixosModules.open-webui
