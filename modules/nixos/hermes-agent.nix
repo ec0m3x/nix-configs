@@ -7,7 +7,10 @@
     owner = "hermes";
     group = "hermes";
     mode = "0400";
-    restartUnits = ["hermes-dashboard.service"];
+    restartUnits = [
+      "hermes-dashboard.service"
+      "hermes-gateway.service"
+    ];
   };
 
   users.groups.hermes.gid = 1001;
@@ -71,6 +74,55 @@
       ProcSubset = "pid";
       MemoryHigh = "2G";
       MemoryMax = "3G";
+    };
+  };
+
+  # The dashboard only exposes the web UI. Messaging channels and scheduled
+  # jobs are handled by the separate long-running gateway process.
+  systemd.services.hermes-gateway = {
+    description = "Hermes Agent Gateway";
+    wantedBy = ["multi-user.target"];
+    after = ["network-online.target"];
+    wants = ["network-online.target"];
+    path = [
+      pkgs.bash
+      pkgs.coreutils
+      pkgs.curl
+      pkgs.git
+      pkgs.nodejs
+      pkgs.openssh
+    ];
+    environment = {
+      HOME = "/home/hermes";
+      HERMES_HOME = "/home/hermes/.hermes";
+      VIRTUAL_ENV = "/home/hermes/.hermes/hermes-agent/venv";
+    };
+    script = ''
+      exec /home/hermes/.hermes/hermes-agent/venv/bin/python3 \
+        -m hermes_cli.main gateway run
+    '';
+    unitConfig = {
+      ConditionPathExists = "/home/hermes/.hermes/hermes-agent/hermes_cli/main.py";
+      StartLimitIntervalSec = 0;
+    };
+    serviceConfig = {
+      Type = "simple";
+      User = "hermes";
+      Group = "hermes";
+      UMask = "0077";
+      WorkingDirectory = "/home/hermes/.hermes";
+      EnvironmentFile = config.sops.secrets.hermes_environment.path;
+      Restart = "always";
+      RestartSec = 5;
+      RestartForceExitStatus = 75;
+      RestartPreventExitStatus = 78;
+      KillMode = "mixed";
+      KillSignal = "SIGTERM";
+      ExecReload = "${pkgs.coreutils}/bin/kill -USR1 $MAINPID";
+      ExecStopPost = "-/home/hermes/.hermes/hermes-agent/venv/bin/python3 -m gateway.cgroup_cleanup";
+      TimeoutStopSec = 210;
+      ProtectProc = "invisible";
+      ProcSubset = "pid";
     };
   };
 

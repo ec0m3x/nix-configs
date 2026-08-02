@@ -225,6 +225,36 @@
     };
   };
 
+  # Recover the external password file from the current account if it was
+  # accidentally removed. Fresh installations must still inject the file.
+  system.activationScripts.restoreEcomexPasswordFile = {
+    deps = ["specialfs"];
+    text = ''
+      secret_dir=/etc/nixos-secrets
+      secret_file="$secret_dir/ecomex"
+
+      if [[ ! -e "$secret_file" ]]; then
+        shadow_record="$(${pkgs.glibc.bin}/bin/getent shadow ecomex || true)"
+        password_hash="''${shadow_record#*:}"
+        password_hash="''${password_hash%%:*}"
+
+        if [[ "$password_hash" == '$y$'* ]]; then
+          ${pkgs.coreutils}/bin/install -d -m 0700 -o root -g root "$secret_dir"
+          temporary_file="$(${pkgs.coreutils}/bin/mktemp --tmpdir="$secret_dir" .ecomex.XXXXXX)"
+          trap '${pkgs.coreutils}/bin/rm -f "$temporary_file"' EXIT
+          ${pkgs.coreutils}/bin/chmod 0600 "$temporary_file"
+          ${pkgs.coreutils}/bin/printf '%s\n' "$password_hash" >"$temporary_file"
+          ${pkgs.coreutils}/bin/chown root:root "$temporary_file"
+          ${pkgs.coreutils}/bin/mv -f "$temporary_file" "$secret_file"
+          trap - EXIT
+        else
+          echo "warning: cannot recover $secret_file: ecomex has no existing yescrypt password hash"
+        fi
+      fi
+    '';
+  };
+  system.activationScripts.users.deps = ["restoreEcomexPasswordFile"];
+
   # Sudo: show asterisks on password input and insult on wrong password
   security.sudo.extraConfig = ''
     Defaults pwfeedback

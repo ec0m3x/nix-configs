@@ -30,15 +30,15 @@ Last updated: 2026-08-02
   unplug` after both runs.
 - At the final online check all backup timers were active and no host had a
   failed systemd unit.
-- A pull-based GitOps workflow is now declared in the repository. Its one-time
-  live bootstrap is still pending: deploy the target wrappers to `hl03`,
-  `hl02`, and `hl01` with the existing manual script, then switch `nix-ai` to
-  start the controller. Follow `docs/gitops.md`; do not enable the controller
-  before the remote wrappers exist.
+- The pull-based GitOps workflow is active and verified. `nix-ai` follows a
+  successful `flake-check` on `main`, builds all four NixOS configurations and
+  deploys `hl03`, `hl02`, `hl01`, then itself. The initial end-to-end run and a
+  subsequent no-op run succeeded on 2026-08-02. Follow `docs/gitops.md` for
+  operation and recovery.
 - `hl01`, `hl02`, `hl03` and `nix-ai` came back cleanly after the office
   rearrangement. The network/repeater issue is resolved, all hosts are
-  reachable and, apart from the GitOps bootstrap above, there are no pending
-  configuration deployments.
+  reachable and there were no pending configuration deployments at that
+  checkpoint.
 - Git `main` is published and synchronized on the Mac and `nix-ai`. The durable
   backup implementation starts at commit `ffbf2b9`; the removable hotplug
   mirror was implemented by commit `5c2bd79` and its verified commissioning is
@@ -49,6 +49,12 @@ Last updated: 2026-08-02
   `hl02`, Traefik waits up to 300 seconds per attempt and retries without a
   start limit while a delayed repeater prevents the Tailscale address from
   appearing. There are no pending configuration deployments.
+- A missing Hermes migration component was corrected on 2026-08-02: the web
+  dashboard had remained available, but its separate messaging/scheduler
+  gateway was not declared on `hl01`. `hermes-gateway.service` now runs beside
+  the dashboard. On `nix-ai`, activation also recovers an accidentally removed
+  `/etc/nixos-secrets/ecomex` atomically from the existing yescrypt shadow hash
+  before user reconciliation; the hash remains outside the repository.
 
 The complete operating and restore runbook is
 [`homelab-backups.md`](homelab-backups.md). Do not remove the encrypted
