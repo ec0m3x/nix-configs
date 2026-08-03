@@ -7,7 +7,17 @@ keys:
   - &hl01 age1f2ky3s8yrvju8cvx7yj4qgp0ztn8gn03mw64dfa22k7y9kvjzceszf05r8
 
 creation_rules:
-  - path_regex: secrets/.*\.ya?ml$
+  # sops matcht die Regex gegen den Pfad relativ zur Config, und Go liefert den
+  # auf Windows mit Backslash — `secrets/.*` matcht dort also nie und jedes
+  # `sops -e`/`--set` von der Workstation scheitert mit "no matching creation
+  # rules found". Die Zeichenklasse deckt beide Trenner ab.
+  #
+  # Zweite Windows-Falle: sops erwartet den age-Key dort unter
+  # %APPDATA%\sops\age\keys.txt, nicht im XDG-Pfad ~/.config/sops/age/keys.txt.
+  # Auf der Workstation deshalb SOPS_AGE_KEY_FILE auf die tatsächliche Datei
+  # zeigen lassen, sonst scheitert jedes Entschlüsseln mit "no master key was
+  # able to decrypt the file".
+  - path_regex: secrets[\\/].*\.ya?ml$
     key_groups:
       - age:
           - *admin
