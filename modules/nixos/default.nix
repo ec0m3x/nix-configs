@@ -13,6 +13,8 @@
   haos-vm = import ./haos-vm.nix;
   haushaltsbuch = import ./haushaltsbuch.nix;
   homelab-gitops = import ./homelab-gitops.nix;
+  homelab-metrics = import ./homelab-metrics.nix;
+  homepage-dashboard = import ./homepage-dashboard.nix;
   latex = import ./latex.nix;
   homelab-backup = import ./homelab-backup.nix;
   immich = import ./immich.nix;

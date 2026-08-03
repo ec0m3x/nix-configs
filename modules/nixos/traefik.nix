@@ -92,6 +92,7 @@ in {
         middlewares.deny-admin.ipAllowList.sourceRange = ["127.0.0.1/32"];
 
         services = {
+          homepage = mkServer "http://127.0.0.1:8083";
           vaultwarden = mkServer "http://127.0.0.1:8222";
           searxng = mkServer "http://127.0.0.1:8081";
           stirling-pdf = mkServer "http://127.0.0.1:8082";
@@ -110,6 +111,7 @@ in {
         };
 
         routers = {
+          homepage = mkInternalRouter "dash.hl.sk4i.com" "homepage";
           vaultwarden = mkInternalRouter "vault.hl.sk4i.com" "vaultwarden";
           searxng = mkInternalRouter "search.hl.sk4i.com" "searxng";
           stirling-pdf = mkInternalRouter "pdf.hl.sk4i.com" "stirling-pdf";
@@ -118,6 +120,10 @@ in {
           adguard = mkInternalRouter "dns.hl.sk4i.com" "adguard";
           home-assistant = mkInternalRouter "ha.hl.sk4i.com" "home-assistant";
           haushaltsbuch = mkInternalRouter "hb.hl.sk4i.com" "haushaltsbuch";
+          # Damit der Dashboard-Link nicht über den Cloudflare-Tunnel
+          # hairpinnen muss. Immich prüft den Host-Header nicht;
+          # settings.server.externalDomain betrifft nur Share-Links.
+          immich = mkInternalRouter "photos.hl.sk4i.com" "immich";
           llama = mkInternalRouter "llama.hl.sk4i.com" "llama";
           ollama = mkInternalRouter "ollama.hl.sk4i.com" "ollama";
           open-webui = mkInternalRouter "openwebui.hl.sk4i.com" "open-webui";

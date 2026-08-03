@@ -9,6 +9,7 @@
     ./services/adguardhome.nix
     ./services/tailscale-router.nix
     inputs.self.nixosModules.homelab-backup
+    inputs.self.nixosModules.homepage-dashboard
     inputs.self.nixosModules.searxng
     inputs.self.nixosModules.stirling-pdf
     inputs.self.nixosModules.traefik

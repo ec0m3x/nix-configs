@@ -13,6 +13,7 @@
     inputs.self.nixosModules.boot
     inputs.self.nixosModules.core-packages
     inputs.self.nixosModules.homelab-gitops
+    inputs.self.nixosModules.homelab-metrics
     inputs.self.nixosModules.locale
     inputs.self.nixosModules.nh
     inputs.self.nixosModules.ssh
