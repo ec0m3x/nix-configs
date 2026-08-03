@@ -1,10 +1,12 @@
 # hl03 — ehemals pve03 (10.20.50.13, 8 GiB RAM, i5-4590T).
 # Phase 3: Nextcloud, LiteLLM + Postgres, cloudflared und Restic-Ziel.
+# Dazu Forgejo als Git-Forge — nutzt denselben Postgres-Cluster wie LiteLLM.
 {inputs, ...}: {
   imports = [
     ../homelab/common.nix
     ./disko.nix
     inputs.self.nixosModules.cloudflared
+    inputs.self.nixosModules.forgejo
     inputs.self.nixosModules.homelab-backup
     inputs.self.nixosModules.litellm
     inputs.self.nixosModules.nextcloud

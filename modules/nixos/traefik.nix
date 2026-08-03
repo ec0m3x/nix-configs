@@ -99,6 +99,7 @@ in {
           litellm = mkServer "http://10.20.50.13:4000";
 
           adguard = mkServer "http://10.20.50.49:80";
+          forgejo = mkServer "http://10.20.50.13:3000";
           home-assistant = mkServer "http://10.20.50.14:8123";
           haushaltsbuch = mkServer "http://10.20.50.11:8787";
           immich = mkServer "http://10.20.50.11:2283";
@@ -118,6 +119,7 @@ in {
           litellm = mkInternalRouter "litellm.hl.sk4i.com" "litellm";
 
           adguard = mkInternalRouter "dns.hl.sk4i.com" "adguard";
+          forgejo = mkInternalRouter "git.hl.sk4i.com" "forgejo";
           home-assistant = mkInternalRouter "ha.hl.sk4i.com" "home-assistant";
           haushaltsbuch = mkInternalRouter "hb.hl.sk4i.com" "haushaltsbuch";
           # Damit der Dashboard-Link nicht über den Cloudflare-Tunnel

@@ -9,6 +9,7 @@
   comfyui = import ./comfyui.nix;
   core-packages = import ./core-packages.nix;
   docker = import ./docker.nix;
+  forgejo = import ./forgejo.nix;
   gaming = import ./gaming.nix;
   haos-vm = import ./haos-vm.nix;
   haushaltsbuch = import ./haushaltsbuch.nix;

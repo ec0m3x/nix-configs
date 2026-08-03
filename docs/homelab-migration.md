@@ -56,7 +56,7 @@ Alle drei: Intel i5-4590T (4 Cores), UEFI-Boot.
 |---|---|
 | hl01 (16 GiB) | immich, paperless-ngx, open-webui, haushaltsbuch + honcho, ava, Home Assistant (HAOS-VM); später ggf. Samba-NAS |
 | hl02 (8 GiB) | AdGuard Home, Tailscale-Subnet-Router, Vaultwarden, SearXNG, Stirling-PDF, Reverse-Proxy (Wildcard `*.hl.sk4i.com`, Tailnet-Einstieg) |
-| hl03 (8 GiB) | Nextcloud, LiteLLM + Postgres, cloudflared (Cloudflare-Tunnel), restic-Backup-Ziel |
+| hl03 (8 GiB) | Nextcloud, LiteLLM + Postgres, Forgejo (nutzt denselben Postgres-Cluster), cloudflared (Cloudflare-Tunnel), restic-Backup-Ziel |
 
 ## Installation & Betrieb
 

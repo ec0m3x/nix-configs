@@ -188,6 +188,14 @@ in {
             };
           }
           {
+            Forgejo = {
+              icon = "forgejo.png";
+              href = "https://git.hl.sk4i.com";
+              description = "Git forge";
+              siteMonitor = "http://10.20.50.13:3000";
+            };
+          }
+          {
             Paperless = {
               icon = "paperless-ngx.png";
               href = "https://docs.hl.sk4i.com";

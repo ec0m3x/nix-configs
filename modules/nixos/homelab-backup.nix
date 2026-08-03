@@ -28,6 +28,9 @@
       "/var/lib/traefik"
     ];
     hl03 = [
+      # Die Forgejo-Datenbank steckt bereits im pg_dumpall unten; hier geht es
+      # um die Repos, LFS-Objekte und Avatare.
+      "/srv/forgejo"
       "/srv/nextcloud"
     ];
   };
@@ -38,7 +41,10 @@
       "/var/lib/private/open-webui/transformers_home"
     ];
     hl02 = [];
-    hl03 = [];
+    hl03 = [
+      # Uploads in Arbeit — im Snapshot wertlos.
+      "/srv/forgejo/data/tmp"
+    ];
   };
 
   prepareCommands = {
