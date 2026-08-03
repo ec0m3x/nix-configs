@@ -18,6 +18,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   # v2026.7.30
@@ -27,6 +28,22 @@
   # ebenfalls mit --network=host und spricht ihn über Loopback an; der Server
   # bindet deshalb auf 127.0.0.1 und 8642 wird nicht in der Firewall geöffnet.
   apiPort = 8642;
+
+  # Hermes' "managed scope": /etc/hermes/config.yaml gewinnt gegen die
+  # Agenten-eigene ~/.hermes/config.yaml und ist für CLI und Agent
+  # schreibgeschützt. Gemerged wird blattweise, eine Teilmenge genügt also —
+  # alles außer mcp_servers bleibt in Avas Hand.
+  #
+  # Der Token steht bewusst NICHT hier: das Nix-Store-File ist world-readable.
+  # ${env:...} löst gegen die Prozess-Env auf, die aus sops kommt.
+  managedConfig = (pkgs.formats.yaml {}).generate "hermes-managed-config.yaml" {
+    mcp_servers.haushaltsbuch = {
+      url = "https://hb.hl.sk4i.com/mcp/";
+      headers.Authorization = "Bearer \${env:HB_MCP_TOKEN}";
+      enabled = true;
+      timeout = 180;
+    };
+  };
 in {
   sops.secrets.ava_environment = {
     mode = "0400";
@@ -67,7 +84,10 @@ in {
       image = avaImage;
       cmd = ["gateway" "run"];
       environmentFiles = [config.sops.templates.ava_env.path];
-      volumes = ["/srv/ava:/opt/data:rw"];
+      volumes = [
+        "/srv/ava:/opt/data:rw"
+        "${managedConfig}:/etc/hermes/config.yaml:ro"
+      ];
       extraOptions = [
         "--network=host"
         "--security-opt=no-new-privileges"
