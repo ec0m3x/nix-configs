@@ -14,6 +14,7 @@
     ../homelab/common.nix
     ./disko.nix
     ./services/postgresql.nix
+    inputs.self.nixosModules.ava
     inputs.self.nixosModules.haos-vm
     inputs.self.nixosModules.haushaltsbuch
     inputs.self.nixosModules.homelab-backup

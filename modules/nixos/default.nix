@@ -3,6 +3,7 @@
 {
   # List your module files here
   # my-module = import ./my-module.nix;
+  ava = import ./ava.nix;
   boot = import ./boot.nix;
   cloudflared = import ./cloudflared.nix;
   comfyui = import ./comfyui.nix;
