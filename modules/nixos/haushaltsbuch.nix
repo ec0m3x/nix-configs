@@ -11,8 +11,8 @@
 #   2. Digest hier eintragen, committen, pushen.
 #   3. GitOps-Controller auf nix-ai rollt hl01 aus.
 {config, ...}: let
-  # Tag b8ad8ad (App-Repo main, 2026-08-05).
-  haushaltsbuchImage = "ghcr.io/ec0m3x/haushaltsbuch@sha256:29310eafb07087df75fcaa7352ade4e0eb7d6c5cb1496a23191877c9dc3547da";
+  # Tag aaf6e39 (App-Repo main, 2026-08-05).
+  haushaltsbuchImage = "ghcr.io/ec0m3x/haushaltsbuch@sha256:0dedf16e3370e509a49159c3db9eae78e1a6a96ba88584cba7fc124368645e95";
   ghcrLogin = {
     registry = "ghcr.io";
     username = "ec0m3x";
