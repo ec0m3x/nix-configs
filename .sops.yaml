@@ -17,6 +17,13 @@ creation_rules:
   # Auf der Workstation deshalb SOPS_AGE_KEY_FILE auf die tatsächliche Datei
   # zeigen lassen, sonst scheitert jedes Entschlüsseln mit "no master key was
   # able to decrypt the file".
+  #
+  # Dieselbe Falle auf macOS (2026-08-05): sops fragt Go nach dem
+  # Konfigverzeichnis, und `os.UserConfigDir()` liefert dort
+  # ~/Library/Application Support — der XDG-Pfad wird NICHT durchsucht. Die
+  # Fehlermeldung listet die geprüften Orte auf; steht ~/.config nicht dabei,
+  # ist es dieser Fall und nicht ein falscher Schlüssel. Gesetzt wird
+  # SOPS_AGE_KEY_FILE deshalb deklarativ in home-manager/home-base.nix.
   - path_regex: secrets[\\/].*\.ya?ml$
     key_groups:
       - age:
