@@ -12,9 +12,8 @@
 # unveränderliches Installat würde gegen sein Design arbeiten. Die
 # Erstkonfiguration läuft einmalig über den interaktiven Setup-Wizard.
 #
-# Update: neuen Digest von
-#   https://hub.docker.com/v2/repositories/nousresearch/hermes-agent/tags
-# holen, hier eintragen, committen — GitOps rollt aus.
+# Update: `scripts/bump-ava.sh` pinnt den neuesten Release-Tag von Docker Hub
+# — GitOps rollt danach aus.
 {
   config,
   lib,
