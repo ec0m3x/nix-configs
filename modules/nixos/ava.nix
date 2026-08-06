@@ -20,8 +20,8 @@
   pkgs,
   ...
 }: let
-  # v2026.7.30
-  avaImage = "docker.io/nousresearch/hermes-agent@sha256:b869e64d6496d4763d5e4fb675b5f504cb23b0e35ec9b790481a56118602b10f";
+  # v2026.8.3
+  avaImage = "docker.io/nousresearch/hermes-agent@sha256:16788311e2fa3035456bdc1bafb8ec2b1777db64ebf020af9bb7eb73c3712c9e";
 
   # OpenAI-kompatibler Endpoint. Das Haushaltsbuch läuft auf demselben Host
   # ebenfalls mit --network=host und spricht ihn über Loopback an; der Server
