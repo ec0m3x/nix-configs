@@ -73,6 +73,14 @@ Alle drei: Intel i5-4590T (4 Cores), UEFI-Boot.
 
 ## Phasen und Status
 
+> Die in den folgenden Phasen genannten Migrationsskripte (`*-hl01-phase4.sh`,
+> `*-hl03-phase3.sh`, `export-pve01-phase4-final.sh`, `test-postgres-dump.sh`)
+> wurden am 2026-08-06 aus `scripts/` entfernt — sie waren auf `pve01`/`pve02`
+> und auf Migrationspfade unter `~/.local/share/nix-configs-migration/`
+> verdrahtet, die es nicht mehr gibt. Der letzte Commit, der sie enthält, ist
+> `6dcb778`; von dort lassen sie sich bei Bedarf zurückholen. Die Beschreibungen
+> unten bleiben als Protokoll dessen stehen, was damals ausgeführt wurde.
+
 ### Phase 0 — Repo-Scaffolding ✅ (2026-07-30)
 - [x] flake-Inputs disko + sops-nix, nixosConfigurations hl01–hl03
 - [x] hosts/homelab/common.nix (Basis), hosts/hl0X/ (configuration + disko)
