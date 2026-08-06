@@ -99,6 +99,7 @@ in {
           litellm = mkServer "http://10.20.50.13:4000";
 
           adguard = mkServer "http://10.20.50.49:80";
+          ava = mkServer "http://10.20.50.11:9119";
           forgejo = mkServer "http://10.20.50.13:3000";
           home-assistant = mkServer "http://10.20.50.14:8123";
           haushaltsbuch = mkServer "http://10.20.50.11:8787";
@@ -119,6 +120,9 @@ in {
           litellm = mkInternalRouter "litellm.hl.sk4i.com" "litellm";
 
           adguard = mkInternalRouter "dns.hl.sk4i.com" "adguard";
+          # Bewusst nur intern: das Dashboard liest und schreibt Avas .env und
+          # kann Agenten-Kommandos ausführen.
+          ava = mkInternalRouter "ava.hl.sk4i.com" "ava";
           forgejo = mkInternalRouter "git.hl.sk4i.com" "forgejo";
           home-assistant = mkInternalRouter "ha.hl.sk4i.com" "home-assistant";
           haushaltsbuch = mkInternalRouter "hb.hl.sk4i.com" "haushaltsbuch";

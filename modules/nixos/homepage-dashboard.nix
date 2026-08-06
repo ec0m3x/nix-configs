@@ -674,6 +674,16 @@ in {
       {
         AI = [
           {
+            Ava = {
+              icon = "mdi-robot";
+              href = "https://ava.hl.sk4i.com";
+              description = "Hermes agent dashboard";
+              # /api/status ist auch mit aktivem Auth-Gate öffentlich; jeder
+              # andere Pfad würde hier auf dem Login-Redirect hängenbleiben.
+              siteMonitor = "http://10.20.50.11:9119/api/status";
+            };
+          }
+          {
             "Open WebUI" = {
               icon = "open-webui.png";
               href = "https://openwebui.hl.sk4i.com";
