@@ -3,12 +3,12 @@
   pkgs,
   ...
 }: let
-  wolfKeyboardLayout = let
+  wolfAppConfig = let
     python = pkgs.python3.withPackages (pythonPackages: [pythonPackages.tomlkit]);
   in
     pkgs.writeTextFile {
-      name = "wolf-set-keyboard-layout";
-      destination = "/bin/wolf-set-keyboard-layout";
+      name = "wolf-configure-apps";
+      destination = "/bin/wolf-configure-apps";
       executable = true;
       text = ''
         #!${python}/bin/python
@@ -29,7 +29,12 @@
         document = tomlkit.parse(config_path.read_text())
         layout_keys = ("XKB_DEFAULT_LAYOUT=", "XKB_DEFAULT_VARIANT=")
         desired_environment = ["XKB_DEFAULT_LAYOUT=de", "XKB_DEFAULT_VARIANT="]
+        steam_mount_target = "/mnt/steam-library"
+        desired_steam_mount = (
+            f"/mnt/ssd/steam-library:{steam_mount_target}:rw"
+        )
         changed_apps = 0
+        changed_steam_mounts = 0
 
         for profile in document.get("profiles", []):
             for app in profile.get("apps", []):
@@ -54,7 +59,28 @@
                     environment.extend(updated_environment)
                     changed_apps += 1
 
-        if changed_apps == 0:
+                if runner.get("name") == "WolfSteam":
+                    mounts = runner.get("mounts")
+                    if mounts is None:
+                        mounts = tomlkit.array()
+                        runner["mounts"] = mounts
+
+                    current_mounts = [str(entry) for entry in mounts]
+                    updated_mounts = [
+                        entry
+                        for entry in current_mounts
+                        if not (
+                            len(entry.split(":")) >= 2
+                            and entry.split(":")[1] == steam_mount_target
+                        )
+                    ] + [desired_steam_mount]
+
+                    if current_mounts != updated_mounts:
+                        mounts.clear()
+                        mounts.extend(updated_mounts)
+                        changed_steam_mounts += 1
+
+        if changed_apps == 0 and changed_steam_mounts == 0:
             raise SystemExit(0)
 
         config_stat = config_path.stat()
@@ -74,7 +100,10 @@
             if os.path.exists(temporary_name):
                 os.unlink(temporary_name)
 
-        print(f"Configured German keyboard layout for {changed_apps} Wolf apps")
+        print(
+            f"Configured German keyboard layout for {changed_apps} Wolf apps; "
+            f"configured SSD Steam library for {changed_steam_mounts} apps"
+        )
       '';
     };
 in {
@@ -115,11 +144,12 @@ in {
     ];
   };
 
-  # Wolf passes keyboard layout settings to app containers via each app's
-  # runner environment. Keep the mutable Wolf config consistent for all
-  # current and future Docker apps before the container starts.
+  # Keep the mutable Wolf app config consistent before the container starts:
+  # use a German keyboard layout in every Docker app and expose the SSD-backed
+  # Steam library to the Steam app container.
+  systemd.services.docker-wolf.unitConfig.RequiresMountsFor = "/mnt/ssd";
   systemd.services.docker-wolf.preStart = lib.mkBefore ''
-    ${wolfKeyboardLayout}/bin/wolf-set-keyboard-layout
+    ${wolfAppConfig}/bin/wolf-configure-apps
   '';
 
   # Virtual input devices (uinput/uhid + virtual gamepads)
@@ -136,6 +166,7 @@ in {
   # Wolf config directory
   systemd.tmpfiles.rules = [
     "d /etc/wolf 0755 root root -"
+    "d /mnt/ssd/steam-library 0755 ecomex users -"
   ];
 
   # Firewall: Wolf (host network)
