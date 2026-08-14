@@ -72,6 +72,19 @@
 
   programs.zsh.enable = true;
 
+  # Required for the VS Code Remote SSH server and other dynamically linked
+  # binaries that expect a conventional Linux dynamic linker.
+  programs.nix-ld = {
+    enable = true;
+    libraries = with pkgs; [
+      stdenv.cc.cc.lib
+      zlib
+      openssl
+      libffi
+      sqlite
+    ];
+  };
+
   # Der GitOps-Controller auf nix-ai darf ausschließlich bereits kopierte,
   # zum Host passende NixOS-Closures über den validierenden Wrapper aktivieren.
   services.homelabGitOps.target.enable = true;

@@ -1,7 +1,83 @@
 {
+  lib,
   pkgs,
   ...
-}: {
+}: let
+  wolfKeyboardLayout = let
+    python = pkgs.python3.withPackages (pythonPackages: [pythonPackages.tomlkit]);
+  in
+    pkgs.writeTextFile {
+      name = "wolf-set-keyboard-layout";
+      destination = "/bin/wolf-set-keyboard-layout";
+      executable = true;
+      text = ''
+        #!${python}/bin/python
+        import os
+        import stat
+        import sys
+        import tempfile
+        from pathlib import Path
+
+        import tomlkit
+
+        config_path = Path(
+            sys.argv[1] if len(sys.argv) > 1 else "/etc/wolf/cfg/config.toml"
+        )
+        if not config_path.exists():
+            raise SystemExit(0)
+
+        document = tomlkit.parse(config_path.read_text())
+        layout_keys = ("XKB_DEFAULT_LAYOUT=", "XKB_DEFAULT_VARIANT=")
+        desired_environment = ["XKB_DEFAULT_LAYOUT=de", "XKB_DEFAULT_VARIANT="]
+        changed_apps = 0
+
+        for profile in document.get("profiles", []):
+            for app in profile.get("apps", []):
+                runner = app.get("runner")
+                if runner is None or runner.get("type") != "docker":
+                    continue
+
+                environment = runner.get("env")
+                if environment is None:
+                    environment = tomlkit.array()
+                    runner["env"] = environment
+
+                current_environment = [str(entry) for entry in environment]
+                updated_environment = [
+                    entry
+                    for entry in current_environment
+                    if not entry.startswith(layout_keys)
+                ] + desired_environment
+
+                if current_environment != updated_environment:
+                    environment.clear()
+                    environment.extend(updated_environment)
+                    changed_apps += 1
+
+        if changed_apps == 0:
+            raise SystemExit(0)
+
+        config_stat = config_path.stat()
+        temporary_fd, temporary_name = tempfile.mkstemp(
+            dir=config_path.parent,
+            prefix=".config.toml.",
+        )
+        try:
+            with os.fdopen(temporary_fd, "w") as temporary_file:
+                temporary_file.write(tomlkit.dumps(document))
+                temporary_file.flush()
+                os.fsync(temporary_file.fileno())
+            os.chmod(temporary_name, stat.S_IMODE(config_stat.st_mode))
+            os.chown(temporary_name, config_stat.st_uid, config_stat.st_gid)
+            os.replace(temporary_name, config_path)
+        finally:
+            if os.path.exists(temporary_name):
+                os.unlink(temporary_name)
+
+        print(f"Configured German keyboard layout for {changed_apps} Wolf apps")
+      '';
+    };
+in {
   # Games On Whales - Wolf (headless game streaming)
   # Nvidia Manual method: requires a pre-populated `nvidia-driver-vol` docker volume
   # containing the host's Nvidia driver files. Run `wolf-update-nvidia-volume` once
@@ -38,6 +114,13 @@
       "--device=/dev/nvidia-modeset"
     ];
   };
+
+  # Wolf passes keyboard layout settings to app containers via each app's
+  # runner environment. Keep the mutable Wolf config consistent for all
+  # current and future Docker apps before the container starts.
+  systemd.services.docker-wolf.preStart = lib.mkBefore ''
+    ${wolfKeyboardLayout}/bin/wolf-set-keyboard-layout
+  '';
 
   # Virtual input devices (uinput/uhid + virtual gamepads)
   services.udev.extraRules = ''

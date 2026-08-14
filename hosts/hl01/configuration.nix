@@ -38,19 +38,6 @@
     }
   ];
 
-  # Keep compatibility for user-managed Python environments that expect the
-  # conventional Linux dynamic linker (for example a fresh Hermes install).
-  programs.nix-ld = {
-    enable = true;
-    libraries = with pkgs; [
-      stdenv.cc.cc.lib
-      zlib
-      openssl
-      libffi
-      sqlite
-    ];
-  };
-
   environment.systemPackages = with pkgs; [
     git
     sqlite
