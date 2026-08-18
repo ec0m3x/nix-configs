@@ -255,4 +255,21 @@ in {
       IOWeight = 20;
     };
   };
+
+  # Temporary recovery trigger for the repository ownership incident on
+  # 2026-08-18. Remove after one fresh snapshot per host has been verified.
+  systemd.services."restic-backup-recovery-${hostName}" = {
+    description = "Create a fresh Restic snapshot after repository ownership repair";
+    wantedBy = ["multi-user.target"];
+    wants = ["network-online.target"];
+    after = ["network-online.target"];
+    serviceConfig = {
+      Type = "oneshot";
+      TimeoutStartSec = "infinity";
+    };
+    script = ''
+      ${pkgs.systemd}/bin/systemctl reset-failed restic-backups-${hostName}.service
+      ${pkgs.systemd}/bin/systemctl start restic-backups-${hostName}.service
+    '';
+  };
 }
