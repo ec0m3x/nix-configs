@@ -27,8 +27,16 @@
             raise SystemExit(0)
 
         document = tomlkit.parse(config_path.read_text())
-        layout_keys = ("XKB_DEFAULT_LAYOUT=", "XKB_DEFAULT_VARIANT=")
-        desired_environment = ["XKB_DEFAULT_LAYOUT=de", "XKB_DEFAULT_VARIANT="]
+        managed_environment_keys = (
+            "XKB_DEFAULT_LAYOUT=",
+            "XKB_DEFAULT_VARIANT=",
+            "TZ=",
+        )
+        desired_environment = [
+            "XKB_DEFAULT_LAYOUT=de",
+            "XKB_DEFAULT_VARIANT=",
+            "TZ=Europe/Berlin",
+        ]
         steam_mount_target = "/mnt/steam-library"
         desired_steam_mount = (
             f"/mnt/ssd/steam-library:{steam_mount_target}:rw"
@@ -51,7 +59,7 @@
                 updated_environment = [
                     entry
                     for entry in current_environment
-                    if not entry.startswith(layout_keys)
+                    if not entry.startswith(managed_environment_keys)
                 ] + desired_environment
 
                 if current_environment != updated_environment:
@@ -101,7 +109,8 @@
                 os.unlink(temporary_name)
 
         print(
-            f"Configured German keyboard layout for {changed_apps} Wolf apps; "
+            f"Configured German keyboard layout and timezone for "
+            f"{changed_apps} Wolf apps; "
             f"configured SSD Steam library for {changed_steam_mounts} apps"
         )
       '';
@@ -117,6 +126,7 @@ in {
     image = "ghcr.io/games-on-whales/wolf:stable";
     environment = {
       NVIDIA_DRIVER_VOLUME_NAME = "nvidia-driver-vol";
+      TZ = "Europe/Berlin";
       # Apps run as ecomex (uid 1000) : users (gid 100) on the host
       WOLF_DEFAULT_RUN_UID = "1000";
       WOLF_DEFAULT_RUN_GID = "100";
@@ -145,8 +155,8 @@ in {
   };
 
   # Keep the mutable Wolf app config consistent before the container starts:
-  # use a German keyboard layout in every Docker app and expose the SSD-backed
-  # Steam library to the Steam app container.
+  # use a German keyboard layout and the Europe/Berlin timezone in every
+  # Docker app, and expose the SSD-backed Steam library to the Steam app container.
   systemd.services.docker-wolf.unitConfig.RequiresMountsFor = "/mnt/ssd";
   systemd.services.docker-wolf.preStart = lib.mkBefore ''
     ${wolfAppConfig}/bin/wolf-configure-apps
