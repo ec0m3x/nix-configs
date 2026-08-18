@@ -12,7 +12,7 @@
   onlineUuid = "bea9cd03-b112-4d84-8c7d-26d53635a9d7";
   mountPoint = "/run/homelab-offline";
   statusFile = "/var/lib/homelab-backup/offline-mirror.status";
-  lockFile = "/run/lock/homelab-restic-target.lock";
+  lockFile = "/run/lock/homelab-restic-target/lock";
   passwordFile = config.sops.secrets.homelab_restic_repository_password.path;
 in {
   assertions = [
@@ -38,10 +38,13 @@ in {
   systemd.services.restic-offline-mirror = {
     description = "Copy and verify Restic repositories on the removable offline disk";
     after = [
-      "srv-backup.mount"
+      "restic-target-permissions.service"
       "udisks2.service"
     ];
-    requires = ["udisks2.service"];
+    requires = [
+      "restic-target-permissions.service"
+      "udisks2.service"
+    ];
     unitConfig.RequiresMountsFor = "/srv/backup";
     serviceConfig = {
       Type = "oneshot";

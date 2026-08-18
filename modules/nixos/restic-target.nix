@@ -2,7 +2,19 @@
   config,
   pkgs,
   ...
-}: {
+}: let
+  repositoryRoot = "/srv/backup/restic";
+  lockDirectory = "/run/lock/homelab-restic-target";
+  lockFile = "${lockDirectory}/lock";
+  repositoryPasswordCredential = "restic-repository-password";
+  repairRepositoryOwnership = pkgs.writeShellScript "repair-restic-repository-ownership" ''
+    set -Eeuo pipefail
+    ${pkgs.util-linux}/bin/mountpoint --quiet /srv/backup
+    ${pkgs.findutils}/bin/find ${repositoryRoot} -xdev \
+      \( ! -user restic -o ! -group restic \) \
+      -exec ${pkgs.coreutils}/bin/chown --no-dereference restic:restic {} +
+  '';
+in {
   sops.secrets = {
     homelab_restic_server_htpasswd = {
       sopsFile = ../../secrets/restic.yaml;
@@ -16,7 +28,7 @@
   services.restic.server = {
     enable = true;
     listenAddress = "10.20.50.13:8000";
-    dataDir = "/srv/backup/restic";
+    dataDir = repositoryRoot;
     appendOnly = true;
     privateRepos = true;
     htpasswd-file = config.sops.secrets.homelab_restic_server_htpasswd.path;
@@ -35,21 +47,50 @@
     script = ''
       ${pkgs.util-linux}/bin/mountpoint --quiet /srv/backup
       ${pkgs.coreutils}/bin/install \
-        -d -o restic -g restic -m 0750 /srv/backup/restic
+        -d -o restic -g restic -m 0750 ${repositoryRoot}
+      ${pkgs.coreutils}/bin/install \
+        -d -o restic -g restic -m 0750 ${lockDirectory}
     '';
   };
-  systemd.services.restic-rest-server = {
+
+  # Restic creates rewritten index files as the user running `prune`. Repair
+  # files left behind by the former root-run maintenance job before exposing
+  # the repositories through rest-server.
+  systemd.services.restic-target-permissions = {
+    description = "Normalize ownership of the homelab Restic repositories";
     after = ["restic-target-prepare.service"];
     requires = ["restic-target-prepare.service"];
+    before = ["restic-rest-server.service"];
+    unitConfig.RequiresMountsFor = "/srv/backup";
+    serviceConfig.Type = "oneshot";
+    script = ''
+      exec ${repairRepositoryOwnership}
+    '';
+  };
+
+  systemd.services.restic-rest-server = {
+    after = ["restic-target-permissions.service"];
+    requires = ["restic-target-permissions.service"];
     unitConfig.RequiresMountsFor = "/srv/backup";
   };
 
+  systemd.tmpfiles.rules = [
+    "d ${lockDirectory} 0750 restic restic -"
+    "f ${lockFile} 0600 restic restic -"
+  ];
+
   systemd.services.restic-maintenance = {
     description = "Prune and verify the homelab Restic repositories";
-    after = ["srv-backup.mount"];
+    after = ["restic-target-permissions.service"];
+    requires = ["restic-target-permissions.service"];
     unitConfig.RequiresMountsFor = "/srv/backup";
     serviceConfig = {
       Type = "oneshot";
+      User = "restic";
+      Group = "restic";
+      LoadCredential = [
+        "${repositoryPasswordCredential}:${config.sops.secrets.homelab_restic_repository_password.path}"
+      ];
       Nice = 10;
       IOSchedulingClass = "idle";
       CPUWeight = 20;
@@ -57,9 +98,9 @@
     };
     script = ''
       set -Eeuo pipefail
-      export RESTIC_PASSWORD_FILE=${config.sops.secrets.homelab_restic_repository_password.path}
+      export RESTIC_PASSWORD_FILE="$CREDENTIALS_DIRECTORY/${repositoryPasswordCredential}"
 
-      exec 9>/run/lock/homelab-restic-target.lock
+      exec 9>${lockFile}
       ${pkgs.util-linux}/bin/flock --exclusive 9
 
       for host in hl01 hl02 hl03; do
@@ -88,10 +129,16 @@
 
   systemd.services.restic-full-check = {
     description = "Read and verify all homelab Restic repository data";
-    after = ["srv-backup.mount"];
+    after = ["restic-target-permissions.service"];
+    requires = ["restic-target-permissions.service"];
     unitConfig.RequiresMountsFor = "/srv/backup";
     serviceConfig = {
       Type = "oneshot";
+      User = "restic";
+      Group = "restic";
+      LoadCredential = [
+        "${repositoryPasswordCredential}:${config.sops.secrets.homelab_restic_repository_password.path}"
+      ];
       Nice = 15;
       IOSchedulingClass = "idle";
       CPUWeight = 10;
@@ -99,9 +146,9 @@
     };
     script = ''
       set -Eeuo pipefail
-      export RESTIC_PASSWORD_FILE=${config.sops.secrets.homelab_restic_repository_password.path}
+      export RESTIC_PASSWORD_FILE="$CREDENTIALS_DIRECTORY/${repositoryPasswordCredential}"
 
-      exec 9>/run/lock/homelab-restic-target.lock
+      exec 9>${lockFile}
       ${pkgs.util-linux}/bin/flock --exclusive 9
 
       for host in hl01 hl02 hl03; do
