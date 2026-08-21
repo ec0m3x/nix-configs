@@ -169,5 +169,23 @@ in {
     };
   };
 
+  # Temporary end-to-end verification for the repository ownership repair.
+  # Remove after maintenance and the following REST backup have succeeded.
+  systemd.services.restic-ownership-recovery-check = {
+    description = "Verify Restic maintenance and client access after ownership repair";
+    wantedBy = ["multi-user.target"];
+    serviceConfig = {
+      Type = "oneshot";
+      TimeoutStartSec = "infinity";
+    };
+    script = ''
+      ${pkgs.systemd}/bin/systemctl reset-failed \
+        restic-maintenance.service \
+        restic-backups-hl03.service
+      ${pkgs.systemd}/bin/systemctl start restic-maintenance.service
+      ${pkgs.systemd}/bin/systemctl start restic-backups-hl03.service
+    '';
+  };
+
   networking.firewall.interfaces.lan0.allowedTCPPorts = [8000];
 }
