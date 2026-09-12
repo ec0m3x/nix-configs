@@ -7,7 +7,14 @@
   config,
   pkgs,
   ...
-}: {
+}: let
+  rebootToWindowsAction = pkgs.writeShellScript "reboot-to-windows-action" ''
+    exec ${pkgs.systemd}/bin/systemctl reboot --boot-loader-entry=auto-windows
+  '';
+  rebootToWindows = pkgs.writeShellScriptBin "reboot-to-windows" ''
+    exec /run/wrappers/bin/sudo ${rebootToWindowsAction}
+  '';
+in {
   # You can import other NixOS modules here
   imports = [
     # If you want to use modules your own flake exports (from modules/nixos):
@@ -259,11 +266,23 @@
     Defaults pwfeedback
     Defaults insults
   '';
+  security.sudo.extraRules = [
+    {
+      users = ["ecomex"];
+      commands = [
+        {
+          command = "${rebootToWindowsAction}";
+          options = ["NOPASSWD"];
+        }
+      ];
+    }
+  ];
 
   environment.systemPackages = with pkgs; [
     cudaPackages.cudatoolkit
     nvtopPackages.nvidia
     iperf3
+    rebootToWindows
   ];
 
   # Required for VSCode server / nix-ld dynamic linking
