@@ -39,7 +39,7 @@
         ]
         steam_mount_target = "/mnt/steam-library"
         desired_steam_mount = (
-            f"/mnt/ssd/steam-library:{steam_mount_target}:rw"
+            f"/mnt/hdd/steam-library:{steam_mount_target}:rw"
         )
         changed_apps = 0
         changed_steam_mounts = 0
@@ -111,7 +111,7 @@
         print(
             f"Configured German keyboard layout and timezone for "
             f"{changed_apps} Wolf apps; "
-            f"configured SSD Steam library for {changed_steam_mounts} apps"
+            f"configured Steam library mount for {changed_steam_mounts} apps"
         )
       '';
     };
@@ -156,8 +156,8 @@ in {
 
   # Keep the mutable Wolf app config consistent before the container starts:
   # use a German keyboard layout and the Europe/Berlin timezone in every
-  # Docker app, and expose the SSD-backed Steam library to the Steam app container.
-  systemd.services.docker-wolf.unitConfig.RequiresMountsFor = "/mnt/ssd";
+  # Docker app, and expose the HDD-backed Steam library to the Steam app container.
+  systemd.services.docker-wolf.unitConfig.RequiresMountsFor = "/mnt/hdd";
   systemd.services.docker-wolf.preStart = lib.mkBefore ''
     ${wolfAppConfig}/bin/wolf-configure-apps
   '';
@@ -176,7 +176,7 @@ in {
   # Wolf config directory
   systemd.tmpfiles.rules = [
     "d /etc/wolf 0755 root root -"
-    "d /mnt/ssd/steam-library 0755 ecomex users -"
+    "d /mnt/hdd/steam-library 0755 ecomex users -"
   ];
 
   # Firewall: Wolf (host network)

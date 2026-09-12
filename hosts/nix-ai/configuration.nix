@@ -130,24 +130,19 @@
     hostName = "nix-ai";
   };
 
-  # Zusätzliche Datenträger (SSD + HDD)
-  fileSystems."/mnt/ssd" = {
-    device = "/dev/disk/by-label/ssd";
-    fsType = "ext4";
-    options = ["defaults" "nofail"];
-  };
+  # Zusätzlicher Datenträger
   fileSystems."/mnt/hdd" = {
     device = "/dev/disk/by-label/hdd";
     fsType = "ext4";
     options = ["defaults" "nofail"];
   };
 
-  # Host-spezifische Samba-Freigabe auf der SSD.
+  # Host-spezifische Samba-Freigabe auf der HDD.
   # Das generische `samba`-Modul aktiviert nur den Dienst + global-Config;
   # die konkrete Freigabe wird hier pro Host definiert.
   # Passwort für `ecomex` einmalig setzen: `sudo smbpasswd -a ecomex`
   services.samba.settings.home-share = {
-    path = "/mnt/ssd/shares";
+    path = "/mnt/hdd/shares";
     browseable = "yes";
     public = "yes"; # = guest ok = yes
     "read only" = "yes"; # Default: nur Lesen
@@ -159,11 +154,11 @@
   };
 
   # Share-Verzeichnis gehört ecomex — sonst schlägt `force user` fehl, weil
-  # die ext4-Root der SSD default root:root ist. Verzeichnis liegt extra
-  # unter /mnt/ssd/shares, damit die SSD nicht direkt exponiert wird.
+  # die ext4-Root der HDD default root:root ist. Verzeichnis liegt extra
+  # unter /mnt/hdd/shares, damit die HDD nicht direkt exponiert wird.
   systemd.tmpfiles.rules = [
-    "d /mnt/ssd 0755 ecomex users -"
-    "d /mnt/ssd/shares 0755 ecomex users -"
+    "d /mnt/hdd 0755 ecomex users -"
+    "d /mnt/hdd/shares 0755 ecomex users -"
   ];
 
   # Zsh shell
