@@ -6,7 +6,6 @@ hosts, managed for user `ecomex`.
 ## System Overview
 
 - **Active hosts**:
-  - `nix-ai` — AI/desktop workstation (NixOS, x86_64-linux)
   - `nix-mac` — MacBook (nix-darwin, aarch64-darwin)
   - `hl01` — application host (NixOS, x86_64-linux, `10.20.50.11`)
   - `hl02` — DNS/proxy host (NixOS, x86_64-linux, `10.20.50.12`)
@@ -16,7 +15,7 @@ hosts, managed for user `ecomex`.
 - **Kernel**: Stock (Linux)
 - **Desktop**: Niri/Noctalia and Plasma modules are available but currently
   inactive
-  > Note: `nix-ai` is currently running **headless** — the desktop modules
+  > Note: `nix-ai` is retired; its last configuration was **headless** — the desktop modules
   > (Niri, Noctalia, greetd, etc.) are commented out in `configuration.nix`
   > and `home.nix`. Re-enable by uncommenting the import lines.
 - **Display Manager**: greetd + tuigreet when desktop imports are enabled
@@ -46,31 +45,31 @@ HAOS 18.2 VM now runs on `hl01` at `10.20.50.14` and is available through
 `https://ha.hl.sk4i.com`.
 
 ```bash
-# Build a homelab host on nix-ai
+# Build a homelab host on hl01
 nixos-rebuild build --flake .#hl01
 
-# Normal remote update from nix-ai (prompts for the target sudo password)
-nixos-rebuild switch --flake .#hl01 \
-  --target-host ecomex@10.20.50.11 \
+# Normal remote update from hl01 (prompts for the target sudo password)
+nixos-rebuild switch --flake .#hl02 \
+  --target-host ecomex@10.20.50.12 \
   --sudo --ask-sudo-password
 
 # Build and deploy all homelab hosts safely (one shared sudo prompt)
 ./scripts/deploy-homelab.sh
 
-# Remove Nix generations older than seven days on nix-ai and hl01-hl03
+# Remove Nix generations older than seven days on hl01 and the other homelab hosts
 ./scripts/cleanup-homelab.sh
 ```
 
 After applying Home Manager, both commands are also available as
-`deploy-homelab` and `cleanup-homelab` aliases on `nix-ai` and `nix-mac`. The
-Mac aliases open an interactive SSH session to `nix-ai`, where the scripts run.
+`deploy-homelab` and `cleanup-homelab` aliases on `hl01` and `nix-mac`. The
+Mac aliases open an interactive SSH session to `hl01`, where the scripts run.
 
 The hosts use disko layouts and sops-nix secrets. Never commit plaintext
 secrets; read the migration document before changing `hosts/hl0*` or
 `hosts/homelab/`.
 
 Homelab application updates follow the pinned flake inputs: update the lockfile,
-review version changes, and use `scripts/deploy-homelab.sh` on `nix-ai`. It
+review version changes, and use `scripts/deploy-homelab.sh` on `hl01`. It
 builds all hosts before switching the first one, then deploys `hl03`, `hl02`,
 and `hl01` with health checks between them. The shared target sudo password is
 requested once and passed to each remote sudo process through stdin.
@@ -81,9 +80,9 @@ Home Manager is enabled as part of each homelab NixOS configuration and uses a
 minimal server profile; no standalone Home Manager command is needed.
 
 After the one-time bootstrap, pushes to `main` are deployed automatically by
-the pull-based controller on `nix-ai`. It waits for the successful GitHub check,
-builds every NixOS configuration before the first activation and preserves the
-safe `hl03` -> `hl02` -> `hl01` -> `nix-ai` order. Bootstrap, monitoring and
+the pull-based controller on `hl01`. It waits for the successful GitHub check,
+builds all three homelab configurations before the first activation and preserves the
+safe `hl03` -> `hl02` -> `hl01` order. Bootstrap, monitoring and
 rollback are documented in [`docs/gitops.md`](docs/gitops.md).
 
 ## Installation from NixOS Minimal Image

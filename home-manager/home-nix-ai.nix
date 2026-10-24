@@ -7,9 +7,4 @@
     ./home.nix
     inputs.self.homeManagerModules.codex
   ];
-
-  programs.zsh.shellAliases = {
-    deploy-homelab = "(cd /home/ecomex/nix-configs && ./scripts/deploy-homelab.sh)";
-    cleanup-homelab = "(cd /home/ecomex/nix-configs && ./scripts/cleanup-homelab.sh)";
-  };
 }

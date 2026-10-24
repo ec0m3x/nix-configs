@@ -1,6 +1,18 @@
 # Next session handover
 
-Last updated: 2026-08-02
+Last updated: 2026-10-24
+
+## Pending builder migration
+
+`nix-ai` no longer exists. The repository now declares `hl01` as the GitOps
+controller and builds/deploys only `hl03`, `hl02`, then `hl01`. CI evaluates
+these three hosts. The former workstation configuration is retained only for
+reference. See `gitops.md` for the required key provisioning and first manual
+activation; a push alone cannot install the replacement for a missing controller.
+
+This migration has not yet been built or activated on the servers. The entries
+below describe the historical state on 2026-08-02, before nix-ai was retired.
+
 
 ## Current state
 
@@ -83,7 +95,7 @@ verified generations.
    changes:
 
    ```bash
-   ssh nix-ai 'cd /home/ecomex/nix-configs && git pull --ff-only'
+   ssh hl01 'cd /home/ecomex/nix-configs && git pull --ff-only'
    ```
 
 2. Verify every host before making changes:

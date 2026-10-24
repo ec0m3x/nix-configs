@@ -2,8 +2,15 @@
 set -Eeuo pipefail
 
 readonly deploy_user=ecomex
+readonly -a ssh_options=(
+  -i "/home/$deploy_user/.ssh/id_ed25519_gitops"
+  -o IdentitiesOnly=yes
+  -o StrictHostKeyChecking=yes
+  -o BatchMode=yes
+  -o ConnectTimeout=10
+)
 readonly retention=7d
-readonly -a hosts=(hl03 hl02 hl01)
+readonly -a hosts=(hl03 hl02)
 
 declare -Ar host_addresses=(
   [hl01]=10.20.50.11
@@ -21,7 +28,7 @@ usage() {
 Usage: ./scripts/cleanup-homelab.sh
 
 Delete Nix generations older than seven days and collect unreachable store
-paths on hl03, hl02, hl01 and nix-ai. The shared sudo password is requested
+paths on hl03, hl02 and hl01. The shared sudo password is requested
 once and passed to every sudo process through stdin.
 EOF
 }
@@ -36,7 +43,7 @@ fi
   exit 2
 }
 
-[[ $(hostname -s) == "nix-ai" ]] || die "run this script on nix-ai"
+[[ $(hostname -s) == "hl01" ]] || die "run this script on hl01"
 [[ -t 0 && -t 1 ]] || die "an interactive terminal is required"
 
 for command in df ssh sudo; do
@@ -46,9 +53,7 @@ done
 printf 'Checking target connectivity and identity...\n'
 for host in "${hosts[@]}"; do
   address=${host_addresses[$host]}
-  remote_host=$(ssh \
-    -o BatchMode=yes \
-    -o ConnectTimeout=10 \
+  remote_host=$(ssh "${ssh_options[@]}" \
     "$deploy_user@$address" \
     hostname -s)
   [[ $remote_host == "$host" ]] || \
@@ -56,7 +61,7 @@ for host in "${hosts[@]}"; do
   printf '  %-4s %s: ready\n' "$host" "$address"
 done
 
-printf 'Sudo password for %s on nix-ai and hl01-hl03: ' "$deploy_user" >&2
+printf 'Sudo password for %s on hl01-hl03: ' "$deploy_user" >&2
 IFS= read -r -s sudo_password </dev/tty
 printf '\n' >&2
 [[ -n $sudo_password ]] || die "the sudo password must not be empty"
@@ -67,18 +72,18 @@ for host in "${hosts[@]}"; do
   target="$deploy_user@$address"
 
   printf '\n==> Cleaning %s (%s), keeping %s\n' "$host" "$address" "$retention"
-  ssh -o BatchMode=yes "$target" df -h /nix/store
-  printf '%s\n' "$sudo_password" | ssh -o BatchMode=yes "$target" \
+  ssh "${ssh_options[@]}" "$target" df -h /nix/store
+  printf '%s\n' "$sudo_password" | ssh "${ssh_options[@]}" "$target" \
     sudo --stdin --prompt= /run/current-system/sw/bin/nix-collect-garbage \
     --delete-older-than "$retention"
-  ssh -o BatchMode=yes "$target" df -h /nix/store
+  ssh "${ssh_options[@]}" "$target" df -h /nix/store
 done
 
-printf '\n==> Cleaning nix-ai, keeping %s\n' "$retention"
+printf '\n==> Cleaning hl01, keeping %s\n' "$retention"
 df -h /nix/store
 printf '%s\n' "$sudo_password" | sudo --stdin --prompt= \
   /run/current-system/sw/bin/nix-collect-garbage \
   --delete-older-than "$retention"
 df -h /nix/store
 
-printf '\nNix cleanup completed successfully on all homelab hosts and nix-ai.\n'
+printf '\nNix cleanup completed successfully on all homelab hosts.\n'

@@ -85,6 +85,8 @@
         -o BatchMode=yes
         -o ConnectTimeout=10
         -o StrictHostKeyChecking=yes
+        -o IdentitiesOnly=yes
+        -i ${lib.escapeShellArg cfg.controller.identityFile}
       )
       export NIX_SSHOPTS="''${ssh_options[*]}"
 
@@ -215,6 +217,12 @@ in {
         description = "Existing SSH user used to copy closures to remote targets.";
       };
 
+      identityFile = mkOption {
+        type = types.str;
+        default = "/home/${cfg.controller.deployUser}/.ssh/id_ed25519_gitops";
+        description = "Private deployment key provisioned outside the Nix store.";
+      };
+
       interval = mkOption {
         type = types.str;
         default = "5min";
@@ -275,6 +283,14 @@ in {
         {
           assertion = lib.length (builtins.filter (target: target.local) cfg.controller.targets) == 1;
           message = "The GitOps controller requires exactly one local target.";
+        }
+        {
+          assertion = lib.all (target: !target.local || target.name == config.networking.hostName) cfg.controller.targets;
+          message = "The local GitOps target must match the controller hostname.";
+        }
+        {
+          assertion = cfg.controller.targets != [] && (lib.last cfg.controller.targets).local;
+          message = "The GitOps controller must activate itself last.";
         }
       ];
 

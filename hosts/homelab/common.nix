@@ -85,7 +85,7 @@
     ];
   };
 
-  # Der GitOps-Controller auf nix-ai darf ausschließlich bereits kopierte,
+  # Der GitOps-Controller auf hl01 darf ausschließlich bereits kopierte,
   # zum Host passende NixOS-Closures über den validierenden Wrapper aktivieren.
   services.homelabGitOps.target.enable = true;
 
@@ -106,6 +106,8 @@
     # /etc/nixos-secrets/ecomex eingespielt (mkpasswd -m yescrypt).
     hashedPasswordFile = "/etc/nixos-secrets/ecomex";
     openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGN4pRVJCkKzFmngB276G+kj+wf21fuB/WrgOxyvma1G ecomex@hl01-gitops"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPXa7eTcsLsTxtemMz4/4akYiHO5VLRp0FoqvDq4/vEm ecomex-homelab"
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGox9JI8NEi1IxF2AXSQQF+Pnm/kxt1/RtnTyy6Rokk/ ecomex@nix-ai"
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIMITvvLRVK0B6amvBv6ZT1eb80fYLVYP9xdRREl7ftk ecomex@nix-ai"
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKGL9iDJCW/+SzxmSNrXvzD++sjageJ+IaFFGYdc3k9T ecomex@nix-ai"

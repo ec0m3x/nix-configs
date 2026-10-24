@@ -26,6 +26,36 @@
   networking.hostName = "hl01";
   sops.defaultSopsFile = ../../secrets/hl01.yaml;
 
+  # Build on the 16 GiB host; activate the controller last.
+  services.homelabGitOps.controller = {
+    enable = true;
+    targets = [
+      {
+        name = "hl03";
+        address = "10.20.50.13";
+      }
+      {
+        name = "hl02";
+        address = "10.20.50.12";
+      }
+      {
+        name = "hl01";
+        local = true;
+      }
+    ];
+  };
+
+  # Leave CPU and RAM available for the application services and HAOS VM.
+  nix.settings = {
+    max-jobs = 1;
+    cores = 2;
+  };
+
+  home-manager.users.ecomex.programs.zsh.shellAliases = {
+    deploy-homelab = "(cd /home/ecomex/nix-configs && ./scripts/deploy-homelab.sh)";
+    cleanup-homelab = "(cd /home/ecomex/nix-configs && ./scripts/cleanup-homelab.sh)";
+  };
+
   # USB-NIC per MAC auf `lan0` pinnen
   systemd.network.links."10-lan0" = {
     matchConfig.MACAddress = "00:24:9b:49:70:91";

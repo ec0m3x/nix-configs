@@ -4,6 +4,13 @@ set -Eeuo pipefail
 readonly script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 readonly repo_root=$(cd -- "$script_dir/.." && pwd)
 readonly deploy_user=ecomex
+readonly -a ssh_options=(
+  -i "/home/$deploy_user/.ssh/id_ed25519_gitops"
+  -o IdentitiesOnly=yes
+  -o StrictHostKeyChecking=yes
+  -o BatchMode=yes
+  -o ConnectTimeout=10
+)
 readonly -a hosts=(hl03 hl02 hl01)
 
 declare -Ar host_addresses=(
@@ -21,7 +28,7 @@ usage() {
   cat <<'EOF'
 Usage: ./scripts/deploy-homelab.sh
 
-Build and deploy all homelab hosts from nix-ai in this order:
+Build and deploy all homelab hosts from hl01 in this order:
   hl03 -> hl02 -> hl01
 
 The script requires a clean main checkout matching origin/main and an
@@ -40,10 +47,10 @@ fi
   exit 2
 }
 
-[[ $(hostname -s) == "nix-ai" ]] || die "run this script on nix-ai"
+[[ $(hostname -s) == "hl01" ]] || die "run this script on hl01"
 [[ -t 0 && -t 1 ]] || die "an interactive terminal is required"
 
-for command in git nixos-rebuild ssh; do
+for command in git nixos-rebuild ssh sudo; do
   command -v "$command" >/dev/null || die "required command not found: $command"
 done
 
@@ -55,6 +62,8 @@ readonly wrapped_rebuild="$(dirname "$rebuild_wrapper")/.nixos-rebuild-wrapped"
 IFS= read -r python_shebang <"$wrapped_rebuild"
 readonly rebuild_python=${python_shebang#\#!}
 [[ -x $rebuild_python ]] || die "cannot locate nixos-rebuild's Python interpreter"
+
+export NIX_SSHOPTS="${ssh_options[*]}"
 
 cd "$repo_root"
 
@@ -73,10 +82,9 @@ printf 'Deploying revision %s\n\n' "$(git rev-parse --short=12 HEAD)"
 
 printf 'Checking target connectivity and identity...\n'
 for host in "${hosts[@]}"; do
+  [[ $host != hl01 ]] || continue
   address=${host_addresses[$host]}
-  remote_host=$(ssh \
-    -o BatchMode=yes \
-    -o ConnectTimeout=10 \
+  remote_host=$(ssh "${ssh_options[@]}" \
     "$deploy_user@$address" \
     hostname -s)
   [[ $remote_host == "$host" ]] || \
@@ -87,7 +95,7 @@ done
 printf '\nBuilding every configuration before the first switch...\n'
 for host in "${hosts[@]}"; do
   printf '\n==> Building %s\n' "$host"
-  nixos-rebuild build --flake ".#$host"
+  nixos-rebuild build --flake ".#$host" --max-jobs 1 --cores 2
 done
 
 printf '\nAll builds succeeded. Starting staggered deployment...\n'
@@ -105,21 +113,35 @@ for host in "${hosts[@]}"; do
   # The launcher supplies the value directly to nixos-rebuild's early getpass
   # call. --no-reexec keeps that hook active when switching; the configuration
   # itself is still built normally from the flake.
-  printf '%s\n' "$sudo_password" | "$rebuild_python" "$rebuild_launcher" \
-    "$wrapped_rebuild" switch \
-    --flake ".#$host" \
-    --target-host "$target" \
-    --no-reexec \
-    --ask-sudo-password
+  if [[ $host == hl01 ]]; then
+    printf '%s\n' "$sudo_password" | sudo --stdin --prompt= --validate
+    sudo --non-interactive nixos-rebuild switch --flake ".#$host" --no-reexec --max-jobs 1 --cores 2
+  else
+    printf '%s\n' "$sudo_password" | "$rebuild_python" "$rebuild_launcher" \
+      "$wrapped_rebuild" switch \
+      --flake ".#$host" \
+      --target-host "$target" \
+      --max-jobs 1 --cores 2 \
+      --no-reexec \
+      --ask-sudo-password
+  fi
 
-  failed_units=$(ssh -o BatchMode=yes "$target" \
-    systemctl --failed --no-legend --plain --no-pager)
+  if [[ $host == hl01 ]]; then
+    failed_units=$(systemctl --failed --no-legend --plain --no-pager)
+  else
+    failed_units=$(ssh "${ssh_options[@]}" "$target" \
+      systemctl --failed --no-legend --plain --no-pager)
+  fi
   if [[ -n $failed_units ]]; then
     printf '\nFailed units on %s:\n%s\n' "$host" "$failed_units" >&2
     die "deployment stopped after $host"
   fi
 
-  generation=$(ssh -o BatchMode=yes "$target" readlink -f /run/current-system)
+  if [[ $host == hl01 ]]; then
+    generation=$(readlink -f /run/current-system)
+  else
+    generation=$(ssh "${ssh_options[@]}" "$target" readlink -f /run/current-system)
+  fi
   printf '  %s: healthy (%s)\n' "$host" "$generation"
 done
 

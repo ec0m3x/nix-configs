@@ -6,7 +6,7 @@ those get wrong, omit, or where the live config has drifted.
 
 ## Current state (drifts from CLAUDE.md / README.md)
 
-- **`nix-ai` is currently running HEADLESS.** All desktop modules
+- **The retired `nix-ai` configuration is HEADLESS.** All desktop modules
   (`niri`, `pipewire`, `greetd`, `gaming`, `latex`) are commented out in
   `hosts/nix-ai/configuration.nix`, and all desktop home-manager modules
   (`kitty`, `niri`, `noctalia`, `zen-browser`, `vscode`, `vesktop`,
@@ -24,8 +24,8 @@ those get wrong, omit, or where the live config has drifted.
   profile in `home-manager/home-homelab.nix`. Do **not** run
   `home-manager switch` — it is not wired up that way.
 - Wolf game streaming is enabled on `nix-ai`; sunshine is commented out.
-- **`nix-server` was removed** (2026-07-30). Do not resurrect it; `nix-ai`
-  already imports every module it used.
+- **`nix-server` was removed** (2026-07-30). Do not resurrect it; the archived `nix-ai`
+  configuration imports every module it used.
 - **The homelab migration is complete** (2026-08-01, branch `main`). The former
   Proxmox mini PCs now run bare-metal NixOS as `hl01`–`hl03` at
   `10.20.50.11`–`.13`; do not treat their files as scaffolding or resurrect
@@ -55,41 +55,44 @@ those get wrong, omit, or where the live config has drifted.
   incremental run were verified on 2026-08-01; both ended unmounted, powered
   off and safe to unplug. Never add a generic hotplug/format rule or use a
   destructive `rsync --delete` mirror.
-- **GitOps deployment is declared on `nix-ai`.** After the one-time bootstrap
+- **`nix-ai` is retired (2026-10-24).** Its configuration is retained for
+  reference. Do not build, deploy or depend on it for homelab operations.
+- **GitOps deployment is declared on `hl01`.** After the one-time migration
   in `docs/gitops.md`, `homelab-gitops.timer` polls public `main`, waits for the
-  successful `flake-check` run for the exact commit, builds all four NixOS
-  configurations, then deploys `hl03` -> `hl02` -> `hl01` -> `nix-ai`. It does
-  not manage `nix-mac`. Keep the CI gate, build-before-switch invariant,
-  deployment order and restricted activation wrapper intact.
+  successful `flake-check` for the exact commit, builds all three homelab
+  configurations, then deploys `hl03` -> `hl02` -> `hl01` (locally, last).
+  Keep the CI gate, build-before-switch invariant, deployment order and
+  restricted activation wrapper intact. The private deployment key is
+  `/home/ecomex/.ssh/id_ed25519_gitops` on hl01, never in Git or the Nix store.
 
 ## Commands
 
 ```bash
-# Apply system + home-manager (single command, nix-ai only)
-sudo nixos-rebuild switch --flake .#nix-ai
+# Apply system + home-manager locally on hl01
+sudo nixos-rebuild switch --flake .#hl01
 
 # Test without switching
-sudo nixos-rebuild test --flake .#nix-ai
+sudo nixos-rebuild test --flake .#hl01
 
 # macOS host
 darwin-rebuild switch --flake .#nix-mac
 
-# Build a homelab host on nix-ai
-ssh nix-ai 'cd /home/ecomex/nix-configs && nixos-rebuild build --flake .#hl01'
+# Build a homelab host on hl01
+ssh hl01 'cd /home/ecomex/nix-configs && nixos-rebuild build --flake .#hl01'
 
-# Build and deploy all homelab hosts from nix-ai (one shared sudo prompt)
-ssh -t nix-ai 'cd /home/ecomex/nix-configs && ./scripts/deploy-homelab.sh'
+# Build and deploy all homelab hosts from hl01 (one shared sudo prompt)
+ssh -t hl01 'cd /home/ecomex/nix-configs && ./scripts/deploy-homelab.sh'
 
-# Clean Nix generations older than seven days on nix-ai and hl01-hl03
-ssh -t nix-ai 'cd /home/ecomex/nix-configs && ./scripts/cleanup-homelab.sh'
+# Clean Nix generations older than seven days on hl01-hl03
+ssh -t hl01 'cd /home/ecomex/nix-configs && ./scripts/cleanup-homelab.sh'
 
-# Deploy a homelab host from nix-ai (run interactively for target sudo)
-ssh -t nix-ai
+# Deploy a remote homelab host from hl01 (run interactively for target sudo)
+ssh -t hl01
 cd /home/ecomex/nix-configs
-nixos-rebuild switch --flake .#hl01 \
-  --target-host ecomex@10.20.50.11 --ask-sudo-password
+nixos-rebuild switch --flake .#hl02 \
+  --target-host ecomex@10.20.50.12 --ask-sudo-password
 
-# Inspect or manually trigger the GitOps controller on nix-ai
+# Inspect or manually trigger the GitOps controller on hl01
 systemctl status homelab-gitops.timer --no-pager
 sudo systemctl start homelab-gitops.service
 journalctl -u homelab-gitops.service -n 200 --no-pager
@@ -105,10 +108,10 @@ nix build .#package-name
 ```
 
 There is no test suite, typecheck, or lint beyond `nix fmt`. Verify edits by
-running `nixos-rebuild build --flake .#nix-ai` (or `test`). On hosts without
+running `nixos-rebuild build --flake .#hl01` (or `test`). On hosts without
 nix (e.g. the Windows workstation), push and let CI validate: GitHub Actions
-(`.github/workflows/check.yml`) evaluates every NixOS host config on push.
-For homelab changes, build every affected `hl0*` configuration on `nix-ai`.
+(`.github/workflows/check.yml`) evaluates the three active homelab configs on push.
+For homelab changes, build every affected `hl0*` configuration on `hl01`.
 When a change rotates Restic server credentials or alters the target, deploy
 `hl03` before the clients and verify the target before starting backups.
 

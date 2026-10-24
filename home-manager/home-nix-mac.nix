@@ -7,7 +7,7 @@
   ];
 
   programs.zsh.shellAliases = {
-    deploy-homelab = "ssh -t nix-ai 'cd /home/ecomex/nix-configs && ./scripts/deploy-homelab.sh'";
-    cleanup-homelab = "ssh -t nix-ai 'cd /home/ecomex/nix-configs && ./scripts/cleanup-homelab.sh'";
+    deploy-homelab = "ssh -t hl01 'cd /home/ecomex/nix-configs && ./scripts/deploy-homelab.sh'";
+    cleanup-homelab = "ssh -t hl01 'cd /home/ecomex/nix-configs && ./scripts/cleanup-homelab.sh'";
   };
 }
