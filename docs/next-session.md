@@ -1,6 +1,15 @@
 # Next session handover
 
-Last updated: 2026-10-24
+Last updated: 2026-11-08
+
+> **Stand 2026-11-08:** Das Homelab läuft jetzt vollständig auf Proxmox
+> (`pve`, 10.20.50.10). hl01–hl03 sind ausgeschaltet, `nix-ai` existiert
+> nicht mehr (die Hardware ist der Proxmox-Host). Doku, Konfiguration und
+> Übergabe für die nächste Sitzung liegen im Repo `~/Code/homelab`
+> (`README.md`, `docs/next-session.md`). Die folgenden Abschnitte sind
+> Historie der NixOS-Zeit. Die gesamte Nix-Konfiguration (hl0*, nix-ai,
+> Module, SOPS-Dateien) bleibt in diesem Repo erhalten; nur die
+> Proxmox-Migration ist ins Homelab-Repo ausgelagert.
 
 ## Pending builder migration
 
